@@ -1,0 +1,19 @@
+name: slither
+
+on:
+    push:
+      branches: 
+        - main
+        - develop
+    pull_request:
+    workflow_dispatch:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: crytic/slither-action@v0.4.1
+        with:
+          fail-on: medium
+          slither-args: --exclude-dependencies

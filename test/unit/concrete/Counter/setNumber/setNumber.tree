@@ -1,0 +1,3 @@
+SetNumberConcreteTest
+└── When set number is called
+    └── It should set the number to the new number
