@@ -1,0 +1,84 @@
+Dromos Restricted Use License 1.0
+Identified in source files by the SPDX license identifier:
+LicenseRef-Dromos-Restricted-Use-1.0
+Copyright © 2026 Perpetual Cyclist Services LLC
+
+While not an open source license, the software will eventually be made available under the same terms as an open source license, as stated herein
+
+Acceptance
+
+In order to receive any license under these terms, you must agree to the terms including all limitations as both strict obligations and conditions to all your licenses.
+
+License
+
+The licensor grants you a non-exclusive, royalty-free, worldwide, non-sublicensable, non-transferable license to use, copy, distribute, make available, and prepare derivative works of the software, in each case subject to the limitations and conditions below.
+
+The license applies separately for each version of the software as defined in the Definitions of this license.
+
+The license applies to any portion of the software.
+
+The license applies to each file that identifies it in an SPDX-License-Identifier header. Files identifying a different license are licensed under that license.
+
+Limitations
+
+You may not make production use of the software, any portion of the software, or of derivative works of the software.  
+
+You may not alter, remove, or obscure any licensing, copyright, or other notices of the licensor in the software. Any use of the licensor’s trademarks is subject to applicable law.
+
+You must ensure that anyone who gets a copy of any part of the software from you also gets a copy of these terms.
+
+If you modify the software, you must include in any modified copies of the software prominent notices stating that you have modified the software.
+
+If you receive the software in original or modified form from a third party, this license applies to your use of that work.
+
+You may not use the software or any derivative work of the software to provide or offer any product or service that substitutes for the software or offers substantially similar functionality, or cause or instruct any person to do so.
+
+Conversion Date
+
+Effective five years after the first publicly available distribution of a specific version of the software, the licensor hereby grants you rights to that version under the terms of the GNU General Public License v2.0 or later, and this license terminates as to that version.  The patent license survives conversion.
+
+Patents
+
+Separately, the licensor grants you a license, under any patent claims the licensor can license, or becomes able to license, to make, have made, use, sell, offer for sale, import and have imported the software, in each case subject to the limitations and conditions in this license. 
+
+This separate patent license does not cover any patent claims that you cause to be infringed by modifications or additions to the software. 
+
+If you or your company make any written claim that the software infringes or contributes to infringement of any patent, your patent license for the software granted under these terms ends immediately. If your company makes such a claim, your patent license ends immediately for work on behalf of your company.
+
+No Other Rights
+
+These terms do not imply any relationship, rights or licenses other than those expressly granted in these terms.
+
+If you desire other rights, you must purchase a commercial license from the licensor, or otherwise be granted additional rights by the licensor.
+
+Termination
+
+If you use the software in violation of these terms, such use is not licensed, and your licenses for this and any other version of this software will automatically terminate. If you wish your license to be reinstated, you must contact the licensor via the repository in which the licensor makes the software available .
+
+Waiver
+
+TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED ON AN "AS IS" BASIS. LICENSOR HEREBY DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS OR IMPLIED, INCLUDING (WITHOUT LIMITATION) WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.  THE LICENSOR WILL NOT BE LIABLE FOR ANY DAMAGES INCLUDING BUT NOT LIMITED TO DIRECT, INDIRECT, CONSEQUENTIAL, OR LOSS-OF-FUNDS ARISING OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF LEGAL CLAIM TO THE EXTENT PERMITTED BY APPLICABLE LAW.
+
+Definitions
+
+The licensor is Perpetual Cyclist Services LLC 
+
+The software is each version of the software that the licensor makes available under these terms, as indicated by the licensor's inclusion of these terms with it, including any portion thereof
+
+The version of the software is identified by a tag in the software, ideally but not necessarily in the VERSIONS file including the version’s first-distribution date
+
+The copyright holder is Perpetual Cyclist Services LLC
+
+You are you, the individual or entity agreeing to these terms
+
+Your company is any legal entity, sole proprietorship, or other kind of organization that you work for, plus all organizations that have control over, are under the control of, or are under common control with that organization. control means ownership of substantially all the assets of an entity, or the power to direct its management and policies by vote, contract, or otherwise. Control can be direct or indirect.
+
+Your licenses are all the licenses granted to you for the software under these terms.
+
+Use means anything you do with the software requiring one of your licenses.
+
+Production Use means using the software in a live (as opposed to test) environment, or causing or instructing any person to do so, to serve actual users, make money directly or indirectly, or run everyday business operations, rather than using it strictly for development, testing, evaluation, or demonstration.
+
+Trademark means trademarks, service marks, and similar rights.
+
+First Publicly Available Distribution means the first time a specific version of the software is publicly published by licensor in source or deployed form.

@@ -1,0 +1,13 @@
+VERSIONS — metadex
+Each version's Dromos Restricted Use License 1.0 converts to
+GPL-2.0-or-later five years after its first public distribution.
+
+Convention: each entry identifies a version by the commit hash of its
+source state; the entry is added in the immediately following commit,
+whose only change is this file.
+
+version:
+commit tag:
+first-distribution:
+converts-to-gpl:
+deployments:

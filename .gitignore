@@ -1,0 +1,39 @@
+# General
+yarn-error.log
+node_modules
+.DS_STORE
+.vscode
+
+# Foundry files
+cache
+out-via-ir
+lcov.info
+lcov-v3.info
+
+# Config files
+.env
+
+# Avoid ignoring gitkeep
+!/**/.gitkeep
+
+# Keep the latest deployment only
+broadcast/*/*/*
+
+# Out dir
+out
+crytic-export
+
+# Scratch dir the fs_permissions profile grants tests write access to
+tmp
+
+# Files excluded from the public contest and release branches
+/.claude/
+/.cursor/
+/.github/CODEOWNERS
+/.github/pull_request_template.md
+/AGENT.md
+/AGENTS.md
+/CLAUDE.md
+/REVIEW.md
+/V3/crosschain.md
+/cubic.yaml

@@ -1,0 +1,18 @@
+{
+  "detectors_to_run": "all",
+  "detectors_to_exclude": [
+    "incorrect-equality",
+    "divide-before-multiply",
+    "write-after-write"
+  ],
+  "exclude_dependencies": true,
+  "include_paths": "V3/src/",
+  "exclude_high": false,
+  "exclude_medium": false,
+  "exclude_low": true,
+  "exclude_informational": true,
+  "exclude_optimization": false,
+  "fail_on": "medium",
+  "disable_color": true,
+  "show_ignored_findings": false
+}

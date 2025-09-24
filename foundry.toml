@@ -1,0 +1,62 @@
+[fmt]
+line_length = 120
+tab_width = 2
+bracket_spacing = false
+int_types = 'long'
+quote_style = 'single'
+number_underscore = 'thousands'
+multiline_func_header = 'params_first_multi'
+sort_imports = true
+
+[profile.default]
+solc_version = '0.8.36'
+evm_version = 'prague'
+src = 'V3/src'
+test = 'V3/test'
+script = 'V3/script'
+libs = ['node_modules']
+optimizer_runs = 10_000
+auto_detect_remappings = false
+fs_permissions = [
+  { access = 'read-write', path = './tmp' },
+  { access = 'read', path = './V3/test/fixtures/art/saero.svg' },
+  { access = 'read', path = './V3/script/pools/inputs' },
+  { access = 'read', path = './V3/test/fixtures/art/token-registry.svg' },
+  { access = 'read', path = './V3/test/fixtures/art/token-registry-weth.svg' },
+  { access = 'read-write', path = './deployment-addresses' },
+  { access = 'read', path = './out' },
+  { access = 'read', path = './node_modules/createx' },
+]
+
+[profile.optimized]
+via_ir = true
+out = 'out-via-ir'
+
+[profile.test]
+via_ir = true
+out = 'out-via-ir'
+
+[profile.docs]
+src = 'V3/src/interfaces/'
+
+# Inner-loop iteration profile: identical build settings, fewer fuzz runs. Final verification and
+# gas snapshots must run on the default profile (1000 runs).
+[profile.dev.fuzz]
+runs = 64
+
+[fuzz]
+runs = 1000
+
+[rpc_endpoints]
+base = "${BASE_RPC_URL}"
+celo = "${CELO_RPC_URL}"
+optimism = "${OPTIMISM_RPC_URL}"
+mainnet = "${ETHEREUM_RPC_URL}"
+ethereum = "${ETHEREUM_RPC_URL}"
+arc = "${ARC_RPC_URL}"
+
+[etherscan]
+base = { key = "${BASE_ETHERSCAN_API_KEY}", url = "${BASE_ETHERSCAN_VERIFIER_URL}" }
+optimism = { key = "${OPTIMISM_ETHERSCAN_API_KEY}", url = "${OPTIMISM_ETHERSCAN_VERIFIER_URL}" }
+ethereum = { key = "${ETHEREUM_ETHERSCAN_API_KEY}", url = "${ETHEREUM_ETHERSCAN_VERIFIER_URL}", chain = 1 }
+arc = { key = "${ARC_ETHERSCAN_API_KEY}", url = "${ARC_ETHERSCAN_VERIFIER_URL}", chain = 5042 }
