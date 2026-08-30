@@ -6,8 +6,8 @@ Convention: each entry identifies a version by the commit hash of its
 source state; the entry is added in the immediately following commit,
 whose only change is this file.
 
-version:
-commit tag:
-first-distribution: 2026-08-DD (public source publication)
-converts-to-gpl: 2031-08-DD
+version: 1.0.0-provisional.3
+commit tag: b032bb7f55eff31e081196754e0fdbc217f978d2
+first-distribution: 2026-08-30
+converts-to-gpl: 2031-08-30
 deployments: (none — provisional)
