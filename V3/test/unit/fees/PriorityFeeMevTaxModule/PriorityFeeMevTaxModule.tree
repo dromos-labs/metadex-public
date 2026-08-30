@@ -1,0 +1,32 @@
+UnitPriorityFeeMevTaxModule::constructor
+├── when the initial owner is the zero address
+│   └── it should revert with OwnableInvalidOwner
+└── when deploying a valid contract
+    ├── it should set the owner
+    ├── it should set the priority fee multiplier
+    ├── it should set the min threshold
+    ├── it should set the base fee factor
+    ├── it should emit MultiplierSet
+    ├── it should emit MinThresholdSet
+    └── it should emit BaseFeeFactorSet
+
+UnitPriorityFeeMevTaxModule::setMultiplier
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── it should set the priority fee multiplier
+    └── it should emit MultiplierSet
+
+UnitPriorityFeeMevTaxModule::setMinThreshold
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── it should set the min threshold
+    └── it should emit MinThresholdSet
+
+UnitPriorityFeeMevTaxModule::setBaseFeeFactor
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── it should set the base fee factor
+    └── it should emit BaseFeeFactorSet

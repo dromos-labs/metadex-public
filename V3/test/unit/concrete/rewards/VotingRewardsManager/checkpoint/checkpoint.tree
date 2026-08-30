@@ -1,0 +1,31 @@
+UnitConcreteVotingRewardsManager::Checkpoint
+├── when the caller is not the voter
+│   └── it should revert with NotVoter
+└── when the caller is the voter
+    ├── when the allocated weights are zero
+    │   ├── it should clear the veNFT's allocation
+    │   └── it should emit the Reset event
+    └── when the allocated weights are not zero
+        ├── when the stake is permanent
+        │   ├── it should record the veNFT's allocation
+        │   └── it should emit the Checkpoint event
+        └── when the stake is not permanent
+            ├── when the stake has expired
+            │   ├── it should clear the veNFT's allocation
+            │   └── it should emit the Reset event
+            └── when the stake has not expired
+                ├── when the allocation is below the minimum
+                │   ├── it should clear the veNFT's allocation
+                │   └── it should emit the Reset event
+                └── when the allocation is at or above the minimum
+                    ├── when the gauge has pending fees
+                    │   ├── it should credit the pending fees to the accumulator
+                    │   ├── it should emit the NotifyFeesAmount event
+                    │   ├── it should record the veNFT's allocation
+                    │   ├── it should snapshot the credited accumulator at the new global checkpoint index
+                    │   └── it should emit the Checkpoint event
+                    └── when the gauge has no pending fees
+                        ├── it should not credit any fees to the accumulator
+                        ├── it should record the veNFT's allocation
+                        ├── it should snapshot the unchanged accumulator at the new global checkpoint index
+                        └── it should emit the Checkpoint event

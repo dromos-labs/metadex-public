@@ -1,0 +1,17 @@
+UnitClPoolTape::FetchSecondsPerLiquidityCumulativeAt
+├── when the target timestamp is gte the current block timestamp
+│   └── it returns the live secondsPerLiquidityCumulativeX128 from the pool
+└── when the target timestamp is lt the current block timestamp
+    ├── when the pool oracle still has the target timestamp
+    │   └── it returns the pool oracle value at the target
+    ├── when the pool oracle reverts with a string
+    │   ├── when the error is OLD
+    │   │   ├── it interpolates between the newest committed observation and the live value
+    │   │   ├── when the cumulative wrapped between the commit and the live value
+    │   │   │   └── it interpolates across the wrap
+    │   │   └── when the target timestamp is lte the newest committed observation
+    │   │       └── it returns the observation secondsPerLiquidityCumulativeX128 value
+    │   └── when the error is not OLD
+    │       └── it reverts
+    └── when the pool oracle reverts with something else
+        └── it reverts

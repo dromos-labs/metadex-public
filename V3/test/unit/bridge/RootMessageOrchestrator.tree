@@ -1,0 +1,122 @@
+UnitRootMessageOrchestrator::constructor
+├── when voter is the zero address
+│   └── it should revert with ZeroAddress
+└── when all inputs are valid
+    └── it should set VOTER to _voter
+
+UnitRootMessageOrchestrator::dispatch
+├── when the caller is not VOTER
+│   └── it should revert with CallerNotAuthorized
+└── given caller is the VOTER
+    ├── when msgType is None
+    │   └── it should revert with UnsupportedMessageType
+    ├── when msgType is Redeem
+    │   └── it should revert with UnsupportedMessageType
+    ├── when msgType is Deallocate
+    │   └── it should revert with UnsupportedMessageType
+    ├── when adapter is not set for a chainId
+    │   └── it should revert with AdapterNotRegistered
+    └── given the adapter is set for chainId
+        ├── when msgValue equals totalValue
+        │   ├── it should advance nonceOut for each _dispatch.chainId
+        │   ├── it should call sendMessage with the message, _gasLimit, and _refundRecipient, forwarding _dispatch.nativeValue on each iteration
+        │   └── it should emit MessageDispatched with _dispatch.chainId, _nonce and _msgType on each iteration
+        ├── when msgValue equals totalValue with duplicate chainIds
+        │   ├── it should advance nonceOut for each chainId by the count of dispatches targeting it
+        │   ├── it should call sendMessage with the per-chain stamped nonce on each iteration
+        │   └── it should emit MessageDispatched with the per-chain stamped nonce on each iteration
+        ├── when msgValue does not equal totalValue
+        │   └── it should revert with InvalidDispatchValue
+        ├── when a charging entry value covers the cost
+        │   ├── it should forward nativeValue minus the chain's deallocationReturnCost to the adapter
+        │   └── it should retain exactly the chain's deallocationReturnCost in its own balance
+        ├── when a non charging entry has a non zero cost
+        │   ├── it should forward the whole nativeValue to the adapter
+        │   └── it should retain nothing in its own balance
+        ├── when a charging entry value is below the cost
+        │   └── it should revert with InsufficientDeallocationReturnCost
+        ├── when a batch mixes charging and non charging destinations
+        │   ├── it should require msgValue to equal the sum of the per destination nativeValues
+        │   ├── it should forward each destination its own nativeValue minus its charged cost
+        │   └── it should retain the sum of the charged costs only
+        └── when msgValue does not equal the sum of nativeValues
+            └── it should revert with InvalidDispatchValue
+
+UnitRootMessageOrchestrator::route
+├── when the caller is not the registered adapter
+│   └── it should revert with CallerNotAdapter
+└── given the caller is the registered adapter
+    ├── when the payload is shorter than the header
+    │   └── it should revert with InvalidPayload
+    └── given the payload contains the header
+        ├── when the message type byte is none
+        │   └── it should revert with NoneMessageType
+        ├── when the message type byte is out of range
+        │   └── it should revert with InvalidMessageType
+        └── given the message type byte is in range
+            ├── when the message was dispatched ahead of the local clock
+            │   ├── it should revert with ClockBehindDispatch
+            │   └── it should deliver once the clock reaches the dispatch time
+            ├── when the chain nonce has already been used
+            │   └── it should revert with NonceAlreadyUsed
+            └── given the chain nonce has not been used
+                ├── when the message type is an unsupported inbound type
+                │   └── it should revert with UnsupportedMessageType
+                ├── given the message type is Redeem
+                │   ├── when the redeem body is malformed
+                │   │   └── it should revert with a decode error
+                │   └── when the redeem body is well formed
+                │       ├── it should mark the chain nonce as used for the origin chain
+                │       ├── it should decode the body and call processRedeem on VOTER with the typed inputs
+                │       └── it should emit MessageReceived for redeem
+                └── given the message type is Deallocate
+                    ├── when the deallocate origin chain is suspended
+                    │   ├── it should still decode the body and call processDeallocation on VOTER
+                    │   └── it should emit MessageReceived for the suspended deallocate
+                    └── when the deallocate origin chain is not suspended
+                        ├── it should decode the body and call processDeallocation on VOTER
+                        └── it should emit MessageReceived for the active deallocate
+
+UnitRootMessageOrchestrator::setAdapter
+├── when the caller is not adapter authority
+│   └── it should revert with CallerNotAdapterAuthority
+└── given the caller is adapter authority
+    ├── when chainId is zero
+    │   └── it should revert with InvalidChainId
+    └── given chainId is not zero
+        ├── when the adapter is the zero address
+        │   └── it should revert with InvalidAdapter
+        └── given the adapter is not the zero address
+            ├── when the adapter remote chain id does not match chainId
+            │   └── it should revert with AdapterChainIdMismatch
+            └── when the adapter remote chain id matches chainId
+                ├── it should set the adapter for _chainId
+                └── it should emit AdapterUpdated with _chainId and _adapter
+
+UnitRootMessageOrchestrator::setDeallocationReturnCost
+├── when the caller is not voter config authority
+│   └── it should revert with CallerNotVoterConfigAuthority
+└── given the caller is voter config authority
+    ├── when the chain is not registered
+    │   └── it should revert with ChainNotRegistered
+    ├── when the cost is non zero for the root colocated chain
+    │   └── it should revert with DeallocationReturnCostNotAllowed
+    ├── when the cost is zero for the root colocated chain
+    │   ├── it should leave the stored cost at zero
+    │   └── it should emit DeallocationReturnCostSet with the chainId and a zero cost
+    └── when the chain is registered
+        ├── it should store the cost for the chainId
+        └── it should emit DeallocationReturnCostSet with the chainId and the cost
+
+UnitRootMessageOrchestrator::withdrawNative
+├── when the caller is not native withdrawer
+│   └── it should revert with CallerNotNativeWithdrawer
+└── given the caller is native withdrawer
+    ├── when the destination is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the destination rejects the transfer
+    │   └── it should revert with WithdrawFailed
+    └── when the destination accepts the transfer
+        ├── it should transfer the amount to the destination
+        ├── it should decrease its own balance by the amount
+        └── it should emit NativeWithdrawn with the destination and the amount

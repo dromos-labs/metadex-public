@@ -1,0 +1,31 @@
+UnitClPoolTape::Record
+├── when caller is not in allowedCaller map
+│   └── it reverts with Unauthorized
+└── when caller is in allowedCaller map
+    ├── it sets lastTick to the swap tick
+    ├── it sets lastSwapTimestamp to the current timestamp
+    ├── when recording the first swap
+    │   ├── it assigns every cumulative discarding the pre populated values
+    │   ├── it sets swapCount to one
+    │   ├── it sets intervalSwapCount to one
+    │   └── it does not commit an observation
+    ├── when recording a subsequent swap
+    │   ├── it adds every cumulative delta to the accumulator
+    │   ├── it increments swapCount by one
+    │   ├── it increments intervalSwapCount by one
+    │   ├── it writes each accumulator slot exactly once
+    │   ├── when a cumulative addition overflows
+    │   │   └── it wraps the cumulative
+    │   ├── when the intervalSwapCount is at its maximum
+    │   │   └── it keeps the intervalSwapCount max value
+    │   └── when the swapCount is at its maximum
+    │       └── it wraps the swapCount to zero
+    ├── when the intervalSwapCount is eq to zero
+    │   ├── it sets intervalMaxTick to the swap tick
+    │   └── it sets intervalMinTick to the swap tick
+    ├── when the intervalSwapCount is gt zero
+    │   └── it updates the interval tick extremes
+    ├── when the elapsed time is lte the pool cadence
+    │   └── it does not commit an observation
+    └── when the elapsed time is gt the pool cadence
+        └── it returns the committed flag

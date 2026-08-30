@@ -1,0 +1,35 @@
+UnitVoter::ClaimRewards
+├── when caller is not authorized for a token
+│   └── it should revert with NotAuthorized
+├── when claim rewards params are empty
+│   └── it should revert with EmptyClaimRewardsParams
+├── when a claim rewards param contains no fee or incentive claims
+│   └── it should revert with EmptyClaimRewardsParams
+├── when a claim rewards param contains only fee claims
+│   └── it should dispatch ClaimRewards with the fee claims
+├── when a claim rewards param contains only incentive claims
+│   └── it should dispatch ClaimRewards with the incentive claims
+├── when a destination chain is not registered
+│   └── it should revert with ChainNotActiveOrSunset
+├── when a registered destination chain is paused
+│   └── it should revert with ChainNotActiveOrSunset
+├── when a registered destination chain is suspended
+│   └── it should revert with ChainNotActiveOrSunset
+├── when a registered destination chain is sunset
+│   └── it should dispatch ClaimRewards to the sunset chain
+├── when the recipient is the zero address
+│   └── it should revert with ZeroAddress
+├── when claim rewards params chainIds are not strictly ascending
+│   └── it should revert with ClaimRewardsParamsNotStrictlyAscending
+├── when a non root chain gas limit is zero
+│   └── it should revert with MissingDestinationGasLimit
+├── when the root chain input is valid
+│   └── it should dispatch ClaimRewards through the root chain entry without forwarding native value
+├── when root and non root chain inputs are valid
+│   └── it should dispatch ClaimRewards for both entries
+├── when multiple chain inputs are valid
+│   ├── it should emit RewardsClaimDispatched for each destination
+│   └── it should encode each chain with all fee and incentive claims in one dispatch call
+└── when all inputs are valid
+    ├── it should check authorization for the tokenId
+    └── it should encode and dispatch ClaimRewards with the supplied params and refund recipient forwarding msg value

@@ -1,0 +1,11 @@
+UnitV2Gauge::PendingFees
+├── when the gauge is not a pool
+│   └── it should return zero amounts
+├── when the emission cap is zero
+│   └── it should return zero amounts
+├── when the gauge is not activated
+│   └── it should return zero amounts
+├── when the pool has no pending fees
+│   └── it should return zero amounts
+└── when the pool has pending fees
+    └── it should return the pool pending fees

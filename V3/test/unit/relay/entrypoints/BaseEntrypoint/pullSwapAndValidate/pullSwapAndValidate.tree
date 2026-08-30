@@ -1,0 +1,25 @@
+UnitBaseEntrypoint::PullSwapAndValidate
+├── when the caller is not the keeper
+│   └── it should revert with NotKeeper
+├── when the minimum output is zero
+│   └── it should revert with ZeroMinOut
+├── when the protocol has not approved the router
+│   └── it should revert with RouterNotApproved
+├── when the input token equals the output token
+│   └── it should revert with SameToken
+├── when the output balance read returns no data
+│   └── it should revert
+├── when the landed output is below the minimum
+│   └── it should revert with InsufficientOutput
+├── when tokens land on the relay but the output stays below the minimum
+│   └── it should revert with InsufficientOutput
+├── when the swap lands enough output
+│   ├── it should pull the input from the relay
+│   ├── it should approve the router for the input
+│   ├── it should execute the swap on the router
+│   ├── it should reset the router allowance
+│   ├── it should forward the landed delta to the relay
+│   ├── it should read the input it still holds
+│   └── it should return the landed delta
+└── when the router spends less than the pulled input
+    └── it should return the unspent input to the relay

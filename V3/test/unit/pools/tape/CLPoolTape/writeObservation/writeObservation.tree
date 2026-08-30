@@ -1,0 +1,30 @@
+UnitClPoolTape::WriteObservation
+├── when it is the first swap
+│   ├── it updates slot zero with the swap timestamp
+│   ├── it sets the staked cumulative value from the pool
+│   ├── it sets the active cumulative value from the pool oracle
+│   ├── it seeds slot zero close tick from the last tick
+│   ├── it sets lastObservationTimestamp on the accumulator
+│   ├── it sets intervalOpenTick from the last tick
+│   └── it returns committed as false
+└── when it is not the first swap
+    ├── when the elapsed time since the last observation is lte the cadence
+    │   └── it returns committed as false
+    └── when the elapsed time since the last observation is gt the cadence
+        ├── it returns committed as true
+        ├── it pushes the interval range dist and swap count into the pool ring
+        ├── it writes the returned head and count into the accumulator
+        ├── it sets every observation field from the accumulator and the pool with a zeroed volatilityCorrob
+        ├── it resets the interval values
+        ├── it sets lastObservationTimestamp to the swap timestamp
+        ├── it emits ObservationRecorded
+        ├── when the interval open tick sits outside the interval extremes
+        │   └── it stores a dist greater than the range
+        ├── when the buffer is not full
+        │   ├── it writes the new observation at the newly grown slot
+        │   ├── it increases cardinality by one
+        │   └── it increases index by one
+        └── when the buffer is full
+            ├── it overwrites the oldest slot
+            ├── it keeps the cardinality unchanged
+            └── it wraps the index to zero

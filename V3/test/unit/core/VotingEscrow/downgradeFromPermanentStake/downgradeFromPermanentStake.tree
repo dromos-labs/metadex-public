@@ -1,0 +1,35 @@
+UnitVotingEscrow::DowngradeFromPermanentStake
+├── when the caller is not the owner or approved operator
+│   └── it should revert with ERC721InsufficientApproval
+├── when the token id has not been minted
+│   └── it should revert with ERC721NonexistentToken
+├── when the stake is not permanent
+│   └── it should revert with NotPermanentStake
+├── when the stake is not fully on chain zero
+│   └── it should revert with InsufficientChain0Allocation
+├── when the delegator ownership changed in the current block
+│   └── it should revert with OwnershipChange
+├── when an authorized caller unstakes a permanent stake with no prior delegatee
+│   ├── it should reanchor the token chain zero shape on the voter
+│   ├── it should flip the stake to decaying and set the end to the next maxtime week boundary
+│   ├── it should leave the staked amount and supply unchanged
+│   ├── it should decrement the permanent stake balance by the staked amount
+│   ├── it should leave the delegation slot clear
+│   ├── it should not record any delegator checkpoint because the clear is a no-op
+│   ├── it should record a user point with the recomputed slope and bias and zero permanent
+│   ├── it should advance the global epoch and reflect the lower permanent balance
+│   ├── it should match the voting-power APIs to the recomputed decay bias
+│   ├── it should emit the DowngradeFromPermanentStake event with the token owner
+│   └── it should emit the MetadataUpdate event
+├── when an authorized caller unstakes a permanent stake with a real prior delegatee
+│   ├── it should clear the delegation slot
+│   ├── it should advance the delegator num checkpoints recording the cleared delegatee
+│   ├── it should advance the former delegatee num checkpoints draining its delegated balance to zero
+│   ├── it should reflect the drained balance in the former delegatee getPastVotes
+│   ├── it should emit the DelegateChanged event clearing the prior delegatee
+│   ├── it should emit the DowngradeFromPermanentStake event with the token owner
+│   └── it should emit the MetadataUpdate event
+└── when an authorized caller unstakes using a known exact slope and bias
+    ├── it should set the end to the known week boundary
+    ├── it should record a user point with the known exact slope and bias
+    └── it should match the voting-power APIs to the known bias

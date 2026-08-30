@@ -1,0 +1,17 @@
+UnitRelaySoulbound
+├── given a soulbound deployment
+│   └── it should deploy both satellites non-transferable
+├── when transferring the soulbound yield token
+│   └── it should revert with TokenNotTransferable
+├── when transferring the soulbound principal token
+│   └── it should revert with TokenNotTransferable
+├── when permitting the soulbound yield token
+│   └── it should revert with TokenNotTransferable
+├── when permitting the soulbound principal token
+│   ├── it should revert with TokenNotTransferable
+│   ├── it should leave the shared nonce untouched
+│   └── it should leave a delegation signed at that nonce spendable
+├── when permitting a transferable yield token
+│   └── it should set the allowance
+└── when running the lifecycle soulbound
+    └── it should admit, accrue, claim and exit without transfers

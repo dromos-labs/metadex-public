@@ -1,0 +1,123 @@
+UnitVotingEscrow::RebalanceUnderlying
+├── when the caller is not a vpm role holder
+│   └── it should revert with NotVoterPaymentsModule
+├── when a vpm role holder rebalances with empty inputs
+│   └── it should authorize the caller to rebalance
+├── when a vpm role holder drains a source without owner approval
+│   └── it should revert with the insufficient approval error
+├── when a vpm role holder is approved by the source owner
+│   └── it should authorize the rebalance
+├── when an add destination targets a non existent token id
+│   └── it should revert with ERC721NonexistentToken
+├── when a source targets the protocol accumulator
+│   └── it should revert with AccumulatorCannotBeSource
+├── when a source carries the mint sentinel token id
+│   └── it should revert with ERC721NonexistentToken
+├── when a non mint destination carries a recipient
+│   └── it should revert with NonMintRecipientNotAllowed
+├── when a source delta exceeds the staked amount
+│   └── it should revert with AmountExceedsStake
+├── when total in does not equal total out
+│   └── it should revert with BalanceMismatch
+├── when the latest source unlock is later than the earliest add destination unlock
+│   └── it should revert with UnlockTimeReduction
+├── when a permanent source is followed by a non permanent add destination
+│   └── it should revert with UnlockTimeReduction
+├── when the add destination credit overflows the signed limit
+│   └── it should revert with AmountExceedsCap
+├── when the accumulator destination credit overflows the signed limit
+│   └── it should revert with AmountExceedsCap
+├── when the mint destination value exceeds the signed cap
+│   └── it should revert with AmountExceedsCap
+├── when moving the full balance from one decay stake to another decay stake
+│   ├── it should zero the source staked amount
+│   ├── it should bump the destination staked amount by the delta
+│   ├── it should leave supply unchanged
+│   ├── it should leave the permanent stake balance unchanged
+│   ├── it should return an empty minted ids array
+│   ├── it should emit a MetadataUpdate event for the source
+│   ├── it should emit a MetadataUpdate event for the destination
+│   └── it should emit the Rebalance event
+├── when moving from a permanent source to an existing permanent destination
+│   ├── it should reduce the source staked amount by the delta
+│   ├── it should bump the destination staked amount by the delta
+│   ├── it should leave the permanent stake balance unchanged
+│   ├── it should leave supply unchanged
+│   ├── it should emit a MetadataUpdate event for the source
+│   └── it should emit a MetadataUpdate event for the destination
+├── when routing a decay source into the protocol accumulator
+│   ├── it should reduce the source staked amount by the delta
+│   ├── it should bump the accumulator staked amount by the delta
+│   ├── it should store the accumulator as a permanent position
+│   ├── it should bump the permanent stake balance by the delta
+│   ├── it should leave supply unchanged
+│   ├── it should propagate the accumulator credit into the latest global point
+│   └── it should emit a MetadataUpdate event for the source only
+├── when minting from decay sources
+│   ├── it should mint a new token id to the recipient
+│   ├── it should append the minted token to the recipient enumeration
+│   ├── it should record the new staked balance with the maximum source unlock
+│   ├── it should leave the permanent stake balance unchanged
+│   ├── it should advance the token id counter by the number of mints
+│   ├── it should return the minted ids in input order
+│   └── it should emit a MetadataUpdate event for the source
+├── when minting from a permanent source
+│   ├── it should mint a permanent stake to the recipient
+│   ├── it should record the new staked balance with zero end and permanent true
+│   ├── it should bump the permanent stake balance by the minted amount
+│   └── it should emit a MetadataUpdate event for the source
+├── when reducing a delegated permanent source
+│   ├── it should decrease the delegatee's recorded balance by the moved amount
+│   ├── it should emit a MetadataUpdate event for the source
+│   └── it should emit a MetadataUpdate event for the destination
+├── when crediting a delegated permanent add destination
+│   ├── it should increase the delegatee's recorded balance by the moved amount
+│   ├── it should emit a MetadataUpdate event for the source
+│   └── it should emit a MetadataUpdate event for the destination
+├── when rebalancing between two distinct delegated permanent stakes
+│   ├── it should decrease the source delegatee's recorded balance by the moved amount
+│   ├── it should increase the destination delegatee's recorded balance by the moved amount
+│   ├── it should emit a MetadataUpdate event for the source
+│   └── it should emit a MetadataUpdate event for the destination
+├── when one decay source feeds an accumulator a mint and an add in a single call
+│   ├── it should reduce the source staked amount by the total moved
+│   ├── it should bump the accumulator staked amount by the accumulator slice
+│   ├── it should mint a new token id to the recipient with the maximum source unlock
+│   ├── it should bump the existing add destination staked amount by the add slice
+│   ├── it should bump the permanent stake balance by the accumulator slice only
+│   ├── it should leave supply unchanged
+│   ├── it should return the minted ids in input order
+│   ├── it should emit a MetadataUpdate event for the source
+│   └── it should emit a MetadataUpdate event for the add destination
+├── when a mixed rebalance mirrors onto the voter chain zero ledger
+│   ├── it should call rebalanceChain0 exactly once with the sources forwarded as is
+│   └── it should credit the resolved destination token ids with unchanged amounts and recipients
+├── when rebalancing from a checkpointed decay source
+│   ├── it should reduce the global voting supply by the source delta
+│   └── it should keep total supply equal to the sum of the remaining token balances
+├── when two decay sources with distinct unlocks drain into one mint
+│   ├── it should record the minted unlock as the latest source unlock
+│   ├── it should zero both source staked amounts
+│   └── it should return the single minted id
+├── when two decay sources drain into one mint with the later unlock first
+│   ├── it should record the minted unlock as the latest source unlock
+│   ├── it should zero both source staked amounts
+│   └── it should return the single minted id
+├── when an add destination unlock lies between the two source unlocks
+│   └── it should revert with UnlockTimeReduction
+├── when the earlier of two add destination unlocks precedes the source unlock
+│   └── it should revert with UnlockTimeReduction
+├── when moving the full decay balance into another decay stake with checkpoint inspection
+│   ├── it should write the source user point slope and bias to zero
+│   ├── it should write the destination user point slope and bias for the combined amount
+│   └── it should keep the scheduled slope change at the shared end
+├── when minting from a decay source with an exact slope amount
+│   ├── it should write the minted user point slope and bias as exact literals
+│   └── it should fold the exact slope and bias into the latest global point
+├── when minting from a decay source with a sub maxtime amount
+│   └── it should floor the minted slope and bias to zero
+└── when the inputs are empty
+    ├── it should not revert
+    ├── it should return an empty minted ids array
+    ├── it should leave the token id counter unchanged
+    └── it should leave the permanent stake balance unchanged

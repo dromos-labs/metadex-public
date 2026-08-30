@@ -1,0 +1,34 @@
+UnitVotingEscrow::Delegate
+├── when the caller is not the owner or approved operator
+│   └── it should revert with ERC721InsufficientApproval
+├── when the delegator tokenId does not exist
+│   └── it should revert with ERC721NonexistentToken
+├── when the delegator stake is not permanent
+│   └── it should revert with NotPermanentStake
+├── when the delegatee tokenId is not zero and does not exist
+│   └── it should revert with ERC721NonexistentToken
+├── when the ownership of the delegator changed in the current block
+│   └── it should revert with OwnershipChange
+├── when the delegator is already delegating to that delegatee
+│   └── it should not emit a DelegateChanged event
+├── when the delegator delegates to itself
+│   ├── it should clear the delegate slot to zero
+│   ├── it should record a delegator checkpoint with a zero delegatee
+│   ├── it should drain the old delegatee delegated balance to zero
+│   └── it should emit the DelegateChanged event clearing to zero
+├── when clearing a prior delegatee with a zero delegatee
+│   ├── it should clear the delegate slot to zero
+│   ├── it should record a delegator checkpoint with a zero delegatee
+│   ├── it should drain the old delegatee delegated balance to zero
+│   └── it should emit the DelegateChanged event clearing to zero
+├── when delegating from no prior delegate
+│   ├── it should set the delegate slot to the delegatee
+│   ├── it should bump the delegator num checkpoints to one
+│   ├── it should bump the delegatee num checkpoints to one
+│   ├── it should record a delegator checkpoint at the current timestamp with the new delegatee
+│   ├── it should record a delegatee checkpoint with delegated balance equal to the delegator amount
+│   └── it should emit the DelegateChanged event
+└── when switching from a prior delegatee to a new one
+    ├── it should record a delegator checkpoint with the new delegatee
+    ├── it should record an old delegatee checkpoint with delegated balance back to zero
+    └── it should record a new delegatee checkpoint with delegated balance equal to the delegator amount

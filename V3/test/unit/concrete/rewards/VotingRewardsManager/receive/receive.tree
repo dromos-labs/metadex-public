@@ -1,0 +1,5 @@
+UnitVotingRewardsManager::Receive
+├── when the sender is not the wrapped native
+│   └── it should revert with NotWrappedNative
+└── when the sender is the wrapped native
+    └── it should accept the native token

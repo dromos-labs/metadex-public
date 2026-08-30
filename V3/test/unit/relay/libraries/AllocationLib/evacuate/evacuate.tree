@@ -1,0 +1,7 @@
+UnitAllocationLib::Evacuate
+├── when the named chain holds no booked weight
+│   └── it should revert with NothingToEvacuate
+├── when the named chain holds booked weight
+│   └── it should send the chain a full dealloc gauge overwrite
+└── when the call carries dispatch value
+    └── it should forward the whole call value to the voter

@@ -1,0 +1,5 @@
+UnitSingleHybrid::ConvertIdleBalance
+├── when the caller is not the keeper
+│   └── it should revert with NotKeeper
+└── when a keeper distributes the idle balance
+    └── it should notify the unaccounted target token balance

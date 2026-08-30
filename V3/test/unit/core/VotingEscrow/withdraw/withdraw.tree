@@ -1,0 +1,25 @@
+UnitVotingEscrow::Withdraw
+├── when the caller is not the owner or approved operator
+│   └── it should revert with ERC721InsufficientApproval
+├── when the token id has not been minted
+│   └── it should revert with ERC721NonexistentToken
+├── when the stake is permanent
+│   ├── it should revert with PermanentStake
+│   └── it should not clear the voter ledger
+├── when the stake has not expired
+│   ├── it should revert with StakeNotExpired
+│   └── it should not clear the voter ledger
+├── when the stake is not fully returned to chain zero
+│   ├── it should revert with InsufficientChain0Allocation
+│   └── it should not clear the voter ledger
+└── when an authorized caller withdraws an expired stake
+    ├── it should preserve the token owner at zero balance
+    ├── it should zero out the staked balance
+    ├── it should decrement the supply by the staked amount
+    ├── it should record a user point with zeroed bias slope and permanent
+    ├── it should advance the global epoch
+    ├── it should transfer the underlying tokens to the recipient
+    ├── it should clear the voter ledger for the token
+    ├── it should emit the Withdraw event with the token owner
+    ├── it should emit the Supply event
+    └── it should emit the MetadataUpdate event

@@ -1,0 +1,66 @@
+UnitRelayRewardLanes
+├── when pulling to an entrypoint
+│   └── it should gate on the entrypoint roles and the un-accounted balance
+├── when compounding into the stake
+│   └── it should grow only the backing so every share appreciates
+├── when compounding with no principal outstanding
+│   ├── it should revert with NoPrincipalSupply while the relay is open
+│   ├── it should revert with NoPrincipalSupply once the relay is closed
+│   ├── it should never reach the escrow with the stake growth
+│   └── it should leave the backing counter untouched
+├── when notifying an invalid batch
+│   └── it should reject unknown tokens, phantom amounts, dust batches and zero supply
+├── when the notified batch does not divide evenly
+│   └── it should account only the distributed amount and recycle the remainder
+├── when a merged settlement spans ragged batches
+│   └── it should cover every claim with the accounted balance
+├── when claiming with nothing settled
+│   └── it should revert with NothingToClaim
+├── when growing the reward registry
+│   └── it should lock Maxi after one token and cap L2 at ten without duplicates
+├── when registering a reward token nothing can pay out
+│   ├── it should reject an address holding no code
+│   ├── it should reject the relay itself
+│   └── it should reject the principal and the yield token
+├── when dropping a reward token
+│   ├── it should refuse to drop one the registry does not hold
+│   ├── it should hold the drop to the keeper
+│   ├── it should drop the token and reopen the slot a locked tier closed
+│   └── it should refuse to drop one that already distributed
+├── when processing donations
+│   └── it should fold the staked surplus into the backing or revert on none
+├── when claiming rewards across chains
+│   └── it should resolve recipients from delayed config and fund leaf dispatches from the caller
+├── when the admin redirects an earned leaf claim
+│   ├── it should refuse to land a re-point inside the delay, so the atomic redirect reverts
+│   ├── it should leave the honest custody in place while the proposal waits
+│   └── it should let anyone rescue the accrued rewards to the honest custody inside the window
+├── when a proposed leaf recipient waits out the delay
+│   ├── it should stamp the proposal and announce when it becomes executable
+│   ├── it should refuse to land one second before the delay elapses
+│   ├── it should land exactly at the boundary, the inclusive end of the delay
+│   └── it should consume the proposal, so the same one cannot land twice
+├── when a proposed leaf operator waits out the delay
+│   ├── it should gate every operator path to the owner
+│   ├── it should reject a proposal for the zero operator, which is the revoke path instead
+│   ├── it should reject an execution with nothing proposed for the chain
+│   ├── it should stamp the proposal and announce when it becomes executable
+│   ├── it should refuse to land one second before the delay elapses
+│   ├── it should dispatch the operator to the voter at the boundary, funded by the caller
+│   └── it should consume the proposal, so the same one cannot land twice
+├── when the operator seat is revoked
+│   ├── it should clear the seat on the leaf with no delay
+│   └── it should cancel a proposal pending for the chain
+├── when the voter refuses to message the chain
+│   ├── it should gate the cancel to the owner
+│   ├── it should revert a revoke, which cannot reach the seat
+│   └── it should drop the proposal anyway
+├── when the voter reverts an execution
+│   ├── it should revert the whole call and keep the proposal
+│   └── it should let the same proposal land on a retry
+├── when a pending operator proposal is replaced
+│   ├── it should overwrite the proposal with the new operator
+│   ├── it should restart the delay from the replacement
+│   └── it should dispatch the replacement once its own delay elapses
+└── given the discovery views are read
+    └── it should report registry membership, the backing mirror and the PT clock

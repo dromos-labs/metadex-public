@@ -1,0 +1,47 @@
+UnitTransientTracking::store
+└── when a value is stored at a slot
+    └── it should write _value to _slot
+
+UnitTransientTracking::storeMapping
+└── when a value is stored for a key under a namespace
+    ├── it should write _value to the slot derived from _key and _namespace
+    └── it should leave the slot derived from a different _key at zero
+
+UnitTransientTracking::track
+├── when the key has already been tracked under the namespace
+│   └── it should leave the _arraySlot length unchanged
+└── when the key has not been tracked under the namespace
+    ├── it should append _key to the _arraySlot array
+    └── it should increment the _arraySlot length
+
+UnitTransientTracking::push
+├── when the array is empty
+│   ├── it should write _value to the slot derived from _arraySlot at index zero
+│   └── it should set the _arraySlot length to one
+└── when the array already holds elements
+    ├── it should write _value to the slot derived from _arraySlot at the current length
+    └── it should increment the _arraySlot length
+
+UnitTransientTracking::clear
+└── when the array holds elements
+    └── it should reset the _arraySlot length to zero
+
+UnitTransientTracking::untrack
+└── when a tracked key is untracked
+    └── it should clear the dedup flag at the slot derived from _key and _namespace
+
+UnitTransientTracking::length
+└── when the array slot holds a length
+    └── it should return the _arraySlot value as _length
+
+UnitTransientTracking::at
+└── when several keys have been tracked
+    └── it should return the stored _value at each _index
+
+UnitTransientTracking::load
+└── when the slot holds a value
+    └── it should return the stored _value at _slot
+
+UnitTransientTracking::loadMapping
+└── when a value has been stored for a key under a namespace
+    └── it should return the stored _value for _key under _namespace

@@ -1,0 +1,12 @@
+UnitMigration::Vote
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── when pools and weights are provided
+    │   └── it should forward the pools weights and migration token id
+    ├── when the pools and weights arrays are empty
+    │   └── it should forward the empty arrays
+    ├── when the pools and weights lengths differ
+    │   └── it should forward the arrays without local validation
+    └── given the contract is paused
+        └── it should forward the pools weights and migration token id

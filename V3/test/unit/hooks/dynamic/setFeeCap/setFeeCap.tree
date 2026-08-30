@@ -1,0 +1,14 @@
+UnitDynamicSwapFeeHook::SetFeeCap
+├── when caller is not Fee Manager
+│   └── it should revert with "NFM"
+└── when caller is Fee Manager
+    ├── when pool doesn't exist
+    │   └── it should revert with "PNP"
+    └── when pool exists
+        ├── when fee cap is 0
+        │   └── it should revert with "FC0"
+        ├── when fee cap is higher than max fee
+        │   └── it should revert with "MFC"
+        └── when fee cap is bigger than 0 and less than or equal to max fee cap
+            ├── it should set feeCap
+            └── it should emit a {FeeCapSet} event

@@ -1,0 +1,127 @@
+UnitPayments::sweep
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+├── when the recipient is the execution address
+│   └── it should revert with InvalidRecipient
+└── given the recipient is valid
+    ├── when the balance is below the minimum
+    │   └── it should revert with InsufficientBalance for _token
+    └── given the balance meets the minimum
+        ├── when the balance is positive
+        │   └── it should transfer the full _token balance to _recipient
+        ├── when the swept token is the native mirror token
+        │   ├── it should transfer only the balance above the pre batch snapshot to _recipient
+        │   └── it should leave the pre batch native with the router at closure
+        ├── when the mirror minimum is met only through the pre batch native
+        │   └── it should revert with InsufficientBalance for the native mirror token
+        └── when the balance is zero
+            └── it should not transfer _token
+
+UnitPayments::transfer
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+└── given the recipient is not the zero address
+    ├── when the resolved amount is positive
+    │   ├── it should transfer _amount to _recipient
+    │   └── it should return the remaining _token balance to _msgSender() at closure
+    ├── when a pips spend resolves a positive amount
+    │   ├── it should transfer the pip proportion to _recipient
+    │   └── it should return the remaining _token balance to _msgSender() at closure
+    ├── when using a known rounded down pip proportion
+    │   ├── it should transfer the hand computed floored proportion to _recipient
+    │   └── it should return the hand computed remainder to _msgSender() at closure
+    ├── when a full pips spend selects the native mirror token
+    │   ├── it should transfer only the balance above the pre batch snapshot to _recipient
+    │   └── it should leave the pre batch native with the router at closure
+    └── when the resolved amount is zero
+        ├── it should not transfer _token
+        └── it should return the remaining _token balance to _msgSender() at closure
+
+UnitPayments::transferNft
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+├── when the recipient is the execution address
+│   └── it should revert with InvalidRecipient
+└── given the recipient is valid
+    ├── when the zero sentinel matches no in flight collection
+    │   └── it should revert with NoInFlightNft
+    ├── when the nft is not in batch custody
+    │   └── it should revert with NftNotInCustody
+    └── given the nft entered custody during the batch
+        ├── when the token id is explicit
+        │   ├── it should transfer the nft to _recipient
+        │   └── it should close the batch with the custody check passing
+        ├── when the recipient burns the nft in its receiver hook
+        │   ├── it should complete the batch
+        │   └── it should clear the nft tracking
+        ├── when the explicit token id matches the in flight nft
+        │   ├── it should transfer the nft to _recipient
+        │   └── it should clear the in flight slots
+        ├── when the token id is the zero sentinel
+        │   ├── it should transfer the in flight nft to _recipient
+        │   └── it should clear the in flight slots
+        └── when the transferred nft is not the in flight one
+            ├── it should transfer the nft to _recipient
+            └── it should keep the in flight slots set
+
+UnitPayments::fundErc20
+├── when the resolved amount is positive
+│   ├── it should resolve _spend against the _msgSender() balance as _amount
+│   ├── it should pull _amount from _msgSender() into the execution address
+│   └── it should return the remaining _token balance to _msgSender() at closure
+├── when a pips spend resolves a positive amount
+│   ├── it should resolve the pip proportion of the _msgSender() balance as _amount
+│   ├── it should pull the pip proportion from _msgSender() into the execution address
+│   └── it should return the remaining _token balance to _msgSender() at closure
+├── when using a known rounded down pip proportion
+│   ├── it should pull the hand computed floored proportion from _msgSender() into the execution address
+│   └── it should return the hand computed pulled proportion to _msgSender() at closure
+└── when the resolved amount is zero
+    └── it should not pull _token from _msgSender()
+
+UnitPayments::wrapEth
+├── when the deployment has no wrapped native
+│   └── it should revert with CommandDisabled
+├── when the resolved amount equals the available balance
+│   ├── it should deposit _amount into WETH
+│   └── it should return the remaining WETH balance to _msgSender() at closure
+├── when the resolved amount is below the available balance
+│   ├── it should deposit only the resolved amount into WETH
+│   ├── it should return the deposited WETH balance to _msgSender() at closure
+│   └── it should refund the undeposited native leftover to _msgSender() at closure
+├── when a pips spend resolves a positive amount
+│   ├── it should deposit the pip proportion of the available native balance into WETH
+│   ├── it should return the deposited WETH balance to _msgSender() at closure
+│   └── it should refund the undeposited native leftover to _msgSender() at closure
+├── when using a known rounded down pip proportion
+│   ├── it should deposit the hand computed floored proportion into WETH
+│   ├── it should return the deposited WETH balance to _msgSender() at closure
+│   └── it should refund the hand computed native leftover to _msgSender() at closure
+└── when the resolved amount is zero
+    ├── it should not deposit into WETH
+    └── it should not return WETH balance to _msgSender() at closure
+
+UnitPayments::unwrapWeth
+├── when the deployment has no wrapped native
+│   └── it should revert with CommandDisabled
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+└── given the recipient is not the zero address
+    ├── when the resolved amount is zero
+    │   └── it should not withdraw from WETH
+    └── given the resolved amount is positive
+        ├── when the recipient is the execution address
+        │   ├── it should withdraw _amount from WETH
+        │   └── it should return the withdrawn native to _msgSender() at closure
+        └── given the recipient is another address
+            ├── when the native transfer succeeds
+            │   ├── it should withdraw _amount from WETH
+            │   └── it should send _amount to _recipient
+            ├── when a pips spend resolves a positive amount
+            │   ├── it should withdraw the pip proportion from WETH
+            │   └── it should send the pip proportion to _recipient
+            ├── when using a known rounded down pip proportion
+            │   ├── it should withdraw the hand computed floored proportion from WETH
+            │   └── it should send the hand computed floored proportion to _recipient
+            └── when the native transfer fails
+                └── it should revert with NativeTransferFailed with _data

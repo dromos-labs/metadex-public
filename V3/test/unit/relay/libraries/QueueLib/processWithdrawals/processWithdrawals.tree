@@ -1,0 +1,40 @@
+UnitQueueLib::ProcessWithdrawals
+├── when the queue is empty
+│   ├── it should settle nothing
+│   └── it should pass the counters through
+└── given the queue is not empty
+    ├── when the idle weight cannot cover the head exit
+    │   ├── it should settle nothing
+    │   └── it should leave the queue untouched
+    └── given the queued exits are affordable
+        ├── it should price each exit at shares times backing over supply
+        ├── it should release exactly each entrys escrow and pair burn the holder
+        ├── it should delete each settled entry
+        ├── it should debit the backing and the pending shares
+        ├── it should emit a WithdrawProcessed event per exit
+        ├── when max entries is below the queue size
+        │   └── it should settle only max entries in FIFO order
+        ├── when a later exit is unaffordable
+        │   └── it should stop the drain at the first unaffordable exit
+        ├── given the relay is closed
+        │   ├── it should burn each settled exits principal in full
+        │   ├── it should skip the yield burn entirely
+        │   └── it should settle the whole batch
+        ├── when the destination is the mint sentinel
+        │   └── it should route the weight to a freshly minted token
+        ├── when the source stake is permanent
+        │   ├── when the destination stake is also permanent
+        │   │   └── it should route the weight to the named destination
+        │   ├── when the destination stake is not permanent
+        │   │   └── it should fall back to minting a fresh token
+        │   └── when the surviving destination already holds stake
+        │       └── it should emit the weight delivered above the previous stake
+        ├── when the source stake is not permanent
+        │   ├── when the destination stake is permanent
+        │   │   └── it should route the weight to the named destination
+        │   ├── when the destination unlock is not earlier than the source unlock
+        │   │   └── it should route the weight to the named destination
+        │   └── when the destination unlock is earlier than the source unlock
+        │       └── it should fall back to minting a fresh token
+        └── when the ratio carries across a batch
+            └── it should price a known two exit example at the simulated ratios

@@ -1,0 +1,7 @@
+UnitRelayVoteAdapter
+├── when reading the proposal snapshot
+│   └── it should forward the governor answer
+├── when encoding a cast
+│   └── it should produce the fractional calldata for the governor
+└── when a component exceeds the dialect width
+    └── it should revert with UnrepresentableWeight

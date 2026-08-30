@@ -1,0 +1,49 @@
+UnitRelayLifecycleMaxi
+├── given a freshly initialized maxi relay
+│   └── it should clone both satellites and pair mint the bootstrap 1:1
+├── when the keeper processes a pending deposit
+│   └── it should pair mint at the current backing to supply ratio
+├── when the principal token fires the hook on a pair mint
+│   └── it should return early and leave the settle to the yield token leg
+├── when only the first of two pending deposits is admitted
+│   └── it should hand back only the admitted weight from the pending counter
+├── when the yield token is transferred around a notify
+│   └── it should settle seller and buyer at pre-change balances
+├── when the yield token moves through an allowance
+│   └── it should settle both ends and spend the allowance
+├── when a holder settles twice without claiming
+│   └── it should add the second accrual on top of the banked one
+├── when a holder claims
+│   └── it should pay out the settled reward and de-account it
+├── when claiming with pending and fresh accrual
+│   └── it should pay the carried pending plus the accrual since the last checkpoint
+├── when a pair mints to an accruing holder
+│   └── it should settle the recipient at the pre-mint balance
+├── when registering an exit after selling the yield
+│   └── it should revert with InsufficientFreeShares
+├── when registering an exit without principal
+│   └── it should revert with InsufficientFreeShares
+├── when transferring past the escrowed balance
+│   └── it should revert with EscrowedSharesLocked
+├── when transferring more yield than the balance
+│   └── it should revert with InsufficientBalance
+├── when draining a fully escrowed holder
+│   └── it should release the escrow before the burns so the drain completes
+├── when draining only the first of two queued exits
+│   └── it should release only the head entry and keep the tail escrowed
+├── when draining an accruing exit
+│   └── it should settle the accrual at the pre-burn balance
+├── when transferring yield to the zero address
+│   ├── it should revert with InvalidRecipient for the zero address
+│   ├── it should accept the relay, the token itself and the sibling satellite alike
+│   └── it should leave the supply and the pair invariant untouched
+├── when transferring the principal token
+│   └── it should revert on every holder path
+├── when minting from outside the relay
+│   └── it should revert with NotRelay
+├── when burning from outside the relay
+│   └── it should revert with NotRelay
+├── when initializing a satellite twice
+│   └── it should revert with AlreadyInitialized
+└── when the hook caller is not a satellite
+    └── it should revert with NotAuthorized

@@ -1,0 +1,5 @@
+UnitVotingEscrow::TokenURI
+├── when the token has not been minted
+│   └── it should revert with ERC721NonexistentToken
+└── when the token is owned
+    └── it should return the art proxy token uri

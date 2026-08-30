@@ -1,0 +1,120 @@
+UnitClPosition::mintClPosition
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+├── when the recipient is the execution address
+│   ├── it should fund both pool tokens
+│   ├── it should approve the position manager for both funded amounts
+│   ├── it should track both pool tokens
+│   ├── it should clear the position manager allowance for both tokens
+│   ├── it should mint the position to the execution address
+│   ├── it should take the minted position into custody
+│   └── it should set the minted position in flight
+└── given the recipient is an external address
+    ├── when both pool tokens are funded from the execution balance
+    │   ├── it should fund both pool tokens
+    │   ├── it should approve the position manager for both funded amounts
+    │   ├── it should track both pool tokens
+    │   ├── it should clear the position manager allowance for both tokens
+    │   ├── it should mint the position to the recipient
+    │   ├── it should not take the minted position into custody
+    │   └── it should not set the minted position in flight
+    ├── when the logical sender pays for both pool tokens
+    │   ├── it should pull both pool tokens from the logical sender
+    │   ├── it should track both pool tokens
+    │   └── it should mint with both pulled amounts
+    └── when the pool tokens have different payers
+        ├── it should pull token zero from the logical sender
+        ├── it should fund token one from the execution balance
+        ├── it should track both pool tokens
+        └── it should mint with both resolved amounts
+
+UnitClPosition::increaseClLiquidity
+├── when the token id is the in flight sentinel
+│   ├── it should read the pool tokens of the in flight position
+│   ├── it should fund both pool tokens
+│   ├── it should approve the position manager for both funded amounts
+│   ├── it should track both pool tokens
+│   ├── it should clear the position manager allowance for both tokens
+│   └── it should increase the liquidity of the in flight position
+├── given the position is already in custody
+│   ├── when the custodied position was not tracked this batch
+│   │   └── it should revert with NftNotInCustody
+│   └── when the custodied position was tracked this batch
+│       ├── it should read the pool tokens of the held position
+│       ├── it should fund both pool tokens
+│       ├── it should approve the position manager for both funded amounts
+│       ├── it should track both pool tokens
+│       ├── it should clear the position manager allowance for both tokens
+│       └── it should increase the liquidity of the held position
+└── given the position is not already in custody
+    ├── when both pool tokens are funded from the execution balance
+    │   ├── it should read the position pool tokens
+    │   ├── it should fund both pool tokens
+    │   ├── it should approve the position manager for both funded amounts
+    │   ├── it should track both pool tokens
+    │   ├── it should clear the position manager allowance for both tokens
+    │   └── it should increase the position liquidity
+    └── when the pool tokens have different payers
+        ├── it should read the position pool tokens
+        ├── it should pull token zero from the logical sender
+        ├── it should fund token one from the execution balance
+        ├── it should track both pool tokens
+        └── it should increase the position liquidity with both resolved amounts
+
+UnitClPosition::decreaseClLiquidity
+├── when the token id is the in flight sentinel
+│   └── it should decrease the liquidity of the in flight position
+├── given the position is already in custody
+│   ├── when the custodied position was not tracked this batch
+│   │   └── it should revert with NftNotInCustody
+│   └── when the custodied position was tracked this batch
+│       └── it should decrease the liquidity of the held position
+└── given the position is not already in custody
+    ├── when the owner is not the logical sender
+    │   └── it should revert with NotPositionOwner
+    ├── when the owner is the logical sender
+    │   └── it should decrease the requested position liquidity
+    ├── when the owner is the logical sender and all liquidity is requested
+    │   ├── it should read the current position liquidity
+    │   └── it should decrease the current position liquidity
+    └── when the owner is the logical sender and all liquidity is requested on an empty position
+        └── it should skip the decrease
+
+UnitClPosition::collectClFees
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+└── given the recipient is valid
+    ├── when the token id is the in flight sentinel
+    │   └── it should collect from the in flight position
+    ├── given the position is already in custody
+    │   ├── when the custodied position was not tracked this batch
+    │   │   └── it should revert with NftNotInCustody
+    │   └── when the custodied position was tracked this batch
+    │       └── it should collect from the held position
+    └── given the position is not already in custody
+        ├── when the owner is not the logical sender
+        │   └── it should revert with NotPositionOwner
+        └── given the owner is the logical sender
+            ├── when the recipient is the execution address
+            │   ├── it should track both pool tokens
+            │   └── it should collect to the execution address
+            └── when the recipient is any other address
+                ├── it should collect to the recipient
+                └── it should not track the pool tokens
+
+UnitClPosition::burnClPosition
+├── when the token id is the in flight sentinel
+│   ├── it should burn the in flight position
+│   └── it should clear the in flight slots
+├── given the position is already in custody
+│   ├── when the custodied position was not tracked this batch
+│   │   └── it should revert with NftNotInCustody
+│   └── when the custodied position was tracked this batch
+│       ├── it should burn the position
+│       ├── it should let the batch close on the burned token id
+│       └── it should remove the position from custody
+└── given the position is not already in custody
+    ├── when the owner is not the logical sender
+    │   └── it should revert with NotPositionOwner
+    └── when the owner is the logical sender
+        └── it should burn the position

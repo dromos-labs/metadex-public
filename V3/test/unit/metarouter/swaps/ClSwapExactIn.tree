@@ -1,0 +1,45 @@
+UnitSwaps::ClSwapExactIn
+├── when a user payer selects a proportional spend
+│   └── it should revert with InvalidSpendMode
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+└── given the recipient is valid
+    ├── when the pool path is empty
+    │   └── it should revert with InvalidPath
+    ├── when a pool is not registered
+    │   └── it should revert with InvalidPool for the pool
+    ├── when a factory does not recognize the pool
+    │   └── it should revert with InvalidPool for the pool
+    ├── when a pool reports an unsupported pool type
+    │   └── it should revert with InvalidPool for the pool
+    └── given every pool is validated
+        ├── when the input token does not belong to the pool
+        │   └── it should revert with InvalidPath
+        ├── when the resolved input exceeds the signed integer maximum
+        │   └── it should revert with AmountOverflow
+        ├── when another callback caller is already armed
+        │   └── it should revert with CallbackNotCleared for the armed caller
+        ├── when the pool returns without consuming its callback
+        │   └── it should revert with CallbackNotCleared for the pool
+        ├── when the pool reports a positive output delta
+        │   └── it should revert with InvalidSwapDeltas
+        ├── when the final output is below the minimum
+        │   └── it should revert with TooLittleReceived
+        └── given the final output meets the minimum
+            ├── when the payer is the execution owner
+            │   └── it should pay the first pool directly from the execution owner
+            ├── when the payer is the execution address
+            │   ├── it should track the input token for the closure sweep
+            │   └── it should pay the first pool from custody
+            ├── when the input token is token one
+            │   └── it should swap toward token zero using the upper price boundary
+            ├── when the path contains multiple pools
+            │   └── it should forward each returned output amount through custody
+            ├── when a user payer routes through multiple pools
+            │   └── it should pay only the first pool from the execution owner
+            ├── when the hop directions differ
+            │   └── it should swap each hop toward its own output token
+            ├── when the recipient is the execution address
+            │   └── it should track and return the output at batch closure
+            └── when the output equals the minimum
+                └── it should complete at the exact bound

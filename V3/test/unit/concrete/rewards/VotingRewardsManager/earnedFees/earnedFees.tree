@@ -1,0 +1,34 @@
+UnitVotingRewardsManager::EarnedFees
+├── when the estimate does not reach the latest checkpoint
+│   └── it should return only the settled rewards
+└── when the estimate reaches the latest checkpoint
+    ├── when the stake has no weight
+    │   └── it should return only the settled rewards
+    └── when the stake has weight
+        ├── when there are no pending fees
+        │   ├── when the buffer is empty
+        │   │   └── it should return only the settled rewards
+        │   └── when the buffer is not empty
+        │       ├── when the gauge is not active
+        │       │   └── it should return only the settled rewards
+        │       └── when the gauge is active
+        │           ├── when the active buffer estimate is known
+        │           │   └── it should add the buffered fee estimate
+        │           └── when the active buffer estimate varies
+        │               └── it should add the buffered fee estimate
+        └── when there are pending fees
+            ├── when the total supply is zero
+            │   └── it should return only the settled rewards
+            └── when the total supply is not zero
+                ├── when the stake weight is permanent
+                │   ├── when the full weight estimate varies
+                │   │   └── it should add the pending fee estimate using the full weight
+                │   ├── when the full weight estimate is known
+                │   │   └── it should add the pending fee estimate using the full weight
+                │   └── when the buffered and settled amounts are known
+                │       └── it should add the buffered and settled fees to the pending estimate
+                └── when the stake weight is decaying
+                    ├── when the decayed weight estimate varies
+                    │   └── it should add the pending fee estimate using the decayed weight
+                    └── when the decayed weight estimate is known
+                        └── it should add the pending fee estimate using the decayed weight

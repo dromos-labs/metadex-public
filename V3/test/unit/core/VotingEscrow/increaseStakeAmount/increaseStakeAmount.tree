@@ -1,0 +1,44 @@
+UnitVotingEscrow::IncreaseStakeAmount
+├── when the caller is not the owner or approved operator
+│   └── it should revert with ERC721InsufficientApproval
+├── when the value is zero
+│   └── it should revert with ZeroAmount
+├── when the stake has expired and is not permanent
+│   ├── it should revert with StakeExpired
+│   └── it should not park anything on the voter
+├── when the resulting amount overflows the signed limit
+│   ├── it should revert with AmountExceedsCap
+│   └── it should not park anything on the voter
+├── when the resulting amount equals the signed cap
+│   ├── it should set the staked amount to the cap
+│   ├── it should bump supply to the cap
+│   └── it should bump the permanent stake balance to the cap
+├── when the staked amount is zero and the end is in the future
+│   ├── it should credit the value to the staked amount
+│   ├── it should bump supply by the value
+│   └── it should keep the existing end
+├── when the caller is an approved operator
+│   ├── it should bump the staked amount by the value
+│   └── it should transfer the value from the operator
+└── when the top up succeeds
+    ├── it should bump the staked amount by the value
+    ├── it should bump supply by the value
+    ├── it should transfer the value from the caller
+    ├── it should park the new voting power on the voter chain zero ledger
+    ├── it should emit the Supply event
+    ├── it should emit the MetadataUpdate event
+    ├── given the stake has a delegatee
+    │   ├── it should append a new delegatee checkpoint
+    │   └── it should increase the delegatee latest checkpoint delegated balance by exactly the value
+    ├── when the stake is permanent
+    │   ├── it should bump the permanent stake balance by the value
+    │   ├── it should record a user point with permanent equal to the new total
+    │   └── it should emit the Deposit event with zero unstake time
+    ├── when the stake is decaying and not expired
+    │   ├── it should leave the permanent stake balance unchanged
+    │   ├── it should record a user point with the recomputed slope and bias
+    │   └── it should emit the Deposit event with the current end as unstake time
+    └── when the stake is decaying using a known exact example
+        ├── it should leave the permanent stake balance unchanged
+        ├── it should record a user point with the hand computed slope and bias
+        └── it should match the voting power APIs to the hand computed bias

@@ -1,0 +1,234 @@
+UnitLeafMessageOrchestrator::constructor
+├── when leafVoter is the zero address
+│   └── it should revert with ZeroAddress
+├── when root chain id is zero
+│   └── it should revert with InvalidRootChainId
+└── when all inputs are valid
+    ├── it should set LEAF_VOTER to _leafVoter
+    └── it should set ROOT_CHAIN_ID to _rootChainId
+
+UnitLeafMessageOrchestrator::dispatch
+├── when the caller is not the leaf voter
+│   └── it should revert with CallerNotAuthorized
+└── given the caller is the leaf voter
+    ├── when the message type is not redeem
+    │   └── it should revert with UnsupportedMessageType
+    ├── given the message type is redeem
+    │   ├── when no adapter is registered
+    │   │   └── it should revert with AdapterNotRegistered
+    │   ├── given an adapter is registered
+    │   │   ├── it should increment nonceOut
+    │   │   ├── it should call sendMessage on the adapter with the wrapped message, _gasLimit, _refundRecipient, and msg value
+    │   │   ├── it should emit MessageDispatched with the adapter remote chain id, _nonce and _msgType
+    │   │   └── when a redeem supplies a gas limit and a deallocation budget is configured
+    │   │       ├── it should send the message with the supplied gas limit
+    │   │       └── it should never pass the configured deallocation gas limit to the adapter
+    │   └── when the adapter quotes a nonzero fee for a redeem
+    │       ├── it should not quote the transport
+    │       └── it should forward the whole msg value to the adapter
+    └── given the message type is deallocate
+        ├── when the deallocate route is suspended
+        │   ├── it should dispatch the deallocation confirmation through the adapter
+        │   └── it should emit MessageDispatched with the adapter remote chain id, _nonce and _msgType
+        ├── when the deallocation is caller funded and covers the quote
+        │   ├── it should quote the transport with the wrapped message and the caller refund recipient
+        │   ├── it should forward the whole msg value with the caller refund recipient
+        │   └── it should increment nonceOut
+        ├── when the deallocation is caller funded and below the quote
+        │   └── it should revert with InsufficientDeallocationMessageValue
+        ├── when the deallocation is pool funded
+        │   ├── it should forward exactly the quoted fee with the orchestrator as refund recipient
+        │   ├── it should draw the fee from the orchestrator balance
+        │   └── it should emit MessageDispatched with the adapter remote chain id, _nonce and _msgType
+        └── when a deallocation supplies a gas limit other than the configured one
+            ├── it should quote the transport with the configured deallocation gas limit
+            ├── it should send the message with the configured deallocation gas limit
+            └── it should never pass the supplied gas limit to the adapter
+
+UnitLeafMessageOrchestrator::route
+├── when the caller is not the adapter
+│   └── it should revert with CallerNotAdapter
+└── given the caller is the adapter
+    ├── when the payload is shorter than the header
+    │   └── it should revert with InvalidPayload
+    └── given the payload contains the header
+        ├── when the message type byte is none
+        │   └── it should revert with NoneMessageType
+        ├── when the message type byte is out of range
+        │   └── it should revert with InvalidMessageType
+        └── given the message type byte is in range
+            ├── when the message was dispatched ahead of the local clock
+            │   ├── it should revert with ClockBehindDispatch
+            │   └── it should deliver once the clock reaches the dispatch time
+            ├── when the nonce has already been used
+            │   └── it should revert with NonceAlreadyUsed
+            ├── when the message type is allocate chain
+            │   ├── it should mark the chain nonce as used
+            │   ├── it should set lastChainVoteNonce to the chain nonce when it is newer
+            │   ├── it should call applyChainAllocation with the decoded chain fields and the scalar update flag true when the chain nonce is newer
+            │   └── it should emit MessageReceived with the origin chain id chain nonce and message type
+            ├── when the chain nonce does not advance the chain vote nonce
+            │   ├── it should still apply the allocation delta with the scalar update flag false
+            │   └── it should leave lastChainVoteNonce unchanged
+            ├── when a fenced chain nonce exceeds the chain vote nonce
+            │   ├── it should fence the delta to zero and suppress the scalar refresh
+            │   └── it should leave lastChainVoteNonce unchanged
+            ├── when the message type is allocate gauge
+            │   ├── it should mark the chain nonce as used
+            │   ├── it should set lastTokenIdVoteNonce to the chain nonce when it is newer
+            │   ├── it should call applyGaugeAllocations with the decoded token fields and the scalar update flag true when the token nonce is newer
+            │   └── it should emit MessageReceived with the origin chain id chain nonce and message type
+            ├── when the chain nonce does not advance the token vote nonce
+            │   ├── it should not call applyGaugeAllocations
+            │   └── it should leave lastTokenIdVoteNonce unchanged
+            ├── when the gauge allocation reverts cooldown active
+            │   └── it should revert so the transport redelivers the message
+            ├── when the gauge chain nonce advances the chain vote nonce
+            │   ├── it should forward applyGaugeAllocations with the scalar update flag true and the message emissions per vp
+            │   └── it should set lastChainVoteNonce to the chain nonce
+            ├── when the gauge chain nonce does not advance the chain vote nonce
+            │   ├── it should forward applyGaugeAllocations with the scalar update flag false
+            │   └── it should leave lastChainVoteNonce unchanged
+            ├── when a gauge is shape stale against a prior allocate chain
+            │   ├── it should forward applyGaugeAllocations with the shape refresh flag false
+            │   └── it should leave the shape high water at the chain nonce
+            ├── when a gauge share the chain vote high water with allocate chain
+            │   ├── it should forward applyChainAllocation with the scalar update flag false
+            │   └── it should leave the shared chain vote high water at the gauge nonce
+            ├── when an allocate gauge message carries value
+            │   ├── it should keep the inbound value in the orchestrator
+            │   └── it should call applyGaugeAllocations with no value
+            ├── when the message type is claim rewards
+            │   ├── it should mark the chain nonce as used
+            │   ├── it should call claimRewards on the leaf voter with the decoded reward claims
+            │   └── it should emit MessageReceived with the origin chain id chain nonce and message type
+            ├── when the claim rewards expiry equals the current timestamp
+            │   ├── it should call claimRewards on the leaf voter with the decoded reward claims
+            │   └── it should mark the chain nonce as used
+            ├── when the claim rewards message is past its expiry
+            │   ├── it should not call claimRewards
+            │   ├── it should emit ExpiredMessageDropped
+            │   └── it should mark the chain nonce as used
+            ├── when the message type is set operator
+            │   ├── it should mark the chain nonce as used
+            │   ├── it should set lastOperatorNonce to the chain nonce when it is newer
+            │   ├── it should call setOperator with the token id and operator when the operator nonce is newer
+            │   └── it should emit MessageReceived with the origin chain id chain nonce and message type
+            ├── when the set operator expiry equals the current timestamp
+            │   ├── it should call setOperator with the token id and operator
+            │   └── it should mark the chain nonce as used
+            ├── when the set operator message is past its expiry
+            │   ├── it should not call setOperator
+            │   ├── it should set lastOperatorNonce to the chain nonce
+            │   └── it should emit ExpiredMessageDropped
+            ├── when the chain nonce does not advance the operator nonce
+            │   └── it should not call setOperator
+            ├── when the set operator message is stale and past its expiry
+            │   ├── it should not call setOperator
+            │   └── it should leave lastOperatorNonce unchanged
+            ├── when the message type is reduce cooldown
+            │   ├── it should mark the chain nonce as used
+            │   ├── it should call applyCooldownReduction with the decoded token id and reduction
+            │   └── it should emit MessageReceived with the origin chain id chain nonce and message type
+            ├── when the reduce cooldown nonce is replayed
+            │   ├── it should not call applyCooldownReduction
+            │   └── it should revert with NonceAlreadyUsed
+            ├── when the message type is emergency deallocate
+            │   ├── it should mark the chain nonce as used
+            │   ├── it should set lastTokenIdVoteNonce to the chain nonce
+            │   ├── it should set lastEmergencyDeallocNonce to the chain nonce
+            │   ├── it should call applyEmergencyDeallocation with the decoded token id and amount
+            │   └── it should emit MessageReceived with the origin chain id chain nonce and message type
+            ├── when the emergency deallocate nonce is replayed
+            │   ├── it should not call applyEmergencyDeallocation
+            │   └── it should revert with NonceAlreadyUsed
+            ├── when the emergency deallocate nonce does not advance the token vote nonce
+            │   ├── it should still forward applyEmergencyDeallocation with the token id and amount
+            │   ├── it should leave lastTokenIdVoteNonce unchanged
+            │   ├── it should set lastEmergencyDeallocNonce to the chain nonce
+            │   ├── it should mark the chain nonce as used
+            │   └── it should still emit MessageReceived
+            ├── when a post resume chain allocation precedes the emergency
+            │   ├── it should forward applyEmergencyDeallocation with the token id and amount
+            │   ├── it should set lastEmergencyDeallocNonce to the emergency nonce
+            │   └── it should fence a later lower nonce allocate chain delta to zero
+            ├── when an emergency arrives after a higher nonce chain allocation
+            │   └── it should forward the emergency deallocation to the leaf voter
+            ├── when an older emergency arrives after a newer emergency
+            │   ├── it should still forward applyEmergencyDeallocation with the token id and amount
+            │   ├── it should leave lastEmergencyDeallocNonce at the higher emergency nonce
+            │   └── it should keep fencing an allocate chain delta between the two emergencies to zero
+            ├── when an emergency precedes a stale gauge vote
+            │   ├── it should forward the emergency deallocation to the leaf voter
+            │   ├── it should bump lastTokenIdVoteNonce to the emergency nonce
+            │   └── it should drop the later lower nonce gauge vote
+            ├── when an allocate chain delta is fenced by a prior emergency deallocation
+            │   ├── it should apply a zero allocation delta while forwarding the scalar and snapshot unchanged
+            │   └── it should mark the chain nonce as used
+            ├── when an allocate chain nonce is above the emergency fence
+            │   ├── it should apply the real allocation delta unchanged
+            │   └── it should mark the chain nonce as used
+            ├── when a gauge follows an emergency deallocation
+            │   ├── it should not advance the shape high water on the emergency
+            │   └── it should refresh the shape from the post emergency gauge
+            ├── when the gauge handler reverts after bumping the shape high water
+            │   └── it should roll back the shape high water with the whole message
+            ├── when the message type is redeem
+            │   └── it should revert with UnsupportedMessageType
+            └── when the chain status is suspended
+                ├── it should not read the chain status
+                ├── it should still process the message without reverting by calling applyChainAllocation with the decoded chain fields
+                ├── it should set lastChainVoteNonce to the chain nonce
+                ├── it should mark the chain nonce as used
+                └── it should emit MessageReceived with the origin chain id chain nonce and message type
+
+UnitLeafMessageOrchestrator::setAdapter
+├── when the caller is not adapter authority
+│   └── it should revert with CallerNotAdapterAuthority
+└── given the caller is adapter authority
+    ├── when the adapter is the zero address
+    │   └── it should revert with InvalidAdapter
+    └── given the adapter is not the zero address
+        ├── when the adapter chain id does not match the root chain id
+        │   └── it should revert with AdapterChainIdMismatch
+        └── when the adapter chain id matches the root chain id
+            ├── it should set the adapter
+            └── it should emit AdapterUpdated with _adapter
+
+UnitLeafMessageOrchestrator::quoteDispatch
+├── when quoting with no adapter registered
+│   └── it should revert with AdapterNotRegistered
+└── given an adapter is registered for the quote
+    ├── it should return the adapter quote for the wrapped envelope with the next outbound nonce
+    ├── when the outbound nonce differs
+    │   └── it should return the same quote for the same envelope length
+    ├── when quoting a deallocation with a gas limit other than the configured one
+    │   ├── it should price against the configured deallocation gas limit
+    │   └── it should never price against the supplied gas limit
+    └── when quoting a redeem while a deallocation budget is configured
+        └── it should price against the supplied gas limit
+
+UnitLeafMessageOrchestrator::setDeallocationGasLimit
+├── when the caller is not the gas configurer
+│   └── it should revert with CallerNotGasConfigurer
+├── when the gas limit is zero
+│   └── it should revert with ZeroGasLimit
+└── when the caller is the gas configurer
+    ├── it should set deallocationGasLimit
+    └── it should emit DeallocationGasLimitSet
+
+UnitLeafMessageOrchestrator::withdrawNative
+├── when the caller is not the native withdrawer
+│   └── it should revert with CallerNotNativeWithdrawer
+└── given the caller is the native withdrawer
+    ├── when the destination is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the destination rejects the transfer
+    │   └── it should revert with WithdrawFailed
+    └── when the destination accepts the transfer
+        ├── it should move the amount to the destination
+        └── it should emit NativeWithdrawn
+
+UnitLeafMessageOrchestrator::receive
+└── when it receives a plain native transfer
+    └── it should increase its balance by the sent value

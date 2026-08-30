@@ -1,0 +1,96 @@
+UnitLeafVoter::SettleGauge
+├── when the gauge is not registered
+│   ├── it should return a zero cumulative reward share
+│   ├── it should not settle the chain index
+│   ├── it should not modify the gauge state
+│   └── it should equal the read only projection for the same input
+├── when the gauge was already settled at the chain settlement
+│   ├── it should return the unchanged gauge cumulative reward share
+│   └── it should not credit the gauge ceiling
+├── when the gauge is the zero gauge
+│   ├── it should settle the chain index to the current timestamp
+│   ├── it should accrue the full allocation to the chain surplus accumulator
+│   ├── it should not credit the zero gauge ceiling
+│   ├── it should advance gaugeStates[_gauge].lastSettlement to the chain lastSettlement
+│   ├── it should advance gaugeStates[_gauge].lastIndex to the chain index
+│   └── it should return the zero gauge cumulative reward share
+├── when the zero gauge has a nonzero registry emission cap
+│   ├── it should ignore the registry cap and accrue the full allocation to the chain surplus accumulator
+│   ├── it should not credit the zero gauge ceiling
+│   └── it should return the zero gauge cumulative reward share
+├── when the gauge is registered
+│   ├── it should settle the chain index to the current timestamp
+│   ├── it should credit the effective share to the gauge ceiling
+│   ├── it should advance gaugeStates[_gauge].lastSettlement to the chain lastSettlement
+│   ├── it should advance gaugeStates[_gauge].lastIndex to the chain index
+│   └── it should return the post settle gauge ceiling
+├── when the projection is queried in the same block
+│   ├── it should not mutate the gauge state
+│   └── it should equal the value a settle in the same block returns
+├── when the projection is queried past the last settlement
+│   ├── it should project the unsettled tail at the live rate
+│   └── it should equal the share the settle path writes
+├── when the gauge carries a seeded ceiling and surplus
+│   ├── it should credit the effective share to the gauge ceiling
+│   ├── it should advance gaugeStates[_gauge].lastSettlement to the chain lastSettlement
+│   ├── it should advance gaugeStates[_gauge].lastIndex to the chain index
+│   ├── it should leave the seeded gauge surplus unchanged
+│   ├── it should leave the chain surplus accumulator unchanged
+│   └── it should return the post settle gauge ceiling
+├── when the allocated share exceeds the emission cap share
+│   ├── it should credit only the capped share to the gauge ceiling
+│   ├── it should return the capped cumulative reward share
+│   └── it should accrue the cap excess to the chain surplus accumulator
+├── when the gauge emission cap is zero
+│   ├── it should return a zero cumulative reward share
+│   ├── it should not credit the gauge ceiling
+│   └── it should accrue the full allocated share to the chain surplus accumulator
+├── when the settled window spans two or more weekly boundaries
+│   ├── it should snapshot the chain index at each crossed boundary
+│   ├── it should sum the per segment shares at the mean of each segment endpoint weight
+│   ├── it should advance gaugeStates[_gauge].lastSettlement to the chain lastSettlement
+│   ├── it should advance gaugeStates[_gauge].lastIndex to the chain index
+│   └── it should return the post settle gauge ceiling
+├── when a gauge stake expiry falls inside the settled window
+│   ├── it should consume the scheduled slope change at the expiry boundary
+│   ├── it should accrue share only up to the expiry boundary
+│   └── it should not clamp the gauge weight
+├── when the gauge has only a permanent stake balance
+│   ├── it should weight every segment with the permanent balance
+│   ├── it should accrue share without decay across boundaries
+│   └── it should leave the permanent balance unchanged after the settle
+├── when the gauge has both a permanent balance and a decaying stake
+│   ├── it should add the permanent balance to the decaying weight in each segment
+│   ├── it should keep accruing share after the decaying stake expires
+│   └── it should not clamp the gauge weight
+├── when the gauge weight is zero across the settled window
+│   ├── it should accrue no share in any segment
+│   ├── it should advance the gauge cursors
+│   └── it should return a zero cumulative reward share
+├── when the chain settlement lands exactly on a weekly boundary
+│   ├── it should accrue nothing in the zero length final segment
+│   └── it should advance the gauge cursors to the boundary
+├── when the gauge weight resolves negative after the walk
+│   ├── it should emit the GaugeWeightClamped event with the negative weight
+│   ├── it should zero the persisted gauge bias and slope
+│   └── it should settle cleanly on the next call
+├── when the emissions scalar is zero
+│   ├── it should leave the chain index untouched
+│   ├── it should advance the chain settlement cursor
+│   ├── it should return a zero cumulative reward share
+│   └── it should advance the gauge cursor without crediting the ceiling
+├── when a leftover slope change crosses a zeroed gauge point
+│   ├── it should floor the slope at zero
+│   ├── it should leave the bias at zero
+│   └── it should accrue nothing for the phantom weight
+├── when the scalar changes inside a decaying gauges segment
+│   └── it should credit the exact per sub interval integral not the whole segment average
+├── when two gauges expire together inside the settled window
+│   ├── it should credit each gauge its exact hand computed share
+│   └── it should keep the sum of gauge shares within the aggregate chain share
+├── when the chain sunsets midway through a decaying gauges segment
+│   ├── it should settle the chain index at the flip timestamp
+│   └── it should credit the exact pre sunset integral and nothing for the post sunset window
+└── when the gauge settles immediately before the sunset and again afterward
+    ├── it should credit nothing on the post sunset settle
+    └── it should credit the same exact pre sunset integral

@@ -1,0 +1,8 @@
+UnitClPoolTape::RecordVolatility
+├── when the caller is not the elastic fee module
+│   └── it reverts with Unauthorized
+└── when the caller is the elastic fee module
+    ├── it writes volatilityCorrob onto the latest committed observation
+    ├── it stores volatilityCorrob in the accumulator
+    ├── it stores nOver in the accumulator
+    └── it emits VolatilityRecorded

@@ -1,0 +1,19 @@
+UnitMultiEntrypoint::Constructor
+├── when the factory registry is the zero address
+│   └── it should revert with ZeroAddress
+├── when the relay is the zero address
+│   └── it should revert with ZeroAddress
+├── when an initial target is the zero address
+│   └── it should revert with ZeroAddress
+├── when an initial excluded token is the zero address
+│   └── it should revert with ZeroAddress
+├── when an initial token is a target and excluded
+│   └── it should revert with TargetExcludedOverlap
+├── when the initial targets contain a duplicate
+│   └── it should revert with TokenAlreadyConfigured
+├── when the initial exclusions contain a duplicate
+│   └── it should revert with TokenAlreadyConfigured
+└── when the initial sets are valid
+    ├── it should bind the relay
+    ├── it should seed the target set
+    └── it should seed the excluded set

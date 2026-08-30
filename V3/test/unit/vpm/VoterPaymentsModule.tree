@@ -1,0 +1,36 @@
+UnitVoterPaymentsModule::constructor
+├── when the VE address is zero
+│   └── it should revert with ZeroAddress
+├── when the FeeManager admin is zero
+│   └── it should revert with ZeroAddress
+└── when every check passes
+    ├── it should set VE to the provided address
+    ├── it should make FEE_MANAGER administered by FEE_MANAGER_ADMIN_ROLE
+    ├── it should make FEE_MANAGER_ADMIN_ROLE self administered
+    └── it should grant FEE_MANAGER_ADMIN_ROLE to the fee manager admin
+
+UnitVoterPaymentsModule::adminRoleSelfRotation
+└── when an admin grants the admin role to a new holder
+    └── it should let the new holder grant the operational role
+
+UnitVoterPaymentsModule::supportsInterface
+├── when the queried interface is IVoterPaymentsModule
+│   └── it should return true
+├── when the queried interface is IERC165
+│   └── it should return true
+├── when the queried interface is IAccessControl
+│   └── it should return true
+└── when the queried interface is random
+    └── it should return false
+
+UnitVoterPaymentsModule::revokeRole
+├── when revoking the last holder of the fee manager admin role
+│   └── it should revert with LastRoleHolder
+└── when revoking a non last holder of the fee manager admin role
+    └── it should remove the role from the holder
+
+UnitVoterPaymentsModule::renounceRole
+├── when renouncing the last holder of the fee manager admin role
+│   └── it should revert with LastRoleHolder
+└── when renouncing a non last holder of the fee manager admin role
+    └── it should remove the role from the caller

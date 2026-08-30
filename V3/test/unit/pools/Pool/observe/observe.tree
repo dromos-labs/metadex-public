@@ -1,0 +1,6 @@
+UnitPool::Observe
+└── when getting observations for an array of secondsAgo
+    ├── when the array is empty
+    │   └── it should return two empty arrays
+    └── when the array is not empty
+        └── it should return the cumulatives at each secondsAgo

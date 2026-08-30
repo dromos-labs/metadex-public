@@ -1,0 +1,11 @@
+UnitMultiHybrid::SetCompoundWeight
+├── when the caller is not the config admin
+│   └── it should revert with NotConfigAdmin
+├── when the new weight exceeds the maximum
+│   └── it should revert with InvalidCompoundWeight
+├── when the new weight equals the current weight
+│   ├── it should not emit a CompoundWeightSet event
+│   └── it should leave the compound weight unchanged
+└── when the new weight is valid and changes
+    ├── it should update the compound weight
+    └── it should emit a CompoundWeightSet event

@@ -1,0 +1,42 @@
+UnitRootEmissionsHandler::constructor
+├── when leafVoter is the zero address
+│   └── it should revert with ZeroAddress
+└── when leafVoter is a valid address
+    └── it should set LEAF_VOTER to _leafVoter
+
+UnitRootEmissionsHandler::handleEmissions
+├── when the caller is not the leaf voter
+│   └── it should revert with CallerNotLeafVoter
+└── given the caller is the leaf voter
+    ├── when every amount is zero
+    │   ├── it should read the minimum redeem amount from the leaf voter
+    │   ├── it should not call redeem on the leaf voter
+    │   ├── it should not emit RedeemDeferred
+    │   └── it should not store any pending amount
+    ├── when the pending total stays below the redeem floor
+    │   ├── given the recipient has no pending amount
+    │   │   ├── it should store the leg amount as the recipient pending amount
+    │   │   ├── it should emit RedeemDeferred
+    │   │   └── it should not call redeem on the leaf voter
+    │   └── given the recipient already has a pending amount
+    │       ├── it should accumulate the leg amount into the recipient pending amount
+    │       ├── it should emit RedeemDeferred with the running total
+    │       └── it should not call redeem on the leaf voter
+    ├── when the pending total reaches exactly the redeem floor
+    │   ├── it should call redeem with the pending total
+    │   └── it should clear the recipient pending amount
+    ├── when the leg amount is at or above the redeem floor
+    │   ├── it should call redeem on the leaf voter for each leg with zero gas limit and zero refund recipient
+    │   ├── it should skip recipients with a zero amount
+    │   └── it should not store any pending amount
+    ├── when a leg pushes the recipient pending amount over the redeem floor
+    │   ├── it should call redeem with the pending amount plus the leg amount
+    │   └── it should clear the recipient pending amount
+    ├── when the batch mixes a dust leg and a full leg
+    │   ├── it should defer the dust leg
+    │   ├── it should redeem the full leg
+    │   └── it should store only the dust leg as a pending amount
+    └── when same recipient dust legs cross the redeem floor
+        ├── it should defer the first leg
+        ├── it should redeem both legs together when the second leg crosses the floor
+        └── it should clear the recipient pending amount

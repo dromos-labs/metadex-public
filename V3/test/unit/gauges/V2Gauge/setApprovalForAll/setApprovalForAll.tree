@@ -1,0 +1,9 @@
+UnitV2Gauge::SetApprovalForAll
+├── when the operator is the zero address
+│   └── it should revert with ZeroAddress
+├── when approval is granted
+│   ├── it should set the allowance to the max sentinel
+│   └── it should emit an ApprovalForAll event
+└── when approval is revoked
+    ├── it should clear the allowance wiping any existing allowance
+    └── it should emit an ApprovalForAll event

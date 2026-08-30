@@ -1,0 +1,10 @@
+UnitAerodromeMigration::KillGauges
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── when the gauges array is empty
+    │   └── it should not call the V2 voter
+    ├── when gauges are provided
+    │   └── it should kill every gauge through the V2 voter
+    └── given the contract is paused
+        └── it should kill every gauge through the V2 voter

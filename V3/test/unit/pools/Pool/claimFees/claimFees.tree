@@ -1,0 +1,62 @@
+UnitPool::ClaimFees
+├── when recipient is the zero address
+│   └── it should revert with ZeroAddress
+├── when caller has no claimable fees
+│   ├── it should have no pending fees before claim
+│   ├── it should return zero amounts
+│   ├── it should return the previously pending amounts
+│   ├── it should sync the caller fee indexes
+│   ├── it should not emit a Claim event
+│   └── it should have no pending fees after claim
+├── when caller has stored token0 fees
+│   ├── it should have pending token0 fees before claim
+│   ├── it should transfer token0 fees to the recipient
+│   ├── it should clear caller token0 claimable
+│   ├── it should return the claimed token0 amount
+│   ├── it should return the previously pending amounts
+│   ├── it should have no pending fees after claim
+│   └── it should emit a Claim event
+├── when caller has stored token1 fees
+│   ├── it should have pending token1 fees before claim
+│   ├── it should transfer token1 fees to the recipient
+│   ├── it should clear caller token1 claimable
+│   ├── it should return the claimed token1 amount
+│   ├── it should return the previously pending amounts
+│   ├── it should have no pending fees after claim
+│   └── it should emit a Claim event
+├── when caller has stored fees for both tokens
+│   ├── it should have pending fees before claim
+│   ├── it should transfer both token fees to the recipient
+│   ├── it should clear caller claimable amounts
+│   ├── it should return both claimed amounts
+│   ├── it should return the previously pending amounts
+│   ├── it should have no pending fees after claim
+│   └── it should emit a Claim event
+├── when caller has stored and newly accrued fees
+│   ├── it should include stored and newly accrued fees before claim
+│   ├── it should update caller fee indexes
+│   ├── it should clear caller claimable amounts
+│   ├── it should transfer stored and newly accrued fees to the recipient
+│   ├── it should return stored and newly accrued amounts
+│   ├── it should have no pending fees after claim
+│   └── it should emit a Claim event
+├── when caller is the recipient
+│   ├── it should have pending fees before claim
+│   ├── it should transfer fees to the caller
+│   ├── it should return the previously pending amounts
+│   └── it should have no pending fees after claim
+├── when caller has newly accrued fees and amounts are known
+│   ├── it should have pending newly accrued fees before claim
+│   ├── it should update caller fee indexes
+│   ├── it should clear newly accrued claimable amounts
+│   ├── it should transfer newly accrued fees to the recipient
+│   ├── it should return the newly accrued amounts
+│   ├── it should have no pending fees after claim
+│   └── it should emit a Claim event
+└── when caller has newly accrued fees
+    ├── it should have pending newly accrued fees before claim
+    ├── it should update caller fee indexes
+    ├── it should clear newly accrued claimable amounts
+    ├── it should transfer newly accrued fees to the recipient
+    ├── it should return the newly accrued amounts
+    └── it should have no pending fees after claim

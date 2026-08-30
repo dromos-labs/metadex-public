@@ -1,0 +1,8 @@
+UnitClPoolTape::Observe
+├── when the pool is registered
+│   ├── when the array is empty
+│   │   └── it returns an empty array
+│   └── when the array is not empty
+│       └── it returns the observation at each secondsAgo
+└── when the pool is unregistered
+    └── it returns zeroed observations

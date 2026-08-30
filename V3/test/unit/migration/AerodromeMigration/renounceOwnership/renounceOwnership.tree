@@ -1,0 +1,11 @@
+UnitAerodromeMigration::RenounceOwnership
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+├── when the migration is not paused
+│   └── it should revert with ExpectedPause
+└── when the migration is paused
+    ├── when the remaining TOKEN balance is not zero
+    │   └── it should revert with RemainingBalance
+    └── when the remaining TOKEN balance is zero
+        ├── it should renounce ownership
+        └── it should emit OwnershipTransferred

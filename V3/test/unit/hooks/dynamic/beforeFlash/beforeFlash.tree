@@ -1,0 +1,10 @@
+UnitDynamicSwapFeeHook::BeforeFlash
+├── when caller isn't pool
+│   └── it reverts with CNP
+└── when caller is pool
+    ├── when base fee is ZERO_FEE_INDICATOR
+    │   └── it returns 0
+    ├── when base fee is zero
+    │   └── it returns tick spacing fee
+    └── when base fee is not zero
+        └── it returns base fee

@@ -1,0 +1,16 @@
+UnitMigration::ClaimIncentives
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── given the recipient is the zero address
+    │   └── it should revert with ZeroAddress
+    └── given the recipient is not the zero address
+        ├── when incentive contracts and token arrays are provided
+        │   ├── it should call claim bribes with the arrays and migration token id
+        │   └── it should transfer the requested token balances to the recipient
+        ├── when the outer arrays are empty
+        │   └── it should call claim bribes with empty arrays
+        ├── when the outer array lengths differ
+        │   └── it should forward the arrays without local validation
+        └── given the contract is paused
+            └── it should call claim bribes with the arrays and migration token id

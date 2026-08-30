@@ -1,0 +1,15 @@
+UnitDiscountRegistry::RegisterDiscount
+├── when caller isn't owner
+│   └── it reverts with OwnableUnauthorizedAccount
+└── when caller is owner
+    ├── when account to discount is address zero
+    │   └── it reverts with AccountIsZero
+    └── when account to discount isn't address zero
+        ├── when new discount exceeds max discount
+        │   └── it reverts with NewDiscountGtMax
+        └── when new discount is lt or eq max discount
+            ├── when new discount equals old discount
+            │   └── it reverts with OldDiscountEqNewDiscount
+            └── when new discount is different from old discount
+                ├── it sets discount to new discount
+                └── it emits DiscountSet event

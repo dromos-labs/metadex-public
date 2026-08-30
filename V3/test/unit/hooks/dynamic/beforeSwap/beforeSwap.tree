@@ -1,0 +1,25 @@
+UnitDynamicSwapFeeHook::BeforeSwap
+├── when caller isn't pool
+│   └── it reverts with CNP
+└── when caller is pool
+    ├── when block fee is zero
+    │   ├── when initial fee is enabled
+    │   │   ├── it returns the initial fee
+    │   │   ├── it stores the first swap fee as block fee
+    │   │   └── it stores the initial fee as first tx initial fee
+    │   └── when initial fee is not enabled
+    │       ├── it computes and returns the first swap fee
+    │       └── it stores the swap fee as block fee
+    ├── when first tx initial fee is not zero
+    │   ├── it returns first tx initial fee
+    │   └── it doesn't update block fee
+    ├── when block fee is not ZERO_FEE_INDICATOR
+    │   ├── it returns block fee
+    │   └── it doesn't update block fee
+    ├── when block fee is ZERO_FEE_INDICATOR
+    │   ├── it returns 0
+    │   └── it doesn't update block fee
+    └── when mev fee is gt zero and toxic
+        ├── it stores dynamic fee and toxic in transient storage
+        ├── it returns the sum of mev fee and block fee
+        └── it doesn't update block fee

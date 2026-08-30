@@ -1,0 +1,16 @@
+UnitRelayQueueDensity
+├── when deposit requests interleave with processing
+│   ├── it should keep every live entry under its issued id up to the tail
+│   ├── it should read the consumed ids as deleted entries
+│   ├── it should leave nothing above the tail
+│   └── it should keep the count equal to the live entries
+├── when the deposit walk reaches the end and a request follows
+│   ├── it should issue the id after the tail rather than restart
+│   └── it should point the head at the new entry
+├── when exits are registered
+│   ├── it should keep an entry under every id up to the tail
+│   ├── it should leave nothing above the tail
+│   └── it should keep the count equal to the undrained exits
+└── when the drain empties the withdraw queue and an exit follows
+    ├── it should issue the id after the tail rather than restart
+    └── it should point the head at the new entry

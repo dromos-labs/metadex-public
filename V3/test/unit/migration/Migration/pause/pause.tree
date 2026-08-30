@@ -1,0 +1,9 @@
+UnitMigration::Pause
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── given the contract is unpaused
+    │   ├── it should pause the contract
+    │   └── it should emit Paused
+    └── given the contract is paused
+        └── it should revert with EnforcedPause

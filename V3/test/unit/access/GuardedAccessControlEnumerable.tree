@@ -1,0 +1,15 @@
+UnitGuardedAccessControlEnumerable::revokeRole
+├── when the role is not self administering
+│   └── it should remove the role from the holder
+├── when the role is self administering but the account is not a holder
+│   └── it should leave the role membership unchanged
+├── when revoking a non last holder of a self administering role
+│   └── it should remove the role from the holder
+└── when revoking the last holder of a self administering role
+    └── it should revert with LastRoleHolder
+
+UnitGuardedAccessControlEnumerable::renounceRole
+├── when renouncing a non last holder of a self administering role
+│   └── it should remove the role from the caller
+└── when renouncing the last holder of a self administering role
+    └── it should revert with LastRoleHolder

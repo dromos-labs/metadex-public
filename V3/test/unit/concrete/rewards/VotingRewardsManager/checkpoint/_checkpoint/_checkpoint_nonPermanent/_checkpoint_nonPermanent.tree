@@ -1,0 +1,102 @@
+UnitConcreteVotingRewardsManager::CheckpointNonPermanent
+├── when there is no prior checkpoint
+│   ├── it should checkpoint the veNFT's weight allocation after applying in-flight decay
+│   ├── it should checkpoint the veNFT's slope
+│   ├── it should checkpoint the current block timestamp
+│   ├── it should record a new user point
+│   ├── it should increment the user checkpoint count
+│   ├── it should decrease the slope changes at the stake end by the slope
+│   ├── it should set the stake expiry for the token ID
+│   ├── it should record a new global point
+│   ├── it should increment the global checkpoint count
+│   ├── it should snapshot the fee accumulators at the new global checkpoint index
+│   ├── it should snapshot the supply accumulators at the new global checkpoint index
+│   └── it should emit the Checkpoint event
+└── when there is a prior checkpoint
+    ├── when the stake was permanent
+    │   ├── it should reset the previous checkpoint
+    │   ├── it should checkpoint the veNFT's weight allocation after applying in-flight decay
+    │   ├── it should checkpoint the veNFT's slope
+    │   ├── it should checkpoint the current block timestamp
+    │   ├── it should record a new user point
+    │   ├── it should increment the user checkpoint count
+    │   ├── it should decrease the slope changes at the stake end by the slope
+    │   ├── it should set the stake expiry for the token ID
+    │   ├── it should record a new global point
+    │   ├── it should increment the global checkpoint count
+    │   ├── it should snapshot the fee accumulators at the new global checkpoint index
+    │   ├── it should snapshot the supply accumulators at the new global checkpoint index
+    │   └── it should emit the Checkpoint event
+    └── when the stake was already non permanent
+        ├── when the stake end is unchanged
+        │   ├── when the previous user point was recorded in the current timestamp
+        │   │   ├── it should checkpoint the veNFT's weight allocation after applying in-flight decay
+        │   │   ├── it should checkpoint the veNFT's slope
+        │   │   ├── it should overwrite the user point
+        │   │   ├── it should adjust the slope changes at the stake end by the slope delta
+        │   │   ├── it should overwrite the global point
+        │   │   └── it should emit the Checkpoint event
+        │   └── when the previous user point was recorded in a prior timestamp
+        │       ├── when the previous global point was recorded in the current timestamp
+        │       │   ├── it should checkpoint the veNFT's weight allocation after applying in-flight decay
+        │       │   ├── it should checkpoint the veNFT's slope
+        │       │   ├── it should checkpoint the current block timestamp
+        │       │   ├── it should record a new user point
+        │       │   ├── it should increment the user checkpoint count
+        │       │   ├── it should adjust the slope changes at the stake end by the slope delta
+        │       │   ├── it should overwrite the global point
+        │       │   └── it should emit the Checkpoint event
+        │       └── when the previous global point was recorded in a prior timestamp
+        │           ├── when the previous global point was recorded in the current week
+        │           │   ├── it should checkpoint the veNFT's weight allocation after applying in-flight decay
+        │           │   ├── it should checkpoint the veNFT's slope
+        │           │   ├── it should checkpoint the current block timestamp
+        │           │   ├── it should record a new user point
+        │           │   ├── it should increment the user checkpoint count
+        │           │   ├── it should adjust the slope changes at the stake end by the slope delta
+        │           │   ├── it should record a new global point
+        │           │   ├── it should increment the global checkpoint count
+        │           │   ├── it should snapshot the fee accumulators at the new global checkpoint index
+        │           │   ├── it should snapshot the supply accumulators at the new global checkpoint index
+        │           │   └── it should emit the Checkpoint event
+        │           └── when the previous global point was recorded in a prior week
+        │               ├── it should checkpoint the veNFT's weight allocation after applying in-flight decay
+        │               ├── it should checkpoint the veNFT's slope
+        │               ├── it should checkpoint the current block timestamp
+        │               ├── it should record a new user point
+        │               ├── it should increment the user checkpoint count
+        │               ├── it should adjust the slope changes at the stake end by the slope delta
+        │               ├── it should record a new global point for each elapsed week
+        │               ├── it should advance globalCheckpointIndex by the number of elapsed weeks
+        │               ├── it should snapshot the fee accumulators at each new global checkpoint index
+        │               ├── it should snapshot the supply accumulators at each new global checkpoint index
+        │               └── it should emit the Checkpoint event
+        └── when the stake end has changed
+            ├── when the previous stake has not yet expired
+            │   ├── it should reset the previous checkpoint
+            │   ├── it should checkpoint the veNFT's weight allocation after applying in-flight decay
+            │   ├── it should checkpoint the veNFT's slope
+            │   ├── it should checkpoint the current block timestamp
+            │   ├── it should record a new user point
+            │   ├── it should increment the user checkpoint count
+            │   ├── it should decrease the slope changes at the new stake end by the slope
+            │   ├── it should overwrite the stake expiry for the token ID
+            │   ├── it should record a new global point
+            │   ├── it should increment the global checkpoint count
+            │   ├── it should snapshot the fee accumulators at the new global checkpoint index
+            │   ├── it should snapshot the supply accumulators at the new global checkpoint index
+            │   └── it should emit the Checkpoint event
+            └── when the previous stake has already expired
+                ├── it should reset the previous checkpoint
+                ├── it should checkpoint the veNFT's weight allocation after applying in-flight decay
+                ├── it should checkpoint the veNFT's slope
+                ├── it should checkpoint the current block timestamp
+                ├── it should record a new user point
+                ├── it should increment the user checkpoint count
+                ├── it should decrease the slope changes at the new stake end by the slope
+                ├── it should overwrite the stake expiry for the token ID
+                ├── it should record a new global point
+                ├── it should increment the global checkpoint count
+                ├── it should snapshot the fee accumulators at the new global checkpoint index
+                ├── it should snapshot the supply accumulators at the new global checkpoint index
+                └── it should emit the Checkpoint event

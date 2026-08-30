@@ -1,0 +1,8 @@
+UnitMigration::ResetVote
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── given the contract is unpaused
+    │   └── it should reset the migration token id through the V2 voter
+    └── given the contract is paused
+        └── it should reset the migration token id through the V2 voter

@@ -1,0 +1,15 @@
+UnitDynamicSwapFeeHook::SetScalingFactor
+├── when caller is not Fee Manager
+│   └── it should revert with "NFM"
+└── when caller is Fee Manager
+    ├── when pool doesn't exist
+    │   └── it should revert with "PNP"
+    └── when pool exists
+        ├── when fee cap is set to 0
+        │   └── it should revert with "ISF"
+        └── when fee cap is not 0
+            ├── when scaling factor is higher than max scaling factor cap
+            │   └── it should revert with "ISF"
+            └── when scaling factor is less than max scaling factor cap
+                ├── it should set scaling factor
+                └── it should emit a {ScalingFactorSet} event

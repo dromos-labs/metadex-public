@@ -1,0 +1,13 @@
+UnitVotingEscrow::Getters
+└── when a known packed value is stored
+    ├── it should decode the staked balance fields
+    ├── it should decode the user point history fields
+    ├── it should decode the point history fields
+    ├── it should decode the delegates entry
+    ├── it should decode the checkpoint fields
+    ├── it should decode the num checkpoints entry
+    ├── it should decode the nonces entry
+    ├── it should decode the slope changes entry
+    ├── it should decode the ownership change entry
+    ├── it should decode the user point epoch entry
+    └── it should return zero for an unwritten key

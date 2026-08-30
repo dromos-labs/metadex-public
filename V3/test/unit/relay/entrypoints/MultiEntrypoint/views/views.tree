@@ -1,0 +1,7 @@
+UnitMultiEntrypoint::Views
+├── when reading the target views
+│   ├── it should list the configured targets
+│   └── it should report target membership
+└── when reading the excluded views
+    ├── it should list the configured exclusions
+    └── it should report exclusion membership

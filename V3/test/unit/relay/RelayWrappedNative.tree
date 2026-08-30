@@ -1,0 +1,4 @@
+UnitRelayWrappedNative
+└── when the relay receives native
+    ├── it should wrap the whole inflow into the wrapped native
+    └── it should keep no native balance

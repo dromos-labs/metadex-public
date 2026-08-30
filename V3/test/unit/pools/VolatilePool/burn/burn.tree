@@ -1,0 +1,8 @@
+UnitVolatilePool::Burn
+├── when the amounts to burn are zero
+│   └── it should revert with InsufficientLiquidityBurned
+└── when the amounts to burn are positive
+    ├── it should transfer token zero to the recipient
+    ├── it should transfer token one to the recipient
+    ├── it should burn the liquidity from the pool
+    └── it should emit the Burn event

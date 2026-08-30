@@ -1,0 +1,121 @@
+UnitVotingRewardsManager::ClaimIncentives
+├── when the recipient is the zero address
+│   └── it should revert with ZeroAddress
+├── when the checkpoint limit is zero
+│   └── it should revert with ZeroCheckpoints
+├── when the caller is neither the voter nor the veNFT operator
+│   └── it should revert with NotAuthorized
+├── when the program id is zero
+│   └── it should revert with InvalidProgramId
+├── when the program does not exist
+│   └── it should revert with InvalidProgramId
+├── when a claim exceeds the remaining program balance
+│   └── it should revert with InsufficientProgramBalance
+├── when the caller is the veNFT operator
+│   └── it should claim successfully
+├── given the program has not started
+│   └── it should transfer nothing
+├── given the veNFT never voted
+│   ├── it should preserve the initial global checkpoint
+│   └── it should transfer nothing
+├── given the latest checkpoint is current
+│   ├── it should not close the open interval
+│   ├── it should pay only the closed intervals
+│   ├── it should reduce the remaining program balance by the claimed amount
+│   └── it should not revert
+├── given a stale open interval
+│   ├── it should close the open interval
+│   ├── it should pay through the closed interval
+│   └── it should advance the global claim pointer to the tip
+├── given a stale open interval beyond the checkpoint iteration limit
+│   ├── it should revert with StaleCheckpointHistory
+│   └── it should claim the complete required interval after history is advanced
+├── given an ended program whose end is reachable but the current timestamp is not
+│   ├── it should advance global history through the program end
+│   ├── it should not query the gauge for pending fees
+│   ├── it should preserve fee accounting
+│   └── it should claim the complete program reward
+├── given a stale open interval and a same timestamp checkpoint with pending fees
+│   ├── it should report no earned fees for the arriving allocation
+│   ├── it should notify fees before the no user global point
+│   └── it should keep the credited fee snapshot on the overwritten point
+├── given a stale open interval and a same timestamp checkpoint with pending fees when the arriving allocation claims fees
+│   └── it should transfer no fees to the arriving allocation
+├── given a single permanent voter
+│   └── it should transfer the full streamed amount
+├── given a large accepted program and single permanent voter
+│   ├── it should compute the full entitlement without overflowing on intermediate products
+│   └── it should claim the full entitlement without overflowing on intermediate products
+├── given a large accepted misaligned program and single permanent voter
+│   └── it should claim without overflowing on partial-interval products
+├── given a large accepted program and single decaying voter
+│   └── it should claim without overflowing on decaying accumulator cancellation
+├── given many minimum slope decaying voters and the maximum accepted program
+│   └── it should not distribute more than the streamed amount
+├── given two equal permanent voters
+│   └── it should pay each voter an equal half of the stream
+├── given a decaying voter alongside a permanent voter
+│   └── it should pay each voter their voting power share
+├── given a week misaligned program and decaying voter
+│   ├── it should pay the expected decaying share
+│   └── it should not distribute more than the streamed amount
+├── given varied week misaligned program inputs and decaying voter
+│   └── it should not distribute more than the streamed amount
+├── given a decaying lock that expires before the program ends
+│   ├── it should report the earned amount before claiming
+│   └── it should stop paying at the stake expiry
+├── given a voter checkpoints at the interval right boundary
+│   ├── it should report no earnings for the boundary voter
+│   └── it should not pay that voter for the previous interval
+├── given several programs funding the same veNFT
+│   └── it should claim each program independently
+├── given the claimed reward is the wrapped native and unwrapping is supported
+│   ├── it should emit the ClaimIncentives event
+│   ├── it should unwrap the wrapped native
+│   └── it should send the native token to the recipient
+├── given the claimed reward is the wrapped native and unwrapping is not supported
+│   ├── it should transfer the wrapped native as an ERC20 token
+│   └── it should not send native token to the recipient
+├── given the claimed reward is an ERC20 token
+│   ├── it should transfer the reward as an ERC20 token
+│   ├── it should not send native token to the recipient
+│   └── it should reduce the remaining program balance to zero
+├── given same token programs funding the same veNFT
+│   ├── it should isolate interleaved claims by program
+│   └── it should track each program's remaining balance independently
+├── given a bounded claim over multiple user checkpoints
+│   ├── it should pay only the processed user checkpoints
+│   ├── it should advance the claim pointers by the processed count
+│   ├── it should let a later claim pay the remaining entitlement
+│   └── it should update the remaining program balance after each claim
+├── given a bounded claim with a stale open interval
+│   ├── it should not close the open interval when the claim stops short of the latest checkpoint
+│   ├── it should pay only the processed checkpoints
+│   ├── it should close the open interval once a later claim reaches the latest checkpoint
+│   └── it should pay the trailing period on that claim
+├── given a bounded historical claim beyond the checkpoint iteration limit
+│   ├── it should allow the bounded historical claim
+│   └── it should pay only the processed checkpoint
+├── given a bounded claim that skips a zero power checkpoint
+│   ├── it should count the skipped checkpoint against the limit
+│   └── it should let a later claim pay the remaining
+├── given a repeated claim after the decaying stake expired
+│   └── it should pay nothing on the second claim
+├── given a voter that reset before claiming
+│   ├── it should report only the earned share before claiming
+│   ├── it should pay only the share earned while voting
+│   └── it should not pay for the period after the reset
+├── given a repeated claim with no new closed interval
+│   ├── it should report no remaining earned rewards
+│   └── it should transfer nothing on the second claim
+├── given a program misaligned with week boundaries
+│   ├── it should report the full streamed amount before claiming
+│   └── it should pay the full streamed amount
+├── given a program ending mid interval at the latest checkpoint
+│   ├── it should report the full streamed amount before claiming
+│   └── it should pay the full streamed amount without overpaying
+├── given program boundaries misaligned with the user checkpoints
+│   ├── it should report the full streamed amount before claiming
+│   └── it should pay the full streamed amount
+└── given multiple voters over the full program
+    └── it should distribute the streamed amount without over-paying

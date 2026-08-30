@@ -1,0 +1,24 @@
+UnitPool::initialize
+├── when factory already set
+│   └── it should revert with FactoryAlreadySet
+└── when called for the first time
+    ├── it should set factory to msg sender
+    ├── it should set token0 and token1 with provided token arguments
+    ├── it should deploy a poolFees contract
+    ├── it should record the decimals of both tokens
+    └── it should set the first observation timestamp to block.timestamp
+
+UnitPool::setName
+├── when the caller is not the pool admin
+│   └── it should revert with NotPoolAdmin
+└── when the caller is the pool admin
+    └── it should update the name
+
+UnitPool::setSymbol
+├── when the caller is not the pool admin
+│   └── it should revert with NotPoolAdmin
+└── when the caller is the pool admin
+    └── it should update the symbol
+
+UnitPool::observations
+└── it should return the stored observation at the given index

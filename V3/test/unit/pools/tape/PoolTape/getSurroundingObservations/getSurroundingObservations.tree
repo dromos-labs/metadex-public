@@ -1,0 +1,11 @@
+UnitPoolTape::GetSurroundingObservations
+├── when the target is gte the newest committed observation
+│   └── it returns the newest committed observation and the accumulator as an observation
+└── when the target is lt the newest committed observation
+    ├── when the target is lte the oldest observation
+    │   └── it returns the oldest observation as both bounds
+    └── when the target is within the committed range
+        ├── when the target matches a committed observation
+        │   └── it returns the matching observation as one of the bounds
+        └── when the target is strictly between two committed observations
+            └── it returns the two surrounding observations

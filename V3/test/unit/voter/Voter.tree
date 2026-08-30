@@ -1,0 +1,339 @@
+UnitVoter::constructor
+├── when the message orchestrator is zero
+│   └── it should revert with ZeroAddress
+├── when the voting escrow is zero
+│   └── it should revert with ZeroAddress
+├── when the minter is zero
+│   └── it should revert with ZeroAddress
+├── when the token is zero
+│   └── it should revert with ZeroAddress
+├── when the adapter authority is zero
+│   └── it should revert with ZeroAddress
+├── when the governor is zero
+│   └── it should revert with ZeroAddress
+├── when the config admin is zero
+│   └── it should revert with ZeroAddress
+├── when the allocation lifetime is below the minimum lifetime
+│   └── it should revert with AllocationLifetimeTooLow
+├── when the allocation lifetime is above the maximum lifetime
+│   └── it should revert with AllocationLifetimeTooHigh
+├── when the message lifetime is below the minimum lifetime
+│   └── it should revert with MessageLifetimeTooLow
+├── when the message lifetime is above the maximum lifetime
+│   └── it should revert with MessageLifetimeTooHigh
+├── when the minter has no code yet
+│   ├── it should deploy without calling the minter
+│   ├── it should set the MINTER immutable to the predicted address
+│   └── it should set the TOKEN immutable to the token
+└── when every address input is non zero
+    ├── it should set the ORCHESTRATOR immutable
+    ├── it should set the VOTING_ESCROW immutable
+    ├── it should set the MINTER immutable
+    ├── it should set the TOKEN immutable to the token
+    ├── it should set allocationLifetime to the constructor value
+    ├── it should set messageLifetime to the constructor value
+    ├── it should grant the governance role to the governor
+    ├── it should grant the config admin role to the config admin
+    ├── it should grant the native withdrawer role to the governor
+    ├── it should grant the adapter config role to the adapter authority
+    ├── it should grant the splitter config role to the governor
+    ├── it should make the governance role its own admin
+    ├── it should make the governance role admin of the config admin role
+    ├── it should make the governance role admin of the splitter config role
+    ├── it should make the config admin role admin of every operational role
+    ├── it should leave the relay deployer role unheld, for the config admin to grant post deploy
+    ├── it should seed totalPoint timestamp to the deployment timestamp
+    ├── it should seed the chain zero point timestamp to the deployment timestamp
+    ├── it should seed the global last settlement to the deployment timestamp
+    ├── it should anchor the chain zero ceiling cursor at the initial index
+    └── it should set the chain zero status to Active
+
+UnitVoter::governanceRoleRotation
+└── when the governor grants a successor and renounces
+    ├── it should grant the role to the successor
+    ├── it should remove the role from the prior governor
+    └── it should leave exactly one holder
+
+UnitVoter::configAdminRoleRotation
+└── when the governor grants a new admin and the prior admin renounces
+    ├── it should grant the role to the new admin
+    ├── it should remove the role from the prior admin
+    └── it should leave exactly one holder
+
+UnitVoter::setAllocationLifetime
+├── when the caller does not hold the voter config role
+│   └── it should revert with AccessControlUnauthorizedAccount
+├── when the allocation lifetime is below the minimum lifetime
+│   └── it should revert with AllocationLifetimeTooLow
+├── when the allocation lifetime is above the maximum lifetime
+│   └── it should revert with AllocationLifetimeTooHigh
+└── when the caller holds the voter config role
+    ├── it should update the stored allocationLifetime
+    └── it should emit the AllocationLifetimeSet event
+
+UnitVoter::setMessageLifetime
+├── when the caller does not hold the voter config role
+│   └── it should revert with AccessControlUnauthorizedAccount
+├── when the message lifetime is below the minimum lifetime
+│   └── it should revert with MessageLifetimeTooLow
+├── when the message lifetime is above the maximum lifetime
+│   └── it should revert with MessageLifetimeTooHigh
+└── when the caller holds the voter config role
+    ├── it should update the stored messageLifetime
+    └── it should emit the MessageLifetimeSet event
+
+UnitVoter::parkOnChain0
+├── when the caller is not the voting escrow
+│   └── it should revert with NotVotingEscrow
+├── when the live stake is expired
+│   └── it should revert with StakeExpired
+├── when the stake was withdrawn
+│   └── it should revert with StakeExpired
+├── when the committed amount exceeds the staked amount
+│   ├── it should emit ParkedOnChain0 with a zero amount
+│   ├── it should park nothing
+│   └── it should leave committed untouched
+├── when the staked amount equals the committed amount
+│   ├── it should park nothing
+│   └── it should re-anchor a stale shape to the live stake end
+├── when the token has unbooked voting power
+│   ├── it should book the parked amount on chain zero
+│   ├── it should increase the token committed by the parked amount
+│   ├── it should seed the token shape on a first booking
+│   ├── it should resample the global emissions per VP
+│   └── it should emit ParkedOnChain0 with the parked amount
+├── when the token already holds a chain zero booking with a matching shape
+│   └── it should add all remaining unbooked voting power onto the existing chain zero booking
+├── when the token holds allocations with a stale shape
+│   ├── it should re-anchor every allocated chain to the live shape
+│   ├── it should book the parked amount at the live shape
+│   ├── it should move the prior slope schedule entries to the live stakeEnd
+│   ├── it should resample the global emissions per VP against the final total weight
+│   ├── it should increase the token committed by the parked amount
+│   └── it should leave lastAllocated untouched
+├── when a permanent shape becomes decaying
+│   ├── it should emit ParkedOnChain0 with a zero amount
+│   ├── it should move the booking out of the permanent bucket so it decays
+│   ├── it should schedule the slope change at the live stake end
+│   └── it should re seed the stored shape and park nothing
+├── when the stake is permanent
+│   ├── it should book the parked amount as a permanent contribution
+│   └── it should seed a zero token shape
+├── when one wei of permanent voting power is priced at the maximum effective rate
+│   └── it should resample the maximum safe emissions per voting power
+└── when settling at the maximum safe scalar near the timestamp horizon
+    ├── it should advance the global index without overflowing
+    ├── it should advance the global time index without overflowing
+    ├── it should accrue the one wei chain ceiling at the maximum effective rate
+    └── it should preserve the maximum safe emissions per voting power
+
+UnitVoter::clearToken
+├── when the caller is not the voting escrow
+│   └── it should revert with NotVotingEscrow
+├── when the token id is token zero
+│   └── it should revert with Token0NotClearable
+├── when the token holds bookings on several chains
+│   ├── it should zero every per chain booked amount
+│   ├── it should empty the tracked chain set
+│   ├── it should zero every token state field
+│   └── it should emit TokenCleared with the cleared chain ids
+├── when the token weight has already decayed out of the points
+│   ├── it should leave every chain point untouched
+│   ├── it should leave the total point untouched
+│   ├── it should leave the sampled emissions per voting power untouched
+│   └── it should leave the global index untouched
+├── when the token is already clear
+│   ├── it should leave the token state zeroed
+│   ├── it should leave the tracked chain set empty
+│   └── it should emit TokenCleared with an empty chain array
+└── when another token holds bookings on the same chains
+    ├── it should leave the other token state untouched
+    └── it should leave the other token booked amounts untouched
+
+UnitVoter::registerChain
+├── when the caller does not hold the chain config role
+│   └── it should revert with AccessControlUnauthorizedAccount
+├── when the chainId is chain zero
+│   └── it should revert with Chain0NotConfigurable
+├── when the chain is already registered
+│   └── it should revert with ChainAlreadyRegistered
+├── when the chain is fresh
+│   ├── it should add the chain to the registered set
+│   ├── it should anchor the ceiling cursor at the current global index
+│   ├── it should anchor the time weighted ceiling cursor at the current global time index
+│   ├── it should seed the chain point timestamp to the current timestamp
+│   ├── it should default the status to Active
+│   └── it should emit the ChainRegistered event
+├── when the global index has already accrued
+│   ├── it should anchor the ceiling cursor at the accumulated index
+│   ├── it should anchor the time weighted ceiling cursor at the accumulated time index
+│   └── it should accrue only the interval since registration
+└── when the global settlement is behind the current timestamp
+    ├── it should anchor the ceiling cursor at the settled index
+    ├── it should anchor the time weighted ceiling cursor at the settled time index
+    └── it should accrue only the interval since registration
+
+UnitVoter::setChainStatus
+├── when the caller does not hold the chain status role
+│   └── it should revert with AccessControlUnauthorizedAccount
+├── when the chainId is chain zero
+│   └── it should revert with Chain0NotConfigurable
+├── when the chain is not registered
+│   └── it should revert with ChainNotRegistered
+├── when the target status is None
+│   └── it should revert with InvalidStatus
+├── when the new status matches the current status
+│   └── it should revert with ChainStatusUnchanged
+├── when flipping from Suspended to Paused
+│   └── it should revert with InvalidChainStatusTransition
+├── when flipping from Suspended to Sunset with elapsed time
+│   ├── it should advance the global last settlement to the current timestamp
+│   ├── it should anchor the chain ceiling cursor at the advanced index
+│   ├── it should accrue cumulativeSuspendedSurplus at the sampled emissions per VP
+│   ├── it should leave the ceiling unchanged
+│   ├── it should update the stored status
+│   └── it should emit the ChainStatusSet event
+├── when flipping from Sunset to Paused
+│   └── it should revert with InvalidChainStatusTransition
+├── when flipping from Sunset to Active
+│   └── it should revert with InvalidChainStatusTransition
+├── when flipping from Sunset to Suspended
+│   ├── it should update the stored status
+│   └── it should emit the ChainStatusSet event
+├── when the chain is registered
+│   ├── it should update the stored status
+│   └── it should emit the ChainStatusSet event
+├── when flipping from Suspended to Active with elapsed time
+│   ├── it should advance the global last settlement to the current timestamp
+│   ├── it should advance the global index at the sampled emissions per VP
+│   ├── it should anchor the chain ceiling cursor at the advanced index
+│   ├── it should accrue cumulativeSuspendedSurplus at the sampled emissions per VP
+│   └── it should leave the ceiling unchanged
+├── when flipping from Active to Suspended with elapsed time
+│   ├── it should advance the global last settlement to the current timestamp
+│   ├── it should anchor the chain ceiling cursor at the advanced index
+│   ├── it should advance the ceiling at the sampled emissions per VP
+│   └── it should leave cumulativeSuspendedSurplus unchanged
+├── when flipping from Active to Sunset with elapsed time
+│   ├── it should advance the global last settlement to the current timestamp
+│   ├── it should anchor the chain ceiling cursor at the advanced index
+│   ├── it should advance the ceiling at the sampled emissions per VP
+│   └── it should leave cumulativeSuspendedSurplus unchanged
+├── when flipping from Paused to Active
+│   ├── it should update the stored status
+│   └── it should emit the ChainStatusSet event
+├── when flipping from Paused to Suspended
+│   ├── it should update the stored status
+│   └── it should emit the ChainStatusSet event
+├── when flipping from Paused to Sunset
+│   ├── it should update the stored status
+│   └── it should emit the ChainStatusSet event
+├── when entering Suspended with the emergency switch enabled
+│   ├── it should reset the emergencyDeallocationAllowed switch to false
+│   └── it should emit the EmergencyDeallocationAllowedSet event
+├── when entering Sunset with the emergency switch enabled
+│   └── it should leave the emergencyDeallocationAllowed switch unchanged
+└── when transitioning to a non Suspended status with the emergency switch enabled
+    └── it should leave the emergencyDeallocationAllowed switch unchanged
+
+UnitVoter::setEmergencyDeallocationAllowed
+├── when the caller does not hold the chain status role
+│   └── it should revert with AccessControlUnauthorizedAccount
+├── when the chain is not registered
+│   └── it should revert with ChainNotRegistered
+├── when the caller holds the chain status role and allowed is true
+│   ├── it should set the emergencyDeallocationAllowed switch to true
+│   └── it should emit the EmergencyDeallocationAllowedSet event
+└── when the caller holds the chain status role and allowed is false
+    ├── it should set the emergencyDeallocationAllowed switch to false
+    └── it should emit the EmergencyDeallocationAllowedSet event
+
+UnitVoter::setOperator
+├── when the caller is not authorized
+│   └── it should revert with NotAuthorized
+├── when the chainId is chain zero
+│   └── it should revert with Chain0NotConfigurable
+├── when the chain is not registered
+│   └── it should revert with ChainNotRegistered
+├── when the chain is Paused
+│   └── it should revert with ChainPaused
+├── when the chain is Suspended
+│   ├── it should dispatch the SetOperator propagation message
+│   └── it should emit the OperatorSet event
+├── when the chain is Sunset
+│   ├── it should dispatch the SetOperator propagation message
+│   └── it should emit the OperatorSet event
+├── when the destination gas limit is zero for a non root chain
+│   └── it should revert with MissingDestinationGasLimit
+├── when the destination gas limit is zero for the local chain
+│   ├── it should not revert
+│   ├── it should dispatch the SetOperator propagation message with zero gas limit
+│   └── it should emit the OperatorSet event
+└── when the operator changes
+    ├── it should dispatch the SetOperator propagation message
+    ├── it should stamp the message with the message lifetime expiry
+    └── it should emit the OperatorSet event
+
+UnitVoter::isSuspended
+├── when the chain status is Suspended
+│   └── it should return true
+└── when the chain status is not Suspended
+    ├── it should return false when the chain is Active
+    ├── it should return false when the chain is Paused
+    └── it should return false when the chain is Sunset
+
+UnitVoter::allocating
+├── when the tokenId has no allocation chains
+│   └── it should return false
+├── when the tokenId has allocation chains
+│   └── it should return true
+└── when the tokenId is parked on chain zero
+    └── it should return false
+
+UnitVoter::spendableSurplus
+├── when the chain is chain zero
+│   └── it should return the ceiling minus the spent surplus
+├── when the chain is not chain zero
+│   └── it should return the reported plus suspended surplus minus the spent surplus
+├── when the reported surplus exceeds the remaining mint entitlement
+│   └── it should return the entitlement plus suspended surplus minus the spent surplus
+└── when the chain has pending unsettled accrual
+    └── it should return the stored floor without settling
+
+UnitVoter::reduceCooldown
+├── when the caller is not whitelisted VPM
+│   └── it should revert with NotVoterPaymentsModule
+├── when the reduction is zero
+│   └── it should revert with ZeroReduction
+├── when the chain is not registered
+│   └── it should revert with ChainNotActiveOrSunset
+├── when the chain is paused or suspended
+│   └── it should revert with ChainNotActiveOrSunset
+├── when the chain is sunset
+│   ├── it should emit the CooldownReductionDispatched event
+│   └── it should dispatch one ReduceCooldown message forwarding the value
+├── when the destination gas limit is zero for a non root chain
+│   └── it should revert with MissingDestinationGasLimit
+├── when the destination gas limit is zero for the local chain
+│   ├── it should not revert
+│   ├── it should emit the CooldownReductionDispatched event
+│   └── it should dispatch one ReduceCooldown message with zero gas limit to the local chain
+└── when the call is valid
+    ├── it should emit the CooldownReductionDispatched event
+    └── it should dispatch one ReduceCooldown message forwarding the value
+
+UnitVoter::donate
+├── when the chain is not registered
+│   └── it should revert with ChainNotRegistered
+├── when the amount is zero
+│   └── it should revert with ZeroAmount
+├── when the donation is valid
+│   ├── it should increase the chain donated buffer by the amount
+│   ├── it should pull the amount from the caller
+│   └── it should emit the Donated event
+├── when donations accrue across calls and chains
+│   ├── it should sum donations on the same chain
+│   └── it should keep per chain buffers independent
+└── when the donation transfer reverts
+    ├── it should bubble the transfer revert
+    └── it should leave the chain donated buffer unchanged

@@ -1,0 +1,6 @@
+UnitCompounder::SwapAndCompound
+├── when the caller is not the keeper
+│   └── it should revert with NotKeeper
+└── when a keeper swaps a reward
+    ├── it should swap the reward into the relay TOKEN
+    └── it should compound the landed delta

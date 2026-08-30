@@ -1,0 +1,33 @@
+UnitRelayFactory
+├── when constructing the factory
+│   ├── it should bind the escrow, the token and both implementations
+│   ├── it should answer every dependency through the interface
+│   └── it should revert with ZeroAddress for each missing dependency
+├── when an implementation holds no code
+│   └── it should revert with ImplementationNotAContract for either tier
+├── when a created relay comes out uninitialized
+│   ├── it should revert with RelayInitializationFailed
+│   └── it should record no relay
+├── when the caller does not hold the deployer role
+│   ├── it should revert with NotAuthorized on both tiers
+│   └── it should read the role from the voter
+├── when creating a maxi relay
+│   ├── it should deploy the clone at the predicted address owning its seed
+│   ├── it should wire the operators and pair mint the bootstrap
+│   └── it should ignore the entrypoint vetoer on the maxi tier
+├── when creating with a time locked seed
+│   └── it should stamp the lock horizon from the seed staking weeks
+├── when creating with a permanent seed and nonzero staking weeks
+│   └── it should stamp a zero lock horizon instead of the seed staking weeks
+├── when creating protocol relays on both levels
+│   ├── it should start as L1 or directly as L2 from the level flag
+│   └── it should seat the named entrypoint vetoer on the protocol tier
+├── when checking whether an address is a relay
+│   ├── it should recognize every relay it created on both tiers
+│   └── it should reject an address it did not create
+├── when enumerating the created relays
+│   ├── it should append every created relay in creation order
+│   └── it should clamp a page that runs past the end instead of reverting
+└── when reusing a creation salt
+    ├── it should revert for the same caller and tier
+    └── it should deploy at a different address for a different caller

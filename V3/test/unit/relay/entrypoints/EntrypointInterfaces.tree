@@ -1,0 +1,7 @@
+UnitEntrypointInterfaces
+└── when reading an entrypoint through its interface
+    ├── it should answer the compounder surface
+    ├── it should answer the single converter surface
+    ├── it should answer the single hybrid surface
+    ├── it should answer the multi converter surface
+    └── it should answer the multi hybrid surface

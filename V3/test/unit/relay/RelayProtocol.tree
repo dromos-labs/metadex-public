@@ -1,0 +1,63 @@
+UnitRelayProtocol
+├── when the yield token would be transferable
+│   └── it should revert with TransferableYieldTokenNotAllowed
+├── given a freshly initialized protocol relay
+│   └── it should allow-list the bootstrap owner and keep both satellites soulbound
+├── when initializing with and without a voter
+│   └── it should grant VOTER_ROLE to the named voter and skip a zero one
+├── when sweeping on level two
+│   └── it should never move rewards already owed to claimants
+├── when promoting to level two
+│   └── it should promote once, hand the ownership over and never demote
+├── when attaching entrypoints on level two
+│   └── it should grant only after the timelock and revoke immediately
+├── when initializing with and without a vetoer
+│   ├── it should leave the seat empty when no vetoer is named
+│   └── it should seat the named vetoer at initialization
+├── when vetoing a pending entrypoint
+│   ├── it should refuse a veto of a pair that was never proposed
+│   ├── it should gate the veto to the vetoer, the owner included
+│   ├── it should cancel the pending proposal and emit the veto
+│   ├── it should leave the vetoed pair unexecutable, elapsed timelock or not
+│   └── it should let the owner re-propose after a veto, restarting the clock
+├── when the veto seat moves
+│   ├── it should gate the rotation to the sitting vetoer
+│   ├── it should refuse a zero successor
+│   └── it should hand the seat over in one rotation
+├── when managing the ownership
+│   ├── it should ban renouncing the ownership
+│   ├── it should leave the owner gated surface intact after the refused renounce
+│   ├── it should refuse a transfer from anyone but the owner
+│   ├── it should hand the whole surface over in one transfer
+│   └── it should let any role holder renounce its bits normally
+├── when moving roles on the public paths
+│   ├── it should let the owner grant and revoke the operator bits
+│   ├── it should refuse the entrypoint bits on grant, which would bypass the timelock
+│   ├── it should refuse the entrypoint bits mixed into a batch
+│   ├── it should refuse the entrypoint bits on revoke, mirroring the grant
+│   └── it should refuse the vetoer bit on both paths, which only initialize seats
+├── when a restricted role holder renounces its own bit
+│   ├── it should refuse the compounder its own bit
+│   ├── it should refuse a batch that mixes an operator bit with a restricted one
+│   ├── it should refuse the sitting vetoer, leaving transferVetoer the only exit
+│   └── it should leave every restricted seat filled after the refused renounces
+├── when kicking the relay or an empty account
+│   ├── it should settle a kick with nothing to eject to zero shares
+│   └── it should evict behind a long withdraw queue, which can no longer refuse the ejection
+├── given the unreachable seams harness
+│   └── it should enforce the allow-list transfer seam and the sweep level check
+├── when the deposit owner is not allow listed
+│   └── it should revert with NotAllowed
+├── when the deposit owner is allow listed
+│   └── it should register the deposit
+├── when the allow list is removed before processing
+│   ├── it should still mint the pair to the delisted recipient
+│   ├── it should keep the minted position from moving on
+│   └── it should let admin eject the delisted holder
+├── when kicking a holder with rewards
+│   └── it should leave the rewards claimable and force the free pair into the queue
+├── when kicking a holder with shares already queued
+│   └── it should queue only the free remainder on top of the standing escrow
+└── when kicking a principal only holder after the closure
+    ├── it should queue the whole principal of a holder that never held a yield side
+    └── it should queue the free remainder when part of the principal is already escrowed

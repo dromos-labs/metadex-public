@@ -1,0 +1,18 @@
+UnitLeafEmissionsHandler::constructor
+├── when leafVoter is the zero address
+│   └── it should revert with ZeroAddress
+├── when receiptToken is the zero address
+│   └── it should revert with ZeroAddress
+└── when all inputs are valid
+    ├── it should set LEAF_VOTER to _leafVoter
+    └── it should set RECEIPT_TOKEN to _receiptToken
+
+UnitLeafEmissionsHandler::handleEmissions
+├── when the caller is not the leaf voter
+│   └── it should revert with CallerNotLeafVoter
+└── given the caller is the leaf voter
+    ├── when every amount is zero
+    │   └── it should not call transfer on the receipt token
+    └── when some amounts are nonzero
+        ├── it should call safeTransfer on the receipt token for each nonzero amount
+        └── it should skip recipients with a zero amount

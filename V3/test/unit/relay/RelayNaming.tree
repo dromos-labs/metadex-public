@@ -1,0 +1,16 @@
+UnitRelayNaming
+├── when the caller is not the admin
+│   └── it should revert with Unauthorized
+├── when the admin renames the relay
+│   ├── it should emit NameChanged carrying both values
+│   ├── it should replace the whole string
+│   ├── it should leave the satellite token names alone
+│   ├── it should leave the symbol where it is
+│   └── it should expose the same surface on every tier
+├── when reading the satellite domains across a rename
+│   ├── it should build each domain from the token name and version one
+│   └── it should leave both domains where they were
+├── when a permit was signed before the rename
+│   └── it should still set the allowance after it
+└── when a delegation was signed before the rename
+    └── it should still set the delegate after it

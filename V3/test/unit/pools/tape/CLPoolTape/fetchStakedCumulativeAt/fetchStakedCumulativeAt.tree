@@ -1,0 +1,14 @@
+UnitClPoolTape::FetchStakedCumulativeAt
+├── when the target timestamp is gte the current block timestamp
+│   └── it returns the live secondsPerStakedLiquidityCumulativeX128 from the pool
+└── when the target timestamp is lt the current block timestamp
+    ├── when the target timestamp is lte the newest committed observation
+    │   └── it returns the observation secondsPerStakedLiquidityCumulativeX128 value
+    ├── when the target timestamp is lt the pool lastUpdated value
+    │   ├── it interpolates between the observation value the settled value in the pool
+    │   └── when the cumulative wrapped between the snapshot and the settlement
+    │       └── it interpolates across the wrap
+    └── when the target timestamp is gte the pool lastUpdated value
+        ├── it interpolates between the settled value and the live secondsPerStakedLiquidityCumulativeX128 value
+        └── when the staked liquidity never changed
+            └── it lands on the projected value

@@ -1,0 +1,5 @@
+UnitVotingEscrow::GetPastTotalSupply
+├── when the timestamp is after the current block
+│   └── it should revert with FutureLookup
+└── when the timestamp is at or before the current block
+    └── it should return the total supply at the timestamp

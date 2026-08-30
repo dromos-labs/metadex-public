@@ -1,0 +1,13 @@
+UnitVolatilePool::initialize
+└── given a freshly deployed volatile pool
+    ├── it should derive the name from the volatile prefix and the token symbols
+    └── it should derive the symbol from the volatile prefix and the token symbols
+
+UnitVolatilePool::getK
+├── when reserves are zero
+│   └── it should return zero
+└── when reserves are non zero
+    └── it should return reserve0 times reserve1
+
+UnitVolatilePool::POOL_TYPE
+└── it should return the volatile pool identifier

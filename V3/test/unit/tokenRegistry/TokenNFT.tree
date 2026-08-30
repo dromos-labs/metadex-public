@@ -1,0 +1,106 @@
+UnitTokenNFT::constructor
+├── when the leaf voter is the zero address
+│   └── it should revert with ZeroAddress
+├── when the token registry is the zero address
+│   └── it should revert with ZeroAddress
+└── when the parameters are valid
+    ├── it should set the name
+    ├── it should set the symbol
+    ├── it should set the LEAF VOTER immutable
+    └── it should set the TOKEN REGISTRY immutable
+
+UnitTokenNFT::mint
+├── when the caller is not the registry
+│   └── it should revert with NotRegistry
+└── given the caller is the registry
+    ├── when there are no records
+    │   ├── it should mint the id to the recipient
+    │   └── it should not emit RecordChanged
+    ├── when there are records
+    │   ├── it should mint the id to the recipient
+    │   ├── it should write each record value
+    │   └── it should emit RecordChanged with _id, _indexedKey, _key, _value for each record
+    └── when the recipient is a receiver contract
+        ├── it should mint the id to the recipient
+        └── it should write the records before invoking the receiver
+
+UnitTokenNFT::setRecord
+├── when the id does not exist
+│   └── it should revert with ERC721NonexistentToken
+└── given the id exists
+    ├── when the caller is not authorized
+    │   └── it should revert with NotAuthorized
+    ├── given the caller is the owner
+    │   ├── when the key is unset
+    │   │   ├── it should write the record value
+    │   │   └── it should emit RecordChanged with _id, _indexedKey, _key, _value
+    │   └── when the key already holds a value
+    │       ├── it should overwrite the previous value
+    │       └── it should emit RecordChanged with _id, _indexedKey, _key, _value
+    ├── when the caller is approved for the token
+    │   ├── it should write the record value
+    │   └── it should emit RecordChanged with _id, _indexedKey, _key, _value
+    └── when the caller is approved for all
+        ├── it should write the record value
+        └── it should emit RecordChanged with _id, _indexedKey, _key, _value
+
+UnitTokenNFT::setRecords
+├── when the id does not exist
+│   └── it should revert with ERC721NonexistentToken
+└── given the id exists
+    ├── when the caller is not authorized
+    │   └── it should revert with NotAuthorized
+    ├── given the caller is the owner
+    │   ├── when there are records
+    │   │   ├── it should write each record value
+    │   │   └── it should emit RecordChanged with _id, _indexedKey, _key, _value for each record
+    │   ├── when there are no records
+    │   │   └── it should not emit RecordChanged
+    │   └── when the batch contains duplicate keys
+    │       └── it should store the last value for the duplicated key
+    ├── when the caller is approved for the token
+    │   └── it should write each record value
+    └── when the caller is approved for all
+        └── it should write each record value
+
+UnitTokenNFT::seize
+├── when the caller is not a seizer
+│   └── it should revert with NotSeizer
+└── given the caller is a seizer
+    ├── when the id does not exist
+    │   └── it should revert with ERC721NonexistentToken
+    └── given the id exists
+        ├── when the recipient is the zero address
+        │   └── it should revert with ERC721InvalidReceiver
+        └── given the recipient is not the zero address
+            ├── when the recipient is a new owner
+            │   ├── it should transfer the nft to the new owner
+            │   ├── it should preserve the records
+            │   └── it should emit Seized with _id, _to
+            ├── when the previous owner sets a record after a seize
+            │   └── it should revert with NotAuthorized
+            └── when an address the previous owner approved sets a record after a seize
+                └── it should revert with NotAuthorized
+
+UnitTokenNFT::transferFrom
+├── when transferring to a new owner
+│   ├── it should move ownership to the new owner
+│   └── it should preserve the records
+├── when the new owner sets a record after a transfer
+│   ├── it should write the record value
+│   └── it should emit RecordChanged with _id, _indexedKey, _key, _value
+└── when the previous owner sets a record after a transfer
+    └── it should revert with NotAuthorized
+
+UnitTokenNFT::safeTransferFrom
+├── when the recipient does not implement the receiver interface
+│   └── it should revert with ERC721InvalidReceiver
+└── when transferring to a new owner
+    └── it should move ownership to the new owner
+
+UnitTokenNFT::records
+├── when there are no keys
+│   └── it should return an empty array
+└── when called
+    ├── it should return the stored value for a set key
+    └── it should return an empty value for an unset key

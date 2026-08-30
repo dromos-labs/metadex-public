@@ -1,0 +1,21 @@
+UnitPoolFactoryIndexation::CreatePoolHook
+├── when tokenA is present in tokenIndex set
+│   ├── it pushes pool keyed by tokenA to poolByTokenIndex
+│   ├── it pushes pool keyed by tokenB to poolByTokenIndex
+│   ├── it pushes pool and timestamp to poolsIndex
+│   └── it adds tokenB to tokenIndex
+├── when tokenB is present in tokenIndex set
+│   ├── it pushes pool keyed by tokenA to poolByTokenIndex
+│   ├── it pushes pool keyed by tokenB to poolByTokenIndex
+│   ├── it pushes pool and timestamp to poolsIndex
+│   └── it adds tokenA to tokenIndex
+├── when tokenA and tokenB are present in tokenIndex set
+│   ├── it pushes pool keyed by tokenA to poolByTokenIndex
+│   ├── it pushes pool keyed by tokenB to poolByTokenIndex
+│   └── it pushes pool and timestamp to poolsIndex
+└── when tokenA and B aren't present in tokenIndex set
+    ├── it pushes pool keyed by tokenA to poolByTokenIndex
+    ├── it pushes pool keyed by tokenB to poolByTokenIndex
+    ├── it pushes pool and timestamp to poolsIndex
+    ├── it adds tokenA to tokenIndex
+    └── it adds tokenB to tokenIndex

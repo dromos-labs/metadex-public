@@ -1,0 +1,15 @@
+UnitVolatilePool::GetAmountInWithTotalFee
+├── when the requested output eq zero
+│   └── it should return zero
+└── when the requested output is gt zero
+    ├── when the requested output is gte the output reserve
+    │   └── it should revert with InsufficientLiquidity
+    └── when the requested output is lt the output reserve
+        ├── it should quote the fee for the curve input from the factory
+        ├── it should match the inverse formula grossed up by the fee
+        ├── when testing a known example
+        │   └── it should return the correct getAmountIn
+        ├── when the fee floors to zero
+        │   └── it should quote the minimal input
+        └── when the reserves are large
+            └── it should quote the inverse without overflowing

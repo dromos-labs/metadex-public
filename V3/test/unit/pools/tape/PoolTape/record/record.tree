@@ -1,0 +1,13 @@
+UnitPoolTape::Record
+├── when caller is not in allowedCaller map
+│   └── it reverts with Unauthorized
+└── when caller is in allowedCaller map
+    ├── when recording the first swap
+    │   ├── it assigns every cumulative discarding the pre populated values
+    │   ├── it sets swapCount to one
+    │   └── it sets lastSwapTimestamp to the block timestamp
+    └── when recording a subsequent swap
+        ├── it adds every cumulative delta to the accumulator
+        ├── it increments swapCount by one
+        ├── it sets lastSwapTimestamp to the block timestamp
+        └── it writes only the five accumulator slots

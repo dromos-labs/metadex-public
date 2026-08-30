@@ -1,0 +1,15 @@
+UnitMigration::SetRestricted
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── when the token ids array is empty
+    │   └── it should not emit RestrictionsSet
+    ├── when the token ids are unrestricted
+    │   ├── it should mark every token id as restricted
+    │   └── it should emit RestrictionsSet for every token id
+    ├── when a token id appears more than once
+    │   └── it should leave the token id restricted
+    ├── when the token ids are already restricted
+    │   └── it should leave every token id restricted
+    └── given the contract is paused
+        └── it should mark every token id as restricted

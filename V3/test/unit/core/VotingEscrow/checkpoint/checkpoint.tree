@@ -1,0 +1,26 @@
+UnitVotingEscrow::Checkpoint
+├── when there is no prior global checkpoint
+│   ├── it should set epoch to one
+│   └── it should record a zeroed point at the current timestamp
+├── when called in the same block as the previous checkpoint
+│   ├── it should keep epoch unchanged
+│   └── it should overwrite the latest point with the same data
+├── when called within the same week as the previous checkpoint
+│   ├── it should increment epoch by one
+│   └── it should decay the bias by slope times the elapsed seconds
+├── when one or more week boundaries are crossed
+│   ├── it should write an intermediate point at each crossed boundary
+│   └── it should end with a final point at the current timestamp
+├── when a scheduled slope change exists at a crossed week boundary
+│   └── it should add the scheduled change to the running slope
+├── when the scheduled change would drive the running slope negative
+│   └── it should clamp the running slope to zero
+├── when using a known decay example
+│   └── it should match the hand computed decayed bias
+├── when the decay would drive the bias negative
+│   └── it should clamp the bias to zero
+├── when the global permanent stake balance has changed since the prior point
+│   └── it should sync the live permanent balance into the new point
+└── when more than the maximum number of week boundaries have elapsed
+    ├── it should cap the epoch at the maximum loop iterations
+    └── it should leave the global point timestamp stale before the current time

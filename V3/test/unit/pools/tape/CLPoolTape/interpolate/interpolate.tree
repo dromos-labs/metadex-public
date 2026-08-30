@@ -1,0 +1,7 @@
+UnitClPoolTape::Interpolate
+├── it linearly interpolates every cumulative field at the target
+├── it carries closeTick and volatility values from the lower bound
+├── when given a concrete example
+│   └── it matches the hand computed interpolation at a truncation boundary
+└── when given a concrete example that wraps
+    └── it matches the hand computed interpolation across a cumulative wrap

@@ -1,0 +1,48 @@
+UnitSwaps::V2SwapExactOut
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+└── given the recipient is valid
+    ├── when the pool path is empty
+    │   └── it should revert with InvalidPath
+    ├── when a pool is not registered
+    │   └── it should revert with InvalidPool for the pool
+    ├── when a factory does not recognize the pool
+    │   └── it should revert with InvalidPool for the pool
+    ├── when a pool reports an unsupported pool type
+    │   └── it should revert with InvalidPool for the pool
+    └── given every pool is validated
+        ├── when the input token does not belong to the pool
+        │   └── it should revert with InvalidPath
+        ├── when the route contains a stable pool
+        │   └── it should execute the swap route
+        ├── when the pool quote reverts
+        │   └── it should bubble the pool revert
+        ├── when the quoted input exceeds the maximum
+        │   └── it should revert with TooMuchRequested
+        └── given the quoted input is within the maximum
+            ├── when the payer is the execution owner
+            │   └── it should pay the first pool directly from the execution owner
+            ├── when the payer is the execution address
+            │   ├── it should track the input token for the closure sweep
+            │   └── it should fund the quoted input from custody
+            ├── when the execution address pays the native mirror token beyond the batch native
+            │   └── it should revert with InsufficientBalance for the input token
+            ├── when a flagged execution address payment exceeds the batch native
+            │   ├── it should continue the batch with the next command
+            │   └── it should preserve the pre-batch native and refund the batch contribution
+            ├── when the input token is token one
+            │   └── it should quote the token zero output and request it from the pool
+            ├── when the path contains multiple pools
+            │   └── it should quote backwards and route each output to the next pool
+            ├── when the hop directions differ
+            │   └── it should request each hop output on its own side
+            ├── when the output token is revisited and an intermediate pool is the recipient
+            │   └── it should revert based on the final hop output
+            ├── when the recipient receives less than the requested output
+            │   └── it should revert with TooLittleReceived
+            ├── when the recipient receives the requested output
+            │   └── it should complete the swap
+            ├── when the recipient is the execution address
+            │   └── it should track and return the output at batch closure
+            └── when the quoted input equals the maximum
+                └── it should complete at the exact bound

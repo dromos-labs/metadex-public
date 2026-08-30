@@ -1,0 +1,3 @@
+UnitVotingEscrow::TotalSupply
+└── when tokens have been minted
+    └── it should return the live minted token count

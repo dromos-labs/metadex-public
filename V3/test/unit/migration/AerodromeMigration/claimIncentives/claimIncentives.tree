@@ -1,0 +1,8 @@
+UnitAerodromeMigration::ClaimIncentives
+├── when a reward token is the migration output token
+│   ├── it should revert with InvalidRewardToken
+│   └── it should leave the migration and recipient balances unchanged
+├── when the same reward token is claimed for different reward contracts
+│   └── it should transfer the claimed token balance once
+└── given the claimed token balance is positive
+    └── it should transfer the claimed token balance

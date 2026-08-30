@@ -1,0 +1,5 @@
+UnitVolatilePool::GetAmountOut
+├── when the reserves are not passed as parameter
+│   └── it should match the constant-product formula against state reserves
+└── when the reserves are passed as parameter
+    └── it should match the constant-product formula against the supplied reserves

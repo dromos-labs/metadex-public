@@ -1,0 +1,54 @@
+UnitConcreteVotingRewardsManager::NotifyFeesAmount
+├── when the fee accumulator was already updated in the current timestamp
+│   └── it should skip the fee accumulator update
+└── when the fee accumulator was not updated in the current timestamp
+    ├── when the gauge has no pending fees
+    │   ├── when the buffer is empty
+    │   │   ├── it should set lastFeeUpdate to the current timestamp
+    │   │   └── it should skip the fee accumulator update
+    │   └── when the buffer is not empty
+    │       ├── when the gauge is not active
+    │       │   ├── it should set lastFeeUpdate to the current timestamp
+    │       │   ├── it should preserve the buffered fees
+    │       │   └── it should skip the fee accumulator update
+    │       └── when the gauge is active
+    │           ├── it should set lastFeeUpdate to the current timestamp
+    │           ├── it should credit the buffered fees to the accumulator
+    │           ├── it should buffer the rounding remainder
+    │           └── it should emit the NotifyFeesAmount event for each qualifying token
+    └── when the gauge has pending fees
+        ├── when the gauge has no newly accrued fees
+        │   ├── it should set lastFeeUpdate to the current timestamp
+        │   └── it should skip the fee accumulator update
+        └── when the gauge has newly accrued fees
+            ├── when the total supply is zero
+            │   ├── it should set lastFeeUpdate to the current timestamp
+            │   ├── it should advance the last pending fees to the current pending amount
+            │   ├── it should buffer the accrued fees
+            │   └── it should skip the fee accumulator update
+            └── when the total supply is greater than zero
+                ├── when no token meets the credit threshold
+                │   ├── it should set lastFeeUpdate to the current timestamp
+                │   ├── it should advance the last pending fees to the current pending amount
+                │   ├── it should buffer the accrued fees
+                │   └── it should skip the fee accumulator update
+                └── when at least one token meets the credit threshold
+                    ├── when there are buffered fees
+                    │   ├── it should set lastFeeUpdate to the current timestamp
+                    │   ├── it should credit the accrued fees including the buffered residual
+                    │   ├── it should buffer the rounding remainder
+                    │   ├── it should advance the last pending fees to the current pending amount
+                    │   └── it should emit the NotifyFeesAmount event for each qualifying token
+                    └── when there are no buffered fees
+                        ├── when the accrued fees leave no rounding remainder
+                        │   ├── it should set lastFeeUpdate to the current timestamp
+                        │   ├── it should credit the accrued fees to the accumulator
+                        │   ├── it should leave no fees buffered
+                        │   ├── it should advance the last pending fees to the current pending amount
+                        │   └── it should emit the NotifyFeesAmount event for each qualifying token
+                        └── when the accrued fees leave a rounding remainder
+                            ├── it should set lastFeeUpdate to the current timestamp
+                            ├── it should credit the rounded down accumulator increment
+                            ├── it should buffer the rounding remainder
+                            ├── it should advance the last pending fees to the current pending amount
+                            └── it should emit the NotifyFeesAmount event for each qualifying token

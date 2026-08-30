@@ -1,0 +1,23 @@
+UnitDefaultGaugeCreationModule::CreateGauge
+├── when the gauge factory is not allowed
+│   └── it should revert with GaugeFactoryNotAllowed
+├── when the target has no recorded factory
+│   └── it should revert with NotAPool
+├── when the recorded factory does not report the target as a pool
+│   └── it should revert with NotAPool
+└── when the target is a recorded pool
+    ├── when neither pool token is a listed base asset
+    │   └── it should revert with NoListedBaseAsset
+    ├── when at least one pool token is a listed base asset
+    │   ├── when both pool tokens are listed in the token registry
+    │   │   ├── it should request an activated registration crediting the caller with empty factory data
+    │   │   └── it should return the created gauge
+    │   ├── when the second pool token is not listed in the token registry
+    │   │   ├── it should request an inactive registration
+    │   │   └── it should still create the gauge
+    │   └── when the first pool token is not listed in the token registry
+    │       ├── it should request an inactive registration
+    │       └── it should still create the gauge
+    └── when only the second pool token is a listed base asset
+        ├── it should create the gauge
+        └── it should return the created gauge

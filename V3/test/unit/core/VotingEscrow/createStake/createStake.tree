@@ -1,0 +1,59 @@
+UnitVotingEscrow::CreateStake
+├── when the value is zero
+│   └── it should revert with ZeroAmount
+├── when the stake is permanent and the staking period is greater than zero
+│   └── it should revert with StakingPeriodNotAllowed
+├── when the staking period resolves to the current block or earlier
+│   ├── when called on a week boundary
+│   │   └── it should revert with StakingPeriodNotInFuture
+│   └── when called mid week
+│       └── it should revert with StakingPeriodNotInFuture
+├── when the staking period exceeds the maximum
+│   └── it should revert with StakingPeriodTooLong
+├── when the staking period is the last valid value
+│   └── it should set the staked balance with the end at the maximum allowed boundary
+├── when the staking period is the first invalid value
+│   └── it should revert with StakingPeriodTooLong
+├── when the value exceeds the signed cap
+│   ├── it should revert with AmountExceedsCap
+│   └── it should not park anything on the voter
+├── when the value equals the signed cap
+│   ├── it should set the staked balance at the cap amount
+│   ├── it should bump supply to the cap
+│   └── it should bump the permanent stake balance to the cap
+└── when the deposit succeeds
+    ├── it should increment the token id counter and mint to the caller
+    ├── it should bump supply by the value
+    ├── it should advance the global epoch
+    ├── it should transfer the value from the caller
+    ├── it should park the new voting power on the voter chain zero ledger
+    ├── it should emit the Supply event
+    ├── it should append the minted token to the owner enumeration
+    ├── it should append the minted token to the global enumeration
+    ├── when the stake is decaying
+    │   ├── it should set the staked balance with the computed end
+    │   ├── it should leave the permanent stake balance unchanged
+    │   ├── it should write a user point with the decaying slope and bias
+    │   ├── it should schedule a negative slope change at the computed end
+    │   ├── it should decay to zero voting power at the computed end
+    │   └── it should emit the Deposit event with the computed end as unstake time
+    ├── when using a known decay example
+    │   ├── it should write a user point with the hand computed slope and bias
+    │   ├── it should set the staked balance with the hand computed end
+    │   ├── it should report the hand computed voting power at creation
+    │   ├── it should report half the voting power at mid life
+    │   ├── it should report zero voting power at the end
+    │   └── it should schedule the negative slope change at the end
+    ├── when the decaying value is below one slope unit
+    │   ├── it should set the staked balance with the nonzero amount
+    │   ├── it should bump supply by the value
+    │   ├── it should write a user point with zero slope and bias
+    │   ├── it should report zero voting power despite the funded stake
+    │   └── it should schedule no slope change at the end
+    ├── when called mid week with a valid period
+    │   └── it should floor the staked end to the week boundary
+    └── when the stake is permanent
+        ├── it should set the staked balance as permanent with zero end
+        ├── it should bump the permanent stake balance by the value
+        ├── it should write a user point with permanent equal to the amount
+        └── it should emit the Deposit event with zero unstake time

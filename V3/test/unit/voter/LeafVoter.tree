@@ -1,0 +1,255 @@
+UnitLeafVoter::Constructor
+├── when the governor is the zero address
+│   └── it should revert with ZeroAddress
+├── when the config admin is the zero address
+│   └── it should revert with ZeroAddress
+├── when the leaf message orchestrator is the zero address
+│   └── it should revert with ZeroAddress
+├── when the receipt token is the zero address
+│   └── it should revert with ZeroAddress
+├── when the factory registry is the zero address
+│   └── it should revert with ZeroAddress
+├── when the gauge manager is the zero address
+│   └── it should revert with ZeroAddress
+├── when the adapter authority is the zero address
+│   └── it should revert with ZeroAddress
+├── when the emissions handler is the zero address
+│   └── it should revert with ZeroAddress
+├── when the emergency council is the zero address
+│   └── it should revert with ZeroAddress
+└── when no address is zero
+    ├── it should grant the governance role to the governor
+    ├── it should grant the config admin role to the config admin
+    ├── it should grant the adapter config role to the adapter authority
+    ├── it should make the governance role its own admin
+    ├── it should make the governance role admin of the config admin role
+    ├── it should make the config admin role admin of every operational role
+    ├── it should make the governance role admin of the emergency council role
+    ├── it should make the governance role admin of the seizer role
+    ├── it should set the orchestrator handle to the leaf message orchestrator
+    ├── it should set the receipt token
+    ├── it should set the emissions handler
+    ├── it should grant the emergency council role to the emergency council
+    ├── it should set the factory registry
+    ├── it should set the gauge manager
+    ├── it should set the vote cooldown
+    ├── it should set the max gauges
+    ├── it should default the max accumulated cooldown reduction to zero
+    ├── it should default local voting to disabled
+    ├── it should anchor the last settlement at the deployment timestamp
+    ├── it should seed the zero gauge settlement cursor
+    ├── it should seed the zero gauge point timestamp
+    └── it should register the zero gauge
+
+UnitLeafVoter::mintEmissions
+├── when the chain status is neither Active nor Sunset
+│   └── it should revert with ChainNotActiveOrSunset
+├── when the caller is not a registered gauge
+│   └── it should revert with GaugeNotRegistered
+├── when the recipients and amounts lengths differ
+│   └── it should revert with ArrayLengthMismatch
+└── given the recipients and amounts lengths match
+    ├── when the amount to mint is zero
+    │   ├── it should not change surplus accrued
+    │   ├── it should not change the gauge claimed amount
+    │   ├── it should not call mint on the receipt token
+    │   ├── it should not call handleEmissions on the emissions handler
+    │   └── it should not emit the EmissionsMinted event
+    ├── when the amount to mint exceeds the claimable headroom
+    │   └── it should revert with CeilingExceeded
+    ├── when the amount to mint is positive and within the claimable headroom
+    │   ├── it should not change surplus accrued
+    │   ├── it should increase the gauge claimed amount by the amount to mint
+    │   ├── it should emit EmissionsMinted with msg.sender, _recipients and _amounts
+    │   ├── it should call mint on the receipt token with the handler and the amount to mint
+    │   └── it should call handleEmissions on the emissions handler
+    └── when the chain status is Sunset and the amount is within the claimable headroom
+        ├── it should increase the gauge claimed amount by the amount to mint
+        ├── it should emit EmissionsMinted with msg.sender, _recipients and _amounts
+        └── it should call mint on the receipt token with the handler and the amount to mint
+
+UnitLeafVoter::SetOperator
+├── when the caller is not the leaf message orchestrator
+│   └── it should revert with NotMessageOrchestrator
+└── when the caller is the leaf message orchestrator
+    ├── it should set the operator for the tokenId
+    └── it should emit the OperatorSet event
+
+UnitLeafVoter::ApplyCooldownReduction
+├── when the caller is not the leaf message orchestrator
+│   └── it should revert with NotMessageOrchestrator
+├── when there is no prior accumulated reduction
+│   ├── it should accrue the reduction onto the accumulated balance
+│   └── it should emit the CooldownReductionApplied event with the new accumulated total equal to the reduction
+├── when a prior reduction is already accumulated
+│   ├── it should accrue additively onto the prior accumulated balance
+│   └── it should emit the CooldownReductionApplied event with the summed accumulated total
+└── when the accrued reduction exceeds the max accumulated cooldown reduction
+    ├── it should clamp the accumulated balance at the max accumulated cooldown reduction
+    └── it should emit the CooldownReductionApplied event with the clamped accumulated total
+
+UnitLeafVoter::operator
+├── when an operator is set for the tokenId
+│   └── it should return the stored operator
+└── when no operator is set for the tokenId
+    └── it should return the zero address
+
+UnitLeafVoter::isActivated
+├── when the gauge is registered and activated
+│   └── it should return true
+├── when the gauge is registered but not activated
+│   └── it should return false
+└── when the gauge is not registered
+    └── it should return false
+
+UnitLeafVoter::SetCanVoteForZeroCapGauges
+├── when the caller does not hold the token whitelist role
+│   └── it should revert with AccessControlUnauthorizedAccount
+└── when the caller holds the token whitelist role
+    ├── it should set the can vote for zero cap gauges flag for the tokenId
+    └── it should emit the CanVoteForZeroCapGaugesSet event
+
+UnitLeafVoter::SetLocalVotingEnabled
+├── when the caller does not hold the voter config role
+│   └── it should revert with AccessControlUnauthorizedAccount
+├── when the caller holds the voter config role and opens local voting
+│   ├── it should set local voting to enabled
+│   └── it should emit the LocalVotingEnabledSet event
+└── when the caller holds the voter config role and closes local voting
+    ├── it should set local voting to disabled
+    └── it should emit the LocalVotingEnabledSet event
+
+UnitLeafVoter::SetAllocationCooldown
+├── when the caller does not hold the voter config role
+│   └── it should revert with AccessControlUnauthorizedAccount
+└── when the caller holds the voter config role
+    ├── it should set the vote cooldown
+    └── it should emit the AllocationCooldownSet event
+
+UnitLeafVoter::SetMaxAccumulatedCooldownReduction
+├── when the caller does not hold the voter config role
+│   └── it should revert with AccessControlUnauthorizedAccount
+└── when the caller holds the voter config role
+    ├── it should set the max accumulated cooldown reduction to the new value
+    └── it should emit MaxAccumulatedCooldownReductionSet with the new value
+
+UnitLeafVoter::SetMaxGauges
+├── when the caller does not hold the voter config role
+│   └── it should revert with AccessControlUnauthorizedAccount
+├── when the caller holds the voter config role
+│   ├── it should set max gauges to the new value
+│   └── it should emit MaxGaugesSet with the new value
+└── when max gauges is lowered below a tokens current allocation list size
+    └── it should revert the next vote with ExceedsMaxGauges
+
+UnitLeafVoter::SetChainStatus
+├── when the caller does not hold the chain status role
+│   └── it should revert with AccessControlUnauthorizedAccount
+├── when the target status is None
+│   └── it should revert with InvalidStatus
+├── when the new status matches the current status
+│   └── it should revert with ChainStatusUnchanged
+├── when flipping from Suspended to Paused
+│   └── it should revert with InvalidChainStatusTransition
+├── when flipping from Suspended to Sunset
+│   ├── it should leave the index flat across the suspended window
+│   ├── it should advance the last settlement to the flip timestamp
+│   ├── it should keep emissions per VP at zero
+│   ├── it should set the chain status
+│   └── it should emit the ChainStatusSet event
+├── when flipping from Sunset to Paused
+│   └── it should revert with InvalidChainStatusTransition
+├── when flipping from Sunset to Active
+│   └── it should revert with InvalidChainStatusTransition
+├── when flipping from Sunset to Suspended
+│   ├── it should keep emissions per VP at zero
+│   ├── it should set the chain status
+│   └── it should emit the ChainStatusSet event
+├── when flipping from Suspended to Active
+│   ├── it should leave the index flat across the suspended window
+│   ├── it should advance the last settlement to the flip timestamp
+│   ├── it should leave the chain rate at zero
+│   ├── it should set the chain status
+│   └── it should emit the ChainStatusSet event
+├── when flipping from Active to Paused
+│   ├── it should settle the index up to the flip timestamp
+│   ├── it should leave emissions per VP unchanged
+│   ├── it should set the chain status
+│   └── it should emit the ChainStatusSet event
+├── when settling at the maximum safe scalar near the timestamp horizon
+│   ├── it should advance the index without overflowing
+│   ├── it should advance the time index without overflowing
+│   ├── it should preserve the maximum safe emissions per voting power
+│   └── it should advance the last settlement to the target timestamp
+├── when the new status is Suspended and the last settlement is before the flip timestamp
+│   ├── it should settle the index at the old rate up to the flip timestamp
+│   ├── it should zero emissions per VP
+│   ├── it should set the chain status
+│   └── it should emit the ChainStatusSet event
+├── when the new status is Suspended and the last settlement is at or after the flip timestamp
+│   ├── it should leave the index and last settlement unchanged
+│   ├── it should zero emissions per VP
+│   ├── it should set the chain status
+│   └── it should emit the ChainStatusSet event
+├── when the new status is Sunset
+│   ├── it should settle the index at the old rate up to the flip timestamp
+│   ├── it should zero emissions per VP
+│   ├── it should set the chain status
+│   └── it should emit the ChainStatusSet event
+├── when flipping from Paused to Active
+│   ├── it should settle the index up to the flip timestamp
+│   ├── it should leave emissions per VP unchanged
+│   ├── it should set the chain status
+│   └── it should emit the ChainStatusSet event
+├── when flipping from Paused to Suspended
+│   ├── it should settle the index at the old rate up to the flip timestamp
+│   ├── it should zero emissions per VP
+│   ├── it should set the chain status
+│   └── it should emit the ChainStatusSet event
+├── when flipping from Paused to Sunset
+│   ├── it should settle the index at the old rate up to the flip timestamp
+│   ├── it should zero emissions per VP
+│   ├── it should set the chain status
+│   └── it should emit the ChainStatusSet event
+├── when running a full suspend message resume sequence
+│   ├── it should keep emissions per VP at zero across the suspended window
+│   ├── it should leave the index flat from the suspend flip to the resume flip
+│   ├── it should advance the last settlement to the resume timestamp
+│   └── it should set the chain status back to Active
+└── when a chain allocation refreshes the scalar while Sunset
+    └── it should keep emissions per VP at zero
+
+UnitLeafVoter::ForfeitEmissions
+├── when the caller is not a registered gauge
+│   └── it should revert with GaugeNotRegistered
+├── when the caller is a registered gauge and the reported amount is within the claimable headroom
+│   ├── it should add the full amount to the gauge surplus
+│   ├── it should add the full amount to the surplus accrued accumulator
+│   └── it should emit EmissionsForfeited with the reported amount
+└── when the caller is a registered gauge and the reported amount exceeds the claimable headroom
+    ├── it should clamp the amount to the claimable headroom
+    ├── it should add the clamped amount to the gauge surplus
+    ├── it should add the clamped amount to the surplus accrued accumulator
+    └── it should emit EmissionsForfeited with the clamped amount
+
+UnitLeafVoter::redeem
+├── when the chain status is neither Active nor Sunset
+│   └── it should revert with ChainNotActiveOrSunset
+├── when the chain status is Sunset and the redeem inputs are valid
+│   ├── it should burn _amount of receipt token from _caller
+│   ├── it should dispatch a Redeem message encoding _amount, _recipient and surplusAccrued forwarding msg value
+│   └── it should emit Redeemed with _redeemer, _recipient, _amount
+└── given the chain status is Active
+    ├── when the amount is less than the minimum amount
+    │   └── it should revert with AmountTooLow
+    ├── when the amount equals the minimum amount
+    │   ├── it should process the redeem at the minimum amount boundary
+    │   └── it should emit Redeemed with _redeemer, _recipient, _amount
+    └── given the amount is at least the minimum amount
+        ├── when the recipient is the zero address
+        │   └── it should revert with ZeroAddress
+        └── given the caller is not the zero address
+            └── when all inputs are valid
+                ├── it should burn _amount of receipt token from _caller
+                ├── it should dispatch a Redeem message encoding _amount, _recipient and surplusAccrued forwarding msg value
+                └── it should emit Redeemed with _redeemer, _recipient, _amount

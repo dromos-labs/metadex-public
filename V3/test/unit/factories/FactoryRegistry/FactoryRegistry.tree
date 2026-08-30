@@ -1,0 +1,366 @@
+UnitFactoryRegistry::constructor
+├── when the leaf voter is the zero address
+│   ├── when the target factory admin is the zero address
+│   │   └── it should revert with ZeroAddress
+│   └── when the target factory admin is non zero
+│       ├── it should set the target factory admin
+│       ├── it should emit TargetFactoryAdminSet
+│       └── it should leave the leaf voter unset
+└── when the leaf voter is non zero
+    ├── when a target factory admin is provided
+    │   └── it should revert with TargetFactoryAdminNotAllowed
+    └── when no target factory admin is provided
+        ├── it should set the leaf voter
+        ├── it should emit LeafVoterSet
+        └── it should leave the target factory admin unset
+
+UnitFactoryRegistry::setLeafVoter
+├── when the caller is not the target factory admin
+│   └── it should revert with NotAuthorized
+└── when the caller is the target factory admin
+    ├── when the leaf voter is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the leaf voter is already set
+    │   └── it should revert with LeafVoterAlreadySet
+    └── when the leaf voter is unset
+        ├── it should write the leaf voter
+        ├── it should clear the target factory admin
+        ├── it should emit LeafVoterSet
+        └── it should emit TargetFactoryAdminSet with the zero address
+
+UnitFactoryRegistry::setTargetFactoryAdmin
+├── when the caller is not the target factory admin
+│   └── it should revert with NotAuthorized
+└── when the caller is the target factory admin
+    ├── when the new target factory admin is the zero address
+    │   └── it should revert with ZeroAddress
+    └── when the new target factory admin is non zero
+        ├── it should write the target factory admin
+        └── it should emit TargetFactoryAdminSet
+
+UnitFactoryRegistry::isGaugeFactoryApproved
+├── when the gauge factory approval set is empty
+│   └── it should return false
+├── when the gauge factory is not in the populated approval set
+│   └── it should return false
+└── when the gauge factory is in the approval set
+    └── it should return true
+
+UnitFactoryRegistry::isTargetFactoryApproved
+├── when the target factory approval set is empty
+│   └── it should return false
+├── when the target factory is not in the populated approval set
+│   └── it should return false
+└── when the target factory is in the approval set
+    └── it should return true
+
+UnitFactoryRegistry::isMetaRouterApproved
+├── when the meta router approval set is empty
+│   └── it should return false
+├── when the meta router is not in the populated approval set
+│   └── it should return false
+└── when the meta router is in the approval set
+    └── it should return true
+
+UnitFactoryRegistry::gaugeFactories
+├── when the gauge factory approval set is empty
+│   └── it should return an empty array
+└── when the gauge factory approval set is populated
+    └── it should return every registered gauge factory
+
+UnitFactoryRegistry::gaugeFactoriesLength
+├── when the gauge factory approval set is empty
+│   └── it should return zero
+└── when the gauge factory approval set is populated
+    └── it should return the member count
+
+UnitFactoryRegistry::gaugeFactoriesAt
+├── when the index is out of range of the gauge factory approval set
+│   └── it should return the zero address
+└── when the index is within range of the gauge factory approval set
+    └── it should return the member at the index
+
+UnitFactoryRegistry::targetFactories
+├── when the target factory approval set is empty
+│   └── it should return an empty array
+└── when the target factory approval set is populated
+    └── it should return every registered target factory
+
+UnitFactoryRegistry::targetFactoriesLength
+├── when the target factory approval set is empty
+│   └── it should return zero
+└── when the target factory approval set is populated
+    └── it should return the member count
+
+UnitFactoryRegistry::targetFactoriesAt
+├── when the index is out of range of the target factory approval set
+│   └── it should return the zero address
+└── when the index is within range of the target factory approval set
+    └── it should return the member at the index
+
+UnitFactoryRegistry::metaRouters
+├── when the meta router approval set is empty
+│   └── it should return an empty array
+└── when the meta router approval set is populated
+    └── it should return every registered meta router
+
+UnitFactoryRegistry::factoryToTargets
+├── when the factory has no recorded targets
+│   └── it should return an empty array
+└── when the factory has recorded targets
+    └── it should return every recorded target
+
+UnitFactoryRegistry::factoryToTargetsLength
+├── when the factory has no recorded targets
+│   └── it should return zero
+└── when the factory has recorded targets
+    └── it should return the member count
+
+UnitFactoryRegistry::factoryToTargetsAt
+├── when the index is out of range of the factory target enumeration
+│   └── it should return the zero address
+└── when the index is within range of the factory target enumeration
+    └── it should return the member at the index
+
+UnitFactoryRegistry::factoryToGauges
+├── when the factory has no recorded gauges
+│   └── it should return an empty array
+└── when the factory has recorded gauges
+    └── it should return every recorded gauge
+
+UnitFactoryRegistry::factoryToGaugesLength
+├── when the factory has no recorded gauges
+│   └── it should return zero
+└── when the factory has recorded gauges
+    └── it should return the member count
+
+UnitFactoryRegistry::factoryToGaugesAt
+├── when the index is out of range of the factory gauge enumeration
+│   └── it should return the zero address
+└── when the index is within range of the factory gauge enumeration
+    └── it should return the member at the index
+
+UnitFactoryRegistry::gaugeToTarget
+├── when the gauge has no linked target
+│   └── it should return the zero address
+└── when the gauge is linked to a target
+    └── it should return the linked target
+
+UnitFactoryRegistry::gaugeFactoryToTargetFactory
+├── when the gauge factory has no recorded link
+│   └── it should return the zero address
+└── when the gauge factory is linked
+    └── it should return the linked target factory
+
+UnitFactoryRegistry::targetFactoryToGaugeFactory
+├── when the target factory has no linked gauge factory
+│   └── it should return the zero address
+└── when the target factory is linked
+    └── it should return the linked gauge factory
+
+UnitFactoryRegistry::targetToGauge
+├── when the target has no linked gauge
+│   └── it should return the zero address
+└── when the target is linked to a gauge
+    └── it should return the linked gauge
+
+UnitFactoryRegistry::gaugeToFactory
+├── when the gauge is unknown
+│   └── it should return the zero address
+└── when the gauge is recorded
+    └── it should return the deploying gauge factory
+
+UnitFactoryRegistry::targetToFactory
+├── when the target is unknown
+│   └── it should return the zero address
+└── when the target is recorded
+    └── it should return the deploying target factory
+
+UnitFactoryRegistry::gaugeToRewards
+├── when the gauge is unknown
+│   └── it should return the zero address
+└── when the gauge is recorded
+    └── it should return the recorded rewards contract
+
+UnitFactoryRegistry::rewardsToGauge
+├── when the rewards contract is unknown
+│   └── it should return the zero address
+└── when the rewards contract is recorded
+    └── it should return the recorded gauge
+
+UnitFactoryRegistry::tokenRegistry
+├── when the token registry is unset
+│   └── it should return the zero address
+└── when the token registry is set
+    └── it should return the recorded token registry
+
+UnitFactoryRegistry::emissionCap
+├── when the gauge is unknown
+│   ├── it should not call the gauge factory
+│   └── it should return zero
+├── when the factory cap query reverts
+│   └── it should return zero
+├── when the deploying factory is no longer in the approval set
+│   ├── it should query the cap on the deploying gauge factory
+│   └── it should return the factory reported cap
+└── when the gauge is recorded under a registered factory
+    ├── it should query the cap on the deploying gauge factory
+    └── it should return the factory reported cap
+
+UnitFactoryRegistry::registerFactories
+├── when the leaf voter is unset
+│   └── it should revert with NotAuthorized
+├── when the caller lacks the factory registry admin role
+│   └── it should revert with NotAuthorized
+└── when the caller holds the factory registry admin role
+    ├── when the gauge factory is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the target factory is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the gauge factory is linked to a different target factory
+    │   └── it should revert with GaugeFactoryAlreadyLinked
+    ├── when the target factory is linked to a different gauge factory
+    │   └── it should revert with TargetFactoryAlreadyLinked
+    ├── when the gauge factory is already in the approval set
+    │   └── it should revert with AlreadyRegistered
+    ├── when the target factory is preregistered and unlinked
+    │   ├── it should write the gauge factory to target factory link
+    │   ├── it should write the target factory to gauge factory link
+    │   ├── it should add the gauge factory to the approval set
+    │   ├── it should keep the target factory in the approval set
+    │   ├── it should emit FactoriesLinked
+    │   ├── it should emit GaugeFactoryRegistered
+    │   └── it should not emit TargetFactoryRegistered
+    ├── when the pair is linked and unregistered
+    │   ├── it should add the gauge factory to the approval set
+    │   ├── it should add the target factory to the approval set
+    │   ├── it should keep the recorded link unchanged
+    │   ├── it should not emit FactoriesLinked
+    │   ├── it should emit GaugeFactoryRegistered
+    │   └── it should emit TargetFactoryRegistered
+    └── when both factories are unlinked and unregistered
+        ├── it should write the gauge factory to target factory link
+        ├── it should write the target factory to gauge factory link
+        ├── it should add the gauge factory to the approval set
+        ├── it should add the target factory to the approval set
+        ├── it should emit FactoriesLinked
+        ├── it should emit GaugeFactoryRegistered
+        └── it should emit TargetFactoryRegistered
+
+UnitFactoryRegistry::registerTargetFactory
+├── when the caller is not the target factory admin
+│   └── it should revert with NotAuthorized
+└── when the caller is the target factory admin
+    ├── when the target factory is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the target factory is already in the approval set
+    │   └── it should revert with AlreadyRegistered
+    └── when the target factory is not in the approval set
+        ├── it should add the target factory to the approval set
+        └── it should emit TargetFactoryRegistered
+
+UnitFactoryRegistry::unregisterFactories
+├── when the leaf voter is unset
+│   └── it should revert with NotAuthorized
+├── when the caller lacks the factory registry admin role
+│   └── it should revert with NotAuthorized
+└── when the caller holds the factory registry admin role
+    ├── when the gauge factory is not in the approval set
+    │   └── it should revert with NotRegistered
+    ├── when the linked target factory is not in the approval set
+    │   └── it should revert with NotRegistered
+    └── when the pair is registered
+        ├── it should remove the gauge factory from the approval set
+        ├── it should remove the linked target factory from the approval set
+        ├── it should keep every record the factories established resolving
+        ├── it should keep the factory link resolving
+        ├── it should emit GaugeFactoryUnregistered
+        └── it should emit TargetFactoryUnregistered
+
+UnitFactoryRegistry::registerMetaRouter
+├── when the leaf voter is unset
+│   └── it should revert with NotAuthorized
+├── when the caller lacks the factory registry admin role
+│   └── it should revert with NotAuthorized
+└── when the caller holds the factory registry admin role
+    ├── when the meta router is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the meta router is already in the approval set
+    │   └── it should revert with AlreadyRegistered
+    └── when the meta router is not in the approval set
+        ├── it should add the meta router to the approval set
+        └── it should emit MetaRouterRegistered
+
+UnitFactoryRegistry::unregisterMetaRouter
+├── when the leaf voter is unset
+│   └── it should revert with NotAuthorized
+├── when the caller lacks the factory registry admin role
+│   └── it should revert with NotAuthorized
+└── when the caller holds the factory registry admin role
+    ├── when the meta router is not in the approval set
+    │   └── it should revert with NotRegistered
+    └── when the meta router is in the approval set
+        ├── it should remove the meta router from the approval set
+        └── it should emit MetaRouterUnregistered
+
+UnitFactoryRegistry::setTokenRegistry
+├── when the leaf voter is unset
+│   └── it should revert with NotAuthorized
+├── when the caller lacks the factory registry admin role
+│   └── it should revert with NotAuthorized
+└── when the caller holds the factory registry admin role
+    ├── when the token registry is the zero address
+    │   └── it should revert with ZeroAddress
+    └── when the token registry is non zero
+        ├── it should write the token registry pointer
+        └── it should emit TokenRegistrySet
+
+UnitFactoryRegistry::registerTarget
+├── when the caller is not a registered target factory
+│   └── it should revert with TargetFactoryNotRegistered
+└── when the caller is a registered target factory
+    ├── when the target is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the target is already recorded
+    │   └── it should revert with TargetAlreadyRecorded
+    ├── when the target is already in the factory enumeration
+    │   └── it should revert with AlreadyEnumerated
+    └── when the target is unrecorded
+        ├── it should write the target to factory record
+        ├── it should add the target to the factory enumeration
+        └── it should emit TargetCreated
+
+UnitFactoryRegistry::registerGauge
+├── when the leaf voter is unset
+│   └── it should revert with NotAuthorized
+├── when the caller is not the gauge manager
+│   └── it should revert with NotAuthorized
+└── when the caller is the gauge manager
+    ├── when the gauge is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the rewards contract is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the gauge factory is not registered
+    │   └── it should revert with GaugeFactoryNotRegistered
+    ├── when the gauge factory has no linked target factory
+    │   └── it should revert with NotLinked
+    ├── when the gauge is already recorded
+    │   └── it should revert with GaugeAlreadyRecorded
+    ├── when the rewards contract is already recorded
+    │   └── it should revert with RewardsAlreadyRecorded
+    ├── when the target is not recorded
+    │   └── it should revert with TargetNotRecorded
+    ├── when the target already holds a gauge
+    │   └── it should revert with TargetAlreadyLinked
+    ├── when the target is not from the linked target factory
+    │   └── it should revert with TargetFactoryMismatch
+    ├── when the gauge is already in the factory enumeration
+    │   └── it should revert with AlreadyEnumerated
+    └── when the report is valid
+        ├── it should write the gauge to factory record
+        ├── it should add the gauge to the factory enumeration
+        ├── it should write the gauge to rewards record
+        ├── it should write the rewards to gauge record
+        ├── it should write the gauge to target link
+        ├── it should write the target to gauge link
+        └── it should emit GaugeRegistered

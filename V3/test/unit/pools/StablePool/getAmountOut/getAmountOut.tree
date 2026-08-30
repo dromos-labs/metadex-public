@@ -1,0 +1,5 @@
+UnitStablePool::GetAmountOut
+├── when the reserves are not passed as parameter
+│   └── it should preserve the stable curve invariant against state reserves
+└── when the reserves are passed as parameter
+    └── it should preserve the stable curve invariant against the supplied reserves

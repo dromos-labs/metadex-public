@@ -1,0 +1,4 @@
+UnitVotingEscrow::TotalVotingPower
+└── when the global curve is seeded
+    ├── it should return the decayed bias plus permanent balance at the current timestamp
+    └── it should match totalVotingPowerAt at the current timestamp

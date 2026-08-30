@@ -1,0 +1,11 @@
+UnitPool::Update
+├── when no time has elapsed since the last update
+│   ├── it should not update the reserves cumulatives
+│   ├── it should update the reserves to the new balances
+│   ├── it should update blockTimestampLast
+│   └── it should emit the Sync event
+└── when time has elapsed since the last update and the reserves are positive
+    ├── it should update the reserves cumulatives
+    ├── it should update the reserves to the new balances
+    ├── it should update blockTimestampLast
+    └── it should emit the Sync event

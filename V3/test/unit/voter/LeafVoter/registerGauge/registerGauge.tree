@@ -1,0 +1,25 @@
+UnitLeafVoter::RegisterGauge
+├── when the caller is not the gauge manager
+│   └── it should revert with NotGaugeManager
+└── when the caller is the gauge manager
+    ├── when the gauge is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the gauge is already registered
+    │   └── it should revert with GaugeAlreadyRegistered
+    └── when the gauge is not registered
+        ├── when the chain cursor lags the current timestamp
+        │   ├── it should settle the chain index to the current timestamp
+        │   └── it should seed the gauge cursor from the settled chain cursor
+        ├── when the chain was pre settled past the current timestamp
+        │   ├── it should keep the pre settled chain cursor
+        │   └── it should seed the gauge cursor from the existing logical cursor
+        ├── when the registration activates the gauge
+        │   ├── it should mark the gauge registered
+        │   ├── it should set the activation flag
+        │   ├── it should emit GaugeRegistered with the settlement cursor
+        │   └── it should emit GaugeActivated with the settlement cursor
+        └── when the registration leaves the gauge inactive
+            ├── it should mark the gauge registered
+            ├── it should leave the activation flag unset
+            ├── it should emit GaugeRegistered with the settlement cursor
+            └── it should not emit GaugeActivated

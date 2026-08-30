@@ -1,0 +1,118 @@
+UnitMetarouter::Execute
+├── when reached through delegatecall
+│   └── it should revert with DirectCallRequired
+└── given reached through a direct call
+    ├── when the commands outnumber the inputs
+    │   └── it should revert with LengthMismatch
+    ├── when the inputs outnumber the commands
+    │   └── it should revert with LengthMismatch
+    └── given the commands and inputs lengths match
+        ├── when the deadline has passed
+        │   └── it should revert with Expired
+        └── given the deadline has not passed
+            ├── given the batch is active
+            │   ├── when an external caller reenters
+            │   │   └── it should revert with ContractLocked
+            │   ├── when the execution address reenters through a child frame
+            │   │   ├── it should run the child commands without opening a new frame
+            │   │   └── it should clear the transient execution slots at closure
+            │   └── when a child frame command reads the logical sender
+            │       ├── it should resolve _msgSender() to the outer caller
+            │       └── it should clear the transient execution slots at closure
+            └── given the batch is not active
+                ├── when the command list is empty
+                │   ├── it should not dispatch any command
+                │   ├── it should emit BatchExecuted with _sender
+                │   └── it should clear the transient execution slots at closure
+                ├── given the batch tracked a position
+                │   ├── when a tracked position still belongs to the router at closure
+                │   │   └── it should revert with NftNotCleared
+                │   ├── when an in flight position is left unconsumed at closure
+                │   │   └── it should revert with NftNotCleared
+                │   ├── when a tracked position has left the router at closure
+                │   │   ├── it should complete the batch
+                │   │   └── it should clear the nft tracking
+                │   ├── when a tracked position was burned before closure
+                │   │   ├── it should complete the batch
+                │   │   └── it should clear the nft tracking
+                │   └── when the same position is tracked by a later batch in the same transaction
+                │       ├── it should check the same position again at the later batch closure
+                │       └── it should clear the nft tracking
+                └── given the command list is not empty
+                    ├── given a root only command runs on a leaf deployment
+                    │   ├── when the root only command is create stake
+                    │   │   └── it should revert with NotRoot for _commandType
+                    │   └── when the root only command is deposit relay
+                    │       └── it should revert with NotRoot for _commandType
+                    ├── when the leaf only redeem command runs on a root deployment
+                    │   └── it should revert with NotLeaf for _commandType
+                    ├── given a command is unflagged
+                    │   ├── when the command id is undefined above the defined range
+                    │   │   └── it should revert the whole batch with InvalidCommandType for _commandType
+                    │   ├── when the command id is undefined inside a command gap
+                    │   │   └── it should revert the whole batch with InvalidCommandType for _commandType
+                    │   └── when the command reverts
+                    │       └── it should revert the whole batch and bubble the command failure
+                    ├── when a flagged command reverts
+                    │   ├── it should revert only the inner call
+                    │   ├── it should continue the batch with the next command
+                    │   └── it should clear the transient execution slots at closure
+                    ├── when a flagged command id is undefined
+                    │   ├── it should swallow the InvalidCommandType revert and continue the batch
+                    │   └── it should clear the transient execution slots at closure
+                    ├── when a flagged command succeeds
+                    │   ├── it should persist its tracked token into the closure sweep
+                    │   └── it should clear the transient execution slots at closure
+                    └── given the batch completes
+                        ├── given the batch tracked tokens
+                        │   ├── when a tracked token holds a balance
+                        │   │   ├── it should return that _token balance to _sender
+                        │   │   └── it should clear the transient execution slots at closure
+                        │   ├── when a tracked token holds no balance
+                        │   │   ├── it should not transfer that _token
+                        │   │   └── it should clear the transient execution slots at closure
+                        │   ├── when the same token is tracked by a later batch in the same transaction
+                        │   │   ├── it should sweep that _token again at the later batch closure
+                        │   │   └── it should clear the transient execution slots at closure
+                        │   ├── when a tracked native mirror token holds more than the pre batch native
+                        │   │   ├── it should not transfer the token through its entry point
+                        │   │   ├── it should refund the batch portion through the native refund
+                        │   │   ├── it should keep the pre batch native in the router
+                        │   │   └── it should clear the transient execution slots at closure
+                        │   └── when a tracked native mirror token holds only the pre batch native
+                        │       ├── it should not transfer the token through its entry point
+                        │       ├── it should keep the pre batch native in the router
+                        │       └── it should clear the transient execution slots at closure
+                        ├── given the native balance is not spent
+                        │   ├── when native eth was introduced
+                        │   │   ├── it should refund _nativeRefund to _sender
+                        │   │   └── it should clear the transient execution slots at closure
+                        │   ├── when the refund recipient returns native eth
+                        │   │   ├── it should revert with NativeBalanceNotCleared
+                        │   │   └── it should leave no residual native eth
+                        │   ├── when a position arrives while the refund is sent
+                        │   │   └── it should revert with NativeTransferFailed wrapping UnexpectedNftSender
+                        │   ├── when the native refund fails
+                        │   │   └── it should revert with NativeTransferFailed with _data
+                        │   ├── when the native refund fails on a mirror deployment
+                        │   │   └── it should deliver the refund through the mirror entry point
+                        │   ├── when the mirror transfer delivers the rejected refund
+                        │   │   ├── it should close the batch with no native left behind
+                        │   │   └── it should credit the refund through the mirror entry point
+                        │   ├── when the native refund fails on a lower decimals mirror deployment
+                        │   │   └── it should deliver the refund floored to the mirror decimals
+                        │   ├── when the mirror transfer delivers a floored refund on a lower decimals deployment
+                        │   │   ├── it should close the batch leaving the untransferable remainder
+                        │   │   └── it should credit the floored refund through the mirror entry point
+                        │   ├── when the failed refund is below one raw mirror unit
+                        │   │   ├── it should skip the mirror transfer
+                        │   │   ├── it should close the batch leaving the untransferable remainder
+                        │   │   └── it should clear the transient execution slots at closure
+                        │   ├── when the mirror fallback transfer fails
+                        │   │   └── it should revert with NativeTransferFailed with the native data
+                        │   └── when no native eth was introduced
+                        │       ├── it should not refund _sender
+                        │       └── it should clear the transient execution slots at closure
+                        └── when the outer frame settles
+                            ├── it should emit BatchExecuted with _sender
+                            └── it should clear the transient execution slots at closure

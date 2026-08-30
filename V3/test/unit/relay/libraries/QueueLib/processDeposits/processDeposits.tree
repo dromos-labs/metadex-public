@@ -1,0 +1,26 @@
+UnitQueueLib::ProcessDeposits
+├── when the list is empty
+│   └── it should revert with NoPendingDeposits
+└── given the list is not empty
+    ├── it should price each entry at amount times supply over backing
+    ├── it should credit the shares to the recipient stored at request
+    ├── it should report every seeded entry in the result count
+    ├── it should delete each settled entry
+    ├── it should decrease the outstanding count for each settled entry
+    ├── it should accumulate the entry amounts into the backing
+    ├── it should emit a DepositProcessed event per entry
+    ├── it should set the head to zero when the walk reaches the end of the list
+    ├── when the budget is below the outstanding count
+    │   └── it should process only the budgeted entries in request order and leave the head on the first unvisited id
+    ├── when consumed entries sit between live ones
+    │   ├── it should process only the live entries
+    │   └── it should spend budget on each consumed entry it visits
+    ├── when the supply is zero
+    │   └── it should price the entry one to one
+    ├── when the backing is zero and the supply is not
+    │   └── it should price the entry one to one
+    ├── when the ratio carries across a batch
+    │   └── it should price a known two entry example at the simulated ratios
+    └── when the pricing floors to zero shares
+        ├── it should mint zero shares
+        └── it should still admit the amount into the backing

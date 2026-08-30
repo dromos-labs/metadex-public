@@ -1,0 +1,16 @@
+UnitVotingRewardsManager
+├── when the voter is the zero address
+│   └── it should revert with ZeroAddress
+└── when passing valid parameters
+    ├── it exposes the max checkpoint iterations constant
+    ├── it sets the accumulator origin to the deployment timestamp
+    ├── it sets the voter address
+    ├── it sets the gauge address
+    ├── it sets the gaugeFactory address
+    ├── it sets the token registry address
+    ├── it sets the wrapped native address
+    ├── it sets token0 to the first initial reward
+    ├── it sets token1 to the second initial reward
+    ├── it registers the initial reward tokens in the rewards set
+    ├── it sets the incentive count to zero
+    └── it returns a zero-initialized incentive claim state for an unset veNFT and program

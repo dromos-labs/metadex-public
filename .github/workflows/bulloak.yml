@@ -1,12 +1,6 @@
 name: bulloak
 
-on:
-  push:
-    branches: 
-      - main
-      - develop
-  pull_request:
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 jobs:
   check:
@@ -33,12 +27,16 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@v1.16.3
+
       - name: Install Bulloak
         # Install Bulloak if it is not already installed
         # Note if we change the version number, we will need to --force to update cache
-        run: (cargo install bulloak@0.8.1 || true)
+        # TODO: switch back to `cargo install` once https://github.com/alexfertel/bulloak/issues/113 is fixed
+        run: (cargo binstall bulloak@0.8.1 --no-confirm || true)
         id: install-bulloak
 
       - name: Run Bulloak checks
-        run: bulloak check $(find test -type f -name "*.tree")
+        run: find V3/test -type f -name "*.tree" -exec bulloak check {} +
         id: check

@@ -1,0 +1,29 @@
+UnitVotingEscrow::UpgradeToPermanentStake
+├── when the caller is not the owner or approved operator
+│   └── it should revert with ERC721InsufficientApproval
+├── when the stake is already permanent
+│   ├── it should revert with PermanentStake
+│   └── it should not park anything on the voter
+├── when the stake has expired
+│   ├── it should revert with StakeExpired
+│   └── it should not park anything on the voter
+├── when the stake end equals the current timestamp
+│   └── it should revert with StakeExpired
+├── when the stake amount is zero and not expired
+│   ├── it should flip the empty stake to permanent
+│   ├── it should leave the permanent stake balance at zero
+│   └── it should emit the UpgradeToPermanentStake event with zero amount
+├── when the stake is decaying and not expired
+│   ├── it should flip the stake to permanent and zero the end
+│   ├── it should leave the staked amount and supply unchanged
+│   ├── it should bump the permanent stake balance by the staked amount
+│   ├── it should record a user point with permanent equal to the amount
+│   ├── it should advance the global epoch and reflect the permanent balance
+│   ├── it should emit the UpgradeToPermanentStake event
+│   ├── it should emit the MetadataUpdate event
+│   └── it should call parkOnChain0 to reanchor the token shape on the voter
+└── when an approved operator triggers the upgrade
+    ├── it should flip the stake to permanent and zero the end
+    ├── it should leave the staked amount unchanged
+    ├── it should bump the permanent stake balance by the staked amount
+    └── it should emit the UpgradeToPermanentStake event with the token owner

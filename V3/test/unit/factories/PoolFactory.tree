@@ -1,0 +1,252 @@
+UnitPoolFactory::constructor
+├── when the implementation is the zero address
+│   └── it should revert with ZeroAddress
+├── when the pool admin is the zero address
+│   └── it should revert with ZeroAddress
+├── when the pauser is the zero address
+│   └── it should revert with ZeroAddress
+├── when the fee manager is the zero address
+│   └── it should revert with ZeroAddress
+├── when the discount registry manager is the zero address
+│   └── it should revert with ZeroAddress
+├── when the pool tape manager is the zero address
+│   └── it should revert with ZeroAddress
+├── when the factory registry is the zero address
+│   └── it should revert with ZeroAddress
+└── given a freshly deployed factory
+    ├── it should emit SetPoolAdmin
+    ├── it should emit SetPauser
+    ├── it should emit SetFeeManager
+    ├── it should emit SetPoolTapeManager
+    ├── it should emit SetDefaultFee
+    ├── it should set implementation to the variant pool implementation
+    ├── it should set poolAdmin to the provided pool admin
+    ├── it should set pauser to the provided pauser
+    ├── it should set feeManager to the provided fee manager
+    ├── it should set defaultFee to the variant default fee
+    ├── it should set poolTapeManager to the provided pool tape manager
+    └── it should set factoryRegistry to the provided factory registry
+
+UnitPoolFactory::setPoolAdmin
+├── when the caller is not the pool admin
+│   └── it should revert with NotPoolAdmin
+└── when the caller is the pool admin
+    ├── when the new admin is the zero address
+    │   └── it should revert with ZeroAddress
+    └── when the new admin is not the zero address
+        ├── it should update poolAdmin
+        └── it should emit SetPoolAdmin
+
+UnitPoolFactory::setPauser
+├── when the caller is not the pauser
+│   └── it should revert with NotPauser
+└── when the caller is the pauser
+    ├── when the new pauser is the zero address
+    │   └── it should revert with ZeroAddress
+    └── when the new pauser is not the zero address
+        ├── it should update pauser
+        └── it should emit SetPauser
+
+UnitPoolFactory::setPauseState
+├── when the caller is not the pauser
+│   └── it should revert with NotPauser
+└── when the caller is the pauser
+    ├── when the new state is true
+    │   ├── it should update isPaused to true
+    │   └── it should emit SetPauseState
+    └── when the new state is false
+        ├── it should update isPaused to false
+        └── it should emit SetPauseState
+
+UnitPoolFactory::setFeeManager
+├── when the caller is not the fee manager
+│   └── it should revert with NotFeeManager
+└── when the caller is the fee manager
+    ├── when the new fee manager is the zero address
+    │   └── it should revert with ZeroAddress
+    └── when the new fee manager is not the zero address
+        ├── it should update feeManager
+        └── it should emit SetFeeManager
+
+UnitPoolFactory::setFeeModule
+├── when the caller is not the fee manager
+│   └── it should revert with NotFeeManager
+└── when the caller is the fee manager
+    ├── when the new fee module is the zero address
+    │   └── it should revert with ZeroAddress
+    └── when the new fee module is not the zero address
+        ├── when the gas limit is zero
+        │   └── it should revert with ZeroGasLimit
+        └── when the gas limit is gt zero
+            ├── when the new fee module is bound to a different factory
+            │   └── it should revert with InvalidFeeModule
+            └── when the new fee module is bound to this factory
+                ├── it should update feeModule
+                ├── it should update feeModuleGasLimit
+                └── it should emit SetFeeModule
+
+UnitPoolFactory::setDefaultFee
+├── when the caller is not the fee manager
+│   └── it should revert with NotFeeManager
+└── when the caller is the fee manager
+    ├── when the new fee is zero
+    │   └── it should revert with ZeroFee
+    └── when the new fee is greater than zero
+        ├── when the new fee is greater than the max fee
+        │   └── it should revert with FeeTooHigh
+        └── when the new fee is less than the max fee
+            ├── it should update defaultFee
+            └── it should emit SetDefaultFee
+
+UnitPoolFactory::createPool
+├── when tokenA equals tokenB
+│   └── it should revert with SameAddress
+└── when tokenA differs from tokenB
+    ├── when the lower token is the zero address
+    │   └── it should revert with ZeroAddress
+    └── when the lower token is not the zero address
+        ├── when the pool already exists for the pair
+        │   └── it should revert with PoolAlreadyExists
+        └── when the pair has no pool yet
+            ├── it should deploy a clone at the predicted deterministic address
+            ├── it should initialize the pool with the sorted token pair
+            ├── it should store the pool in the mapping in both directions
+            ├── it should append the pool to allPools
+            ├── it should mark the pool as a valid pool in _isPools mapping
+            ├── it should push pool keyed by tokenA to poolByTokenIndex
+            ├── it should push pool keyed by tokenB to poolByTokenIndex
+            ├── it should push pool and timestamp to poolsIndex
+            ├── it should add tokenA to tokenIndex
+            ├── it should add tokenB to tokenIndex
+            ├── it should register the pool as a target in the factory registry
+            ├── it should emit PoolCreated
+            └── when the factory registry reverts the registration
+                └── it should revert
+
+UnitPoolFactory::getBaseFee
+├── when no fee module is set
+│   └── it should return the default fee
+└── when a fee module is set
+    ├── when there isn't enough gas left for the external call
+    │   └── it should revert with InsufficientGasForCall
+    └── when there is enough gas left for the external call
+        ├── when the fee module call reverts
+        │   └── it should return the default fee
+        ├── when the fee module returns a fee above the custom cap
+        │   └── it should return the default fee
+        └── when the fee module returns a fee within the custom cap
+            └── it should return the custom fee
+
+UnitPoolFactory::setDiscountRegistryManager
+├── when the caller is not the discount registry manager
+│   └── it should revert with NotDiscountRegistryManager
+└── when the caller is the discount registry manager
+    ├── when the new discount registry manager is the zero address
+    │   └── it should revert with ZeroAddress
+    └── when the new discount registry manager is not the zero address
+        ├── it should update discountRegistryManager
+        └── it should emit SetDiscountRegistryManager
+
+UnitPoolFactory::setDiscountRegistry
+├── when the caller is not the discount registry manager
+│   └── it should revert with NotDiscountRegistryManager
+└── when the caller is the discount registry manager
+    ├── when the new discount registry is the zero address
+    │   └── it should revert with ZeroAddress
+    └── when the new discount registry is not the zero address
+        ├── it should update discountRegistry
+        └── it should emit SetDiscountRegistry
+
+UnitPoolFactory::setPoolTapeManager
+├── when the caller is not the pool tape manager
+│   └── it should revert with NotPoolTapeManager
+└── when the caller is the pool tape manager
+    ├── when the new manager is the zero address
+    │   └── it should revert with ZeroAddress
+    └── when the new manager is not the zero address
+        ├── it should update poolTapeManager
+        └── it should emit SetPoolTapeManager
+
+UnitPoolFactory::setPoolTape
+├── when the caller is not the pool tape manager
+│   └── it should revert with NotPoolTapeManager
+└── when the caller is the pool tape manager
+    ├── when the gas limit is zero
+    │   └── it should revert with ZeroGasLimit
+    └── when the gas limit is gt zero
+        ├── it should update poolTape
+        ├── it should update poolTapeGasLimit
+        └── it should emit SetPoolTape
+
+UnitPoolFactory::recordPoolTape
+├── when no pool tape is set
+│   └── it should not record the swap data into a pool tape
+└── when a pool tape is set
+    ├── when the caller is not a pool
+    │   └── it should not forward to the pool tape
+    └── when the caller is a pool
+        ├── when there isn't enough gas left for the external call
+        │   └── it should revert with InsufficientGasForCall
+        └── when there is enough gas left for the external call
+            └── it should forward the pool's record data to the pool tape
+
+UnitPoolFactory::setMevTaxModule
+├── when the caller is not the fee manager
+│   └── it should revert with NotFeeManager
+└── when the caller is the fee manager
+    ├── when the gas limit is zero
+    │   └── it should revert with ZeroGasLimit
+    └── when the gas limit is gt zero
+        ├── when the new mev tax module is the zero address
+        │   ├── it should clear mevTaxModule
+        │   └── it should emit SetMevTaxModule
+        └── when the new mev tax module is not the zero address
+            ├── it should update mevTaxModule
+            ├── it should update mevTaxModuleGasLimit
+            └── it should emit SetMevTaxModule
+
+UnitPoolFactory::getFee
+├── when no mev tax module is set
+│   └── it should return the base fee with zero mev fee and false toxic
+└── when a mev tax module is set
+    ├── when there isn't enough gas left for the external call
+    │   └── it should revert with InsufficientGasForCall
+    └── when there is enough gas left for the external call
+        ├── it should forward the pool to the module
+        ├── when the module call fails
+        │   └── it should return the base fee with zero mev fee and false toxic
+        └── when the module call succeeds
+            ├── when the module returns a tax above the maximum encodable tax
+            │   └── it should return the base fee with zero mev fee and false toxic
+            ├── when the module returns a valid tax and toxic flag
+            │   ├── it should return the base fee plus the mev fee in bps
+            │   ├── it should return the mev fee in bps
+            │   └── it should return the toxic boolean
+            └── when fee plus mev is higher than MAX_FEE
+                ├── it should return MAX_FEE
+                └── it should return the mev fee clamped to the remainder
+
+UnitPoolFactory::setExactOutFeeQuoter
+├── when the caller is not the fee manager
+│   └── it should revert with NotFeeManager
+└── when the caller is the fee manager
+    ├── when the new quoter is the zero address
+    │   └── it should revert with ZeroAddress
+    └── when the new quoter is not the zero address
+        ├── when the new quoter is bound to a different factory
+        │   └── it should revert with InvalidExactOutFeeQuoter
+        └── when the new quoter is bound to this factory
+            ├── it should update exactOutFeeQuoter
+            └── it should emit SetExactOutFeeQuoter
+
+UnitPoolFactory::getFeeForAmountIn
+├── when no exact out fee quoter is set
+│   └── it should revert with NoExactOutFeeQuoter
+└── when an exact out fee quoter is set
+    ├── when the quoter reverts
+    │   └── it revert
+    ├── when the quoter returns a fee above the max fee
+    │   └── it should revert with FeeTooHigh
+    └── when the quoter returns a fee within the max fee
+        ├── it should forward the pool caller amounts and reserves to the quoter
+        └── it should return the quoted fee

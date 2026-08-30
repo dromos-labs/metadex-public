@@ -1,0 +1,6 @@
+UnitVotingEscrow::TotalVotingPowerAt
+├── when the timestamp is after the current block
+│   └── it should revert with FutureLookup
+└── when the global curve is seeded
+    ├── it should return the decayed bias plus permanent balance at the timestamp
+    └── it should match getPastTotalSupply at the timestamp

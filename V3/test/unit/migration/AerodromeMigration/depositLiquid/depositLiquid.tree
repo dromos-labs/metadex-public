@@ -1,0 +1,33 @@
+UnitAerodromeMigration::DepositLiquid
+├── when the migration is paused
+│   └── it should revert with EnforcedPause
+└── when the migration is not paused
+    ├── when native tokens are sent
+    │   └── it should revert with UnexpectedValue
+    └── when native tokens are not sent
+        ├── when the migration has not opened
+        │   └── it should revert with MigrationNotOpen
+        └── when the migration has opened
+            ├── when the deposited amount is zero
+            │   └── it should revert with ZeroAmount
+            └── when the deposited amount is not zero
+                ├── when the recipient is the zero address
+                │   └── it should revert with ZeroAddress
+                └── when the recipient is not the zero address
+                    ├── when the conversion exceeds the migration budget
+                    │   └── it should revert with BudgetExhausted
+                    └── when the conversion fits within the migration budget
+                        ├── when the migration parameters are known
+                        │   ├── it should increase the paid basis by the conversion output
+                        │   ├── it should transfer the deposited amount from the caller
+                        │   ├── it should approve the v2 voting escrow to spend the deposited amount
+                        │   ├── it should increase the migration veNFT amount by the deposited amount
+                        │   ├── it should transfer the conversion output to the recipient as liquid tokens
+                        │   └── it should emit the LiquidMigrated event
+                        └── when the migration parameters vary
+                            ├── it should increase the paid basis by the conversion output
+                            ├── it should transfer the deposited amount from the caller
+                            ├── it should approve the v2 voting escrow to spend the deposited amount
+                            ├── it should increase the migration veNFT amount by the deposited amount
+                            ├── it should transfer the conversion output to the recipient as liquid tokens
+                            └── it should emit the LiquidMigrated event

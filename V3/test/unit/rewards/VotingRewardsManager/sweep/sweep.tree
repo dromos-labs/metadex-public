@@ -1,0 +1,96 @@
+UnitVotingRewardsManager::Sweep
+├── when the program id is zero
+│   └── it should revert with ProgramNotFound
+├── when the program id exceeds the incentive count
+│   └── it should revert with ProgramNotFound
+├── when the caller is not the program creator
+│   └── it should revert with NotCreator
+├── when the program has not ended
+│   └── it should revert with ProgramNotEnded
+├── when a sweep exceeds the remaining program balance
+│   └── it should revert with InsufficientProgramBalance
+└── when the program can be swept
+    ├── given only the initialization checkpoint exists
+    │   ├── it should credit the full program window
+    │   ├── it should transfer the swept amount to the creator
+    │   ├── it should emit IncentiveSwept
+    │   ├── it should record the swept amount
+    │   └── it should reduce the remaining program balance to zero
+    ├── given a zero voter prefix precedes the first voter checkpoint
+    │   ├── it should credit the zero voter prefix
+    │   ├── it should transfer the swept amount to the creator
+    │   └── it should reduce the remaining program balance by the swept amount
+    ├── given the history is stale across the program end
+    │   ├── it should advance the global history before measuring
+    │   └── it should credit the zero voter intervals up to the program end
+    ├── given history cannot reach the program end within the iteration limit
+    │   ├── it should revert with StaleCheckpointHistory
+    │   └── it should sweep the complete program window after history is advanced
+    ├── given the program is longer than the checkpoint iteration limit
+    │   ├── it should revert with StaleCheckpointHistory until the program end is reachable
+    │   ├── it should transfer the complete zero voter reward to the creator
+    │   ├── it should conserve the deposited amount across swept and remaining balances
+    │   └── it should transfer nothing on a repeat sweep
+    ├── given the program end is reachable but the current timestamp is not
+    │   ├── it should advance global history through the program end
+    │   ├── it should not query the gauge for pending fees
+    │   ├── it should preserve fee accounting
+    │   └── it should sweep the complete program window
+    ├── given stale history across the program end and a same timestamp checkpoint with pending fees
+    │   ├── it should report no earned fees for the arriving allocation
+    │   ├── it should notify fees before the no user global point
+    │   └── it should keep the credited fee snapshot on the overwritten point
+    ├── given stale history across the program end and a same timestamp checkpoint with pending fees when the arriving allocation claims fees
+    │   └── it should transfer no fees to the arriving allocation
+    ├── given a permanent voter is active for the whole window
+    │   ├── it should not credit any amount
+    │   ├── it should not transfer or emit
+    │   └── it should leave the swept amount unchanged
+    ├── given a non permanent voter decays to zero mid program
+    │   ├── it should credit only the interval that is zero at its right aligned reference
+    │   ├── it should transfer the swept amount to the creator
+    │   └── it should emit IncentiveSwept
+    ├── given a permanent voter resets mid program
+    │   ├── it should credit the interval after the reset
+    │   └── it should transfer the swept amount to the creator
+    ├── given a checkpoint sits exactly on the program end
+    │   ├── it should keep zero supply accounting inside the program window
+    │   └── it should record the cumulative swept amount
+    ├── given the program was already fully swept
+    │   ├── it should not credit any amount on a repeat sweep
+    │   ├── it should keep the swept amount unchanged
+    │   └── it should leave the remaining program balance unchanged
+    ├── given a voter claims and the creator sweeps the same program
+    │   ├── it should not pay out more than the deposited amount
+    │   └── it should account for the deposited amount across claim, sweep, and remaining balance
+    ├── given the creator sweeps and a voter claims the same program
+    │   ├── it should not pay out more than the deposited amount
+    │   └── it should account for the deposited amount across claim, sweep, and remaining balance
+    ├── given variable program timing and stake duration
+    │   └── it should conserve the deposited amount across claim, sweep, and remaining balance
+    ├── given a known rounded down example
+    │   ├── it should transfer the rounded down amount to the creator
+    │   └── it should emit IncentiveSwept with the rounded down amount
+    ├── given a checkpoint precedes a non aligned start with zero supply at the right aligned reference
+    │   └── it should credit the clipped first interval to the creator
+    ├── given a checkpoint precedes a non aligned start with positive supply at the right aligned reference
+    │   ├── it should not sweep the clipped first interval
+    │   └── it should not pay out more than the deposited amount
+    ├── given program start is inside a zero priced interval with positive start supply
+    │   └── it should not sweep the pre program slice
+    ├── given leading and trailing partials have no aligned interior
+    │   ├── it should skip the aligned prefix delta
+    │   ├── it should sweep only the trailing partial
+    │   └── it should conserve the deposited amount across claim and sweep
+    ├── given a trailing partial has supply at the right aligned reference
+    │   ├── it should not sweep the trailing partial
+    │   └── it should leave the full amount claimable by the voter
+    ├── given a trailing partial has zero supply at the right aligned reference
+    │   ├── it should sweep only the trailing partial
+    │   └── it should leave the right aligned positive prefix claimable by the voter
+    ├── given the program end is clipped before the next checkpoint
+    │   ├── it should sweep only through the program end
+    │   └── it should conserve the deposited amount across claim and sweep
+    └── given the swept reward is the wrapped native
+        ├── it should transfer the wrapped native as an ERC20 token
+        └── it should not send native token to the creator

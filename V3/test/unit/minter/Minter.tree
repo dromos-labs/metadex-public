@@ -1,0 +1,366 @@
+UnitMinter::constructor
+├── when the token is the zero address
+│   └── it should revert with ZeroAddress
+├── when the voter is the zero address
+│   └── it should revert with ZeroAddress
+├── when the splitter is the zero address
+│   └── it should revert with ZeroAddress
+├── when the operator is the zero address
+│   └── it should revert with ZeroAddress
+├── when the initial base rate is zero
+│   └── it should revert with InvalidBaseRate
+├── when the initial base rate exceeds the maximum base rate
+│   └── it should revert with BaseRateTooHigh
+├── when the max base rate change cap is zero
+│   └── it should revert with MaxBaseRateChangeCapTooLow
+├── when the max base rate change cap exceeds the weekly maximum rate change
+│   └── it should revert with MaxBaseRateChangeCapTooHigh
+├── when the max base rate change exceeds its cap
+│   └── it should revert with MaxBaseRateChangeTooHigh
+├── when the min cooldown is zero
+│   └── it should revert with MinCooldownTooLow
+├── when the min cooldown exceeds the max cooldown
+│   └── it should revert with InvalidCooldownRange
+├── when the base rate update cooldown is below the minimum cooldown
+│   └── it should revert with CooldownTooLow
+├── when the base rate update cooldown exceeds the maximum cooldown
+│   └── it should revert with CooldownTooHigh
+├── when the rate controls exceed the discrete cooldown derived maximum
+│   └── it should revert with RateControlsTooAggressive
+├── when the max band floor cap is zero
+│   └── it should revert with BandFloorCapTooLow
+├── when the max band floor cap reaches the maximum pips
+│   └── it should revert with BandFloorCapTooWide
+├── when the max band ceiling cap is zero
+│   └── it should revert with BandCeilingCapTooLow
+├── when the max band ceiling exceeds the maximum pips
+│   └── it should revert with BandCeilingCapTooWide
+├── when the splitter is the minter address
+│   └── it should revert with InvalidSplitter
+├── when the team rate exceeds the maximum team rate
+│   └── it should revert with TeamRateTooHigh
+├── when the initial next base rate update overflows
+│   └── it should revert with SafeCastOverflowedUintDowncast
+├── when migration open is zero
+│   └── it should revert with InvalidActivationTimestamp
+├── when migration open is in the past
+│   └── it should revert with InvalidActivationTimestamp
+├── when migration open equals current timestamp
+│   └── it should revert with InvalidActivationTimestamp
+├── when migration open is not epoch aligned
+│   └── it should revert with InvalidActivationTimestamp
+└── when all inputs are valid
+    ├── it should set the immutable dependencies
+    ├── it should set ACTIVATION_TIMESTAMP to one week after migrationOpen
+    ├── it should set the immutable configuration caps
+    ├── it should leave dynamicRate at zero
+    ├── it should set lastCapUpdate to ACTIVATION TIMESTAMP
+    ├── it should set the mutable configuration
+    ├── it should leave fed unset
+    ├── it should leave the rate band unset
+    └── it should leave the dynamic rate module unset
+
+UnitMinter::MAX_BASE_RATE
+└── it should expose the exact maximum base rate that keeps Voter arithmetic within uint256
+
+UnitMinter::mint
+├── when the caller is not the voter
+│   └── it should revert with CallerNotVoter
+├── when the amount is below the minimum mint amount
+│   └── it should revert with AmountTooLow
+├── when the mint would exceed the emissions cap
+│   └── it should revert with CapExceeded
+├── when the recipient amount fits but the recipient and team total exceeds the emissions cap
+│   ├── it should mint _amount to _recipient
+│   ├── it should mint _splitterShare to SPLITTER
+│   └── it should increase emissionsMinted by _amount
+├── when the cumulative total exceeds the emissions cap and the amount alone fits
+│   └── it should revert with CapExceeded
+├── when a second mint follows an earlier mint
+│   └── it should increase emissionsMinted by both amounts
+└── given the accrual segment is live
+    ├── when the team rate is zero
+    │   ├── it should mint _amount to _recipient
+    │   ├── it should not mint zero _splitterShare to SPLITTER
+    │   ├── it should increase emissionsMinted by _amount
+    │   ├── it should accrue the emissions cap at the outgoing effective rate
+    │   └── it should emit Minted with _recipient, _amount and zero _splitterShare
+    ├── when the team rate is not zero
+    │   ├── it should mint _amount to _recipient
+    │   ├── it should mint _splitterShare to SPLITTER
+    │   ├── it should increase emissionsMinted by _amount
+    │   ├── it should accrue the emissions cap at the outgoing effective rate
+    │   └── it should emit Minted with _recipient, _amount and _splitterShare
+    └── when the team rate is not zero and the splitter share has a remainder
+        ├── it should mint _amount to _recipient
+        ├── it should mint the rounded down _splitterShare to SPLITTER
+        ├── it should accrue the emissions cap at the outgoing effective rate
+        └── it should emit Minted with _recipient, _amount and the rounded down _splitterShare
+
+UnitMinter::setOperator
+├── when the caller is not the governor
+│   └── it should revert with CallerNotGovernor
+├── when the operator is the zero address
+│   └── it should revert with ZeroAddress
+├── when the operator equals fed
+│   └── it should revert with OperatorFEDCollision
+└── when the operator is valid
+    ├── it should update operator with _operator
+    └── it should emit OperatorSet with _operator
+
+UnitMinter::setFED
+├── when the caller is not the governor
+│   └── it should revert with CallerNotGovernor
+├── when fed equals operator
+│   └── it should revert with OperatorFEDCollision
+└── when fed is valid
+    ├── it should update fed with _fed
+    └── it should emit FEDSet with _fed
+
+UnitMinter::setMaxBaseRateChangePips
+├── when the caller is not the governor
+│   ├── it should revert with CallerNotGovernor
+│   └── it should leave nextBaseRateUpdate unchanged
+├── when the max base rate change pips exceeds the immutable cap
+│   ├── it should revert with MaxBaseRateChangeTooHigh
+│   └── it should leave nextBaseRateUpdate unchanged
+├── when the max base rate change pips exceeds the discrete cooldown derived maximum
+│   ├── it should revert with RateControlsTooAggressive
+│   └── it should leave nextBaseRateUpdate unchanged
+├── when the transition delay overflows
+│   ├── it should revert with SafeCastOverflowedUintDowncast
+│   ├── it should leave maxBaseRateChangePips unchanged
+│   └── it should leave nextBaseRateUpdate unchanged
+└── when the max base rate change pips is valid
+    ├── when the minimum transition deadline is later than next base rate update
+    │   ├── it should update maxBaseRateChangePips with _maxBaseRateChangePips
+    │   ├── it should update nextBaseRateUpdate with block.timestamp plus one week
+    │   └── it should emit MaxBaseRateChangePipsSet with _maxBaseRateChangePips
+    ├── when the minimum transition deadline is not later than next base rate update
+    │   ├── it should update maxBaseRateChangePips with _maxBaseRateChangePips
+    │   ├── it should leave nextBaseRateUpdate unchanged
+    │   └── it should emit MaxBaseRateChangePipsSet with _maxBaseRateChangePips
+    ├── when using a six day cooldown at the discrete derived maximum
+    │   ├── it should update maxBaseRateChangePips with _maxBaseRateChangePips
+    │   ├── it should update nextBaseRateUpdate with block.timestamp plus one week
+    │   └── it should emit MaxBaseRateChangePipsSet with _maxBaseRateChangePips
+    ├── when the cooldown divides the week at the discrete derived maximum
+    │   ├── it should update maxBaseRateChangePips with _maxBaseRateChangePips
+    │   ├── it should update nextBaseRateUpdate with block.timestamp plus one week
+    │   └── it should emit MaxBaseRateChangePipsSet with _maxBaseRateChangePips
+    ├── when the value equals the current value
+    │   ├── it should keep maxBaseRateChangePips unchanged
+    │   ├── it should update nextBaseRateUpdate with block.timestamp plus one week
+    │   └── it should emit MaxBaseRateChangePipsSet with _maxBaseRateChangePips
+    └── when next base rate update equals the transition delay
+        ├── it should update maxBaseRateChangePips with _maxBaseRateChangePips
+        ├── it should leave nextBaseRateUpdate unchanged
+        └── it should emit MaxBaseRateChangePipsSet with _maxBaseRateChangePips
+
+UnitMinter::setBaseRateUpdateCooldown
+├── when the caller is not the governor
+│   ├── it should revert with CallerNotGovernor
+│   └── it should leave nextBaseRateUpdate unchanged
+├── when the base rate update cooldown is below the minimum cooldown
+│   ├── it should revert with CooldownTooLow
+│   └── it should leave nextBaseRateUpdate unchanged
+├── when the base rate update cooldown exceeds the maximum cooldown
+│   ├── it should revert with CooldownTooHigh
+│   └── it should leave nextBaseRateUpdate unchanged
+├── when the current max base rate change exceeds the discrete cooldown derived maximum
+│   ├── it should revert with RateControlsTooAggressive
+│   └── it should leave nextBaseRateUpdate unchanged
+├── when the transition delay overflows
+│   ├── it should revert with SafeCastOverflowedUintDowncast
+│   ├── it should leave baseRateUpdateCooldown unchanged
+│   └── it should leave nextBaseRateUpdate unchanged
+└── when the base rate update cooldown is valid
+    ├── when the minimum transition deadline is later than next base rate update
+    │   ├── it should update baseRateUpdateCooldown with _baseRateUpdateCooldown
+    │   ├── it should update nextBaseRateUpdate with block.timestamp plus one week
+    │   └── it should emit BaseRateUpdateCooldownSet with _baseRateUpdateCooldown
+    ├── when the minimum transition deadline is not later than next base rate update
+    │   ├── it should update baseRateUpdateCooldown with _baseRateUpdateCooldown
+    │   ├── it should leave nextBaseRateUpdate unchanged
+    │   └── it should emit BaseRateUpdateCooldownSet with _baseRateUpdateCooldown
+    ├── when the value equals the current value
+    │   ├── it should keep baseRateUpdateCooldown unchanged
+    │   ├── it should update nextBaseRateUpdate with block.timestamp plus one week
+    │   └── it should emit BaseRateUpdateCooldownSet with _baseRateUpdateCooldown
+    └── when next base rate update is after the transition delay
+        ├── it should update baseRateUpdateCooldown with _baseRateUpdateCooldown
+        ├── it should leave nextBaseRateUpdate unchanged
+        └── it should emit BaseRateUpdateCooldownSet with _baseRateUpdateCooldown
+
+UnitMinter::rateControlSetters
+├── when both setters are called in the same block
+│   ├── it should update baseRateUpdateCooldown with the new cooldown
+│   ├── it should update maxBaseRateChangePips with the new max
+│   └── it should set nextBaseRateUpdate to block.timestamp plus one week exactly once
+└── when changing from six day controls to seven day controls
+    ├── it should update baseRateUpdateCooldown with the seven day cooldown
+    ├── it should update maxBaseRateChangePips with the weekly maximum
+    ├── it should update nextBaseRateUpdate with the transition time plus one week
+    ├── it should keep setBaseRate blocked at the stale six day deadline
+    └── it should allow setBaseRate at the extended one week deadline
+
+UnitMinter::setTeamRate
+├── when the caller is not the governor
+│   └── it should revert with CallerNotGovernor
+├── when the team rate exceeds the maximum team rate
+│   └── it should revert with TeamRateTooHigh
+└── when the team rate is valid
+    ├── it should update teamRate with _teamRate
+    └── it should emit TeamRateSet with _teamRate
+
+UnitMinter::setRateBand
+├── when the caller is not the governor
+│   └── it should revert with CallerNotGovernor
+├── when the floor pips exceeds the immutable cap
+│   └── it should revert with BandFloorTooWide
+├── when the ceiling pips exceeds the immutable cap
+│   └── it should revert with BandCeilingTooWide
+├── when the rate band is set before activation
+│   ├── it should update bandFloorPips with _floorPips
+│   ├── it should update bandCeilingPips with _ceilingPips
+│   ├── it should emit RateBandSet with _floorPips and _ceilingPips
+│   └── it should leave the emissions cap at zero
+├── when the rate band is set after activation
+│   ├── it should update bandFloorPips with _floorPips
+│   ├── it should update bandCeilingPips with _ceilingPips
+│   ├── it should emit RateBandSet with _floorPips and _ceilingPips
+│   ├── it should accrue the emissions cap at the outgoing effective rate
+│   └── it should advance lastCapUpdate to the current timestamp
+└── when accruing at the maximum base rate and the widest band over the full timestamp horizon
+    ├── it should expose twice the maximum base rate as the effective rate
+    └── it should accrue the emissions cap without overflowing
+
+UnitMinter::setBaseRate
+├── when the caller is not the operator
+│   └── it should revert with CallerNotOperator
+├── when the new rate is zero
+│   └── it should revert with InvalidBaseRate
+├── when the new rate exceeds the maximum base rate
+│   └── it should revert with BaseRateTooHigh
+├── when the cooldown is active
+│   └── it should revert with CooldownActive
+├── when the new rate equals the current base rate
+│   └── it should revert with SameRate
+├── when the rate change above base exceeds the max change
+│   └── it should revert with RateChangeExceedsMax
+├── when using a concrete rate above the maximum change
+│   └── it should revert with RateChangeExceedsMax
+├── when using a concrete active max base rate change
+│   └── it should revert with RateChangeExceedsMax
+├── when the rate change below base exceeds the max change
+│   └── it should revert with RateChangeExceedsMax
+├── when using a concrete rate below the maximum change
+│   └── it should revert with RateChangeExceedsMax
+├── when the rate change equals the rounded up max change with a remainder
+│   ├── it should update baseRate with _newRate
+│   ├── it should update nextBaseRateUpdate with block.timestamp + baseRateUpdateCooldown
+│   └── it should emit BaseRateSet with _newRate
+├── when the rate change exceeds the rounded up max change with a remainder
+│   └── it should revert with RateChangeExceedsMax
+├── when the rate change bound is at the lowest possible values
+│   └── it should allow a minimum rate change of one
+├── when the next base rate update overflows
+│   └── it should revert with SafeCastOverflowedUintDowncast
+├── when timestamp is before activation and rate change is valid
+│   ├── it should update baseRate with _newRate
+│   ├── it should update nextBaseRateUpdate with block.timestamp + baseRateUpdateCooldown
+│   └── it should emit BaseRateSet with _newRate
+└── given the accrual segment is live
+    ├── when the rate change above base is valid
+    │   ├── it should update baseRate with _newRate
+    │   ├── it should update nextBaseRateUpdate with block.timestamp + baseRateUpdateCooldown
+    │   ├── it should emit BaseRateSet with _newRate
+    │   ├── it should accrue the emissions cap at the outgoing effective rate
+    │   └── it should advance lastCapUpdate to the current timestamp
+    └── when the rate change below base is valid
+        ├── it should update baseRate with _newRate
+        ├── it should update nextBaseRateUpdate with block.timestamp + baseRateUpdateCooldown
+        ├── it should emit BaseRateSet with _newRate
+        ├── it should accrue the emissions cap at the outgoing effective rate
+        └── it should advance lastCapUpdate to the current timestamp
+
+UnitMinter::setDynamicRateModule
+├── when the caller is not fed
+│   └── it should revert with CallerNotFED
+├── when the caller is fed and the new module is nonzero
+│   ├── it should update dynamicRateModule with _module
+│   ├── it should preserve the current dynamic rate target
+│   └── it should emit DynamicRateModuleSet with _module
+├── when the caller is fed and the new module is zero and a dynamic target exists
+│   ├── it should accrue the emissions cap at the outgoing effective rate
+│   ├── it should advance lastCapUpdate to the current timestamp
+│   ├── it should clear the dynamic rate target
+│   ├── it should return the base rate
+│   ├── it should clear the dynamic rate module
+│   ├── it should emit DynamicRateSet with zero
+│   └── it should emit DynamicRateModuleSet with zero
+└── when the caller is fed and the new module is zero and no dynamic target exists
+    ├── it should not accrue the emissions cap
+    ├── it should leave lastCapUpdate at ACTIVATION TIMESTAMP
+    ├── it should not emit DynamicRateSet
+    ├── it should clear the dynamic rate module
+    └── it should emit DynamicRateModuleSet with zero
+
+UnitMinter::setDynamicRate
+├── when the caller is not the dynamic rate module
+│   └── it should revert with CallerNotDynamicRateModule
+└── given the caller is the dynamic rate module
+    ├── when set before activation
+    │   ├── it should store the rate
+    │   ├── it should emit DynamicRateSet with the rate
+    │   └── it should leave the emissions cap at zero
+    ├── when set at exactly activation
+    │   ├── it should store the rate
+    │   ├── it should leave the emissions cap at zero
+    │   └── it should leave lastCapUpdate at ACTIVATION TIMESTAMP
+    └── given the accrual segment is live
+        ├── when set after activation
+        │   ├── it should store the rate
+        │   ├── it should emit DynamicRateSet with the rate
+        │   ├── it should accrue the emissions cap at the effective rate
+        │   └── it should advance lastCapUpdate to the current timestamp
+        └── when a second push follows an earlier segment
+            ├── it should accrue the sum of both segments at their own rates
+            └── it should advance lastCapUpdate to the current timestamp
+
+UnitMinter::emissionRate
+├── when the timestamp is before activation
+│   └── it should return zero
+├── when the timestamp equals activation
+│   └── it should return the base rate
+├── when the dynamic rate is zero and the rate band is set
+│   └── it should return the base rate
+├── when the rate band is unset
+│   └── it should return the base rate
+├── when the dynamic rate is below the floor
+│   └── it should return the floor rate
+├── when the dynamic rate is above the ceiling
+│   └── it should return the ceiling rate
+├── when widening the ceiling band with an unchanged target
+│   ├── it should return the narrow ceiling rate before the widening
+│   └── it should return the wider ceiling rate after the widening
+├── when the dynamic rate is below the base and above the floor
+│   └── it should return the dynamic rate
+├── when the dynamic rate is above the base and below the ceiling
+│   └── it should return the dynamic rate
+├── when using a concrete rate below the floor
+│   └── it should return the floor rate
+├── when the dynamic rate is below the base and the floor width rounds down to zero
+│   └── it should return the base rate
+├── when the dynamic rate is above the base and the ceiling width rounds down to zero
+│   └── it should return the base rate
+├── when the dynamic rate is below the floor and the floor width has a remainder
+│   └── it should return the floor rate
+├── when using a concrete rate below the base and above the floor
+│   └── it should return the dynamic rate
+├── when using a concrete rate above the base and below the ceiling
+│   └── it should return the dynamic rate
+├── when using a concrete rate above the ceiling
+│   └── it should return the ceiling rate
+└── when the dynamic rate is above the ceiling and the ceiling width has a remainder
+    └── it should return the ceiling rate

@@ -1,0 +1,23 @@
+UnitPoolTape::IncreaseObservationCardinalityNext
+├── when the buffer cardinality eq zero
+│   ├── when the new cardinalityNext is lt or eq to one
+│   │   ├── it populates slot zero with the current timestamp
+│   │   ├── it sets cardinality to one
+│   │   ├── it sets cardinalityNext to one
+│   │   └── it emits PoolObservationBufferInitialized
+│   └── when the new cardinalityNext is gt one
+│       ├── it populates slot zero with the current timestamp
+│       ├── it sets cardinality to one
+│       ├── it emits PoolObservationBufferInitialized
+│       ├── it pre warms every storage slot of each new entry
+│       ├── it writes the new entry slots and the initialization and cardinalityNext slots
+│       ├── it raises cardinalityNext to the new target
+│       └── it emits ObservationCardinalityIncreased
+└── when the buffer cardinality gt zero
+    ├── when the new cardinalityNext is lt or eq to the current cardinalityNext
+    │   └── it leaves cardinalityNext unchanged
+    └── when the new cardinalityNext is gt the current cardinalityNext
+        ├── it pre warms every storage slot of each new entry
+        ├── it writes only the new entry slots and the cardinalityNext slot
+        ├── it raises cardinalityNext to the new target
+        └── it emits ObservationCardinalityIncreased

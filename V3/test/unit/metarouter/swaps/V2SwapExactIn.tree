@@ -1,0 +1,52 @@
+UnitSwaps::V2SwapExactIn
+├── when a user payer selects a proportional spend
+│   └── it should revert with InvalidSpendMode
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+└── given the recipient is valid
+    ├── when the pool path is empty
+    │   └── it should revert with InvalidPath
+    ├── when a pool is not registered
+    │   └── it should revert with InvalidPool for the pool
+    ├── when a factory does not recognize the pool
+    │   └── it should revert with InvalidPool for the pool
+    ├── when a pool reports an unsupported pool type
+    │   └── it should revert with InvalidPool for the pool
+    └── given every pool is validated
+        ├── when the input token does not belong to the pool
+        │   └── it should revert with InvalidPath
+        ├── when the route contains a stable pool
+        │   └── it should execute the swap route
+        ├── when the pool balance is below the input reserve
+        │   └── it should revert with InvalidReserves for the pool
+        ├── when the recipient output balance decreases
+        │   └── it should revert with an arithmetic panic
+        ├── when the output token is revisited and an intermediate pool is the recipient
+        │   └── it should revert based on the final hop output
+        ├── when the final output is below the minimum
+        │   └── it should revert with TooLittleReceived
+        ├── when the final hop quote is below the minimum
+        │   ├── it should revert with TooLittleReceived from the quoted output
+        │   ├── it should not execute the final swap
+        │   └── it should not read the recipient balance
+        └── given the final output meets the minimum
+            ├── it should quote every hop with the total fee from the amount actually received by that pool
+            ├── when the first pool receives less than the requested input
+            │   └── it should quote from the received balance delta
+            ├── when the payer is the execution owner
+            │   └── it should pay the first pool directly from the execution owner
+            ├── when the payer is the execution address
+            │   ├── it should track the input token for the closure sweep
+            │   └── it should pay the first pool from custody
+            ├── when the recipient is the execution address
+            │   └── it should track and return the output at batch closure
+            ├── when the input is token one
+            │   └── it should request token zero output
+            ├── when the path contains multiple pools
+            │   └── it should forward each actual pool output into the next hop
+            ├── when the hop directions differ
+            │   └── it should request each hop output on its own side
+            ├── when the output equals the minimum
+            │   └── it should complete the swap at the exact bound
+            └── when the pool receives zero input
+                └── it should quote the zero received amount with the total fee

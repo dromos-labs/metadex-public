@@ -1,0 +1,6 @@
+UnitDynamicSwapFeeHook::SetMevTaxModule
+├── when caller is not Fee Manager
+│   └── it should revert with "NFM"
+└── when caller is Fee Manager
+    ├── it should set the new mevTaxModule
+    └── it should emit a {MevTaxModuleSet} event

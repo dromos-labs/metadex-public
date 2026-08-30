@@ -1,0 +1,22 @@
+UnitVotingEscrow::DelegateBySig
+├── when the signature s component is in the upper half order
+│   └── it should revert with InvalidSignatureS
+├── when the signature s component equals the upper bound of the valid range
+│   └── it should not revert with InvalidSignatureS
+├── when the recovered signatory is zero
+│   └── it should revert with InvalidSignature
+├── when the recovered signatory is not the owner or approved operator
+│   └── it should revert with ERC721InsufficientApproval
+├── when the nonce does not match the signatory next nonce
+│   └── it should revert with InvalidNonce
+├── when the signature has expired
+│   └── it should revert with SignatureExpired
+├── when the signature is valid and current
+│   ├── it should increment the signatory nonce
+│   ├── it should set the delegate slot to the delegatee
+│   ├── it should record a delegator checkpoint with the new delegatee
+│   ├── it should record a delegatee checkpoint with delegated balance equal to the delegator amount
+│   ├── it should reflect the new delegated balance in getPastVotes with the delegatee owner
+│   └── it should emit the DelegateChanged event with the delegator owner as the indexed delegator
+└── when the signatory is an approved operator of the delegator owner
+    └── it should emit the DelegateChanged event with the delegator owner not the signatory

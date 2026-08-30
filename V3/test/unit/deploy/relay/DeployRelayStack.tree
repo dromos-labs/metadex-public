@@ -1,0 +1,21 @@
+UnitDeployRelayStack
+├── when parameters are not valid
+│   ├── when the chain id does not match the current chain
+│   │   └── it should revert with ChainIdMismatch
+│   ├── when the voting escrow is the zero address
+│   │   └── it should revert with InvalidInput
+│   ├── when the payments module is the zero address
+│   │   └── it should revert with InvalidInput
+│   ├── when the voter is the zero address
+│   │   └── it should revert with InvalidInput
+│   └── when the governor is the zero address
+│       └── it should revert with InvalidInput
+├── when the shipped parameters are still placeholders
+│   └── it should revert rather than deploy a stack bound to nothing
+├── when no other deployment unit has run
+│   └── it should deploy every contract at its deterministic create three address
+├── when the pools unit ran first under the same deployer
+│   ├── it should deploy every contract at its deterministic create three address
+│   └── it should leave the pool unit addresses untouched
+└── when reading the relay entropies against the deployment registry
+    └── it should share no entropy with another deployment unit

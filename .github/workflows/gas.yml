@@ -1,32 +1,26 @@
 name: gas
 
-on:
-  push:
-    branches: 
-      - main
-      - develop
-  pull_request:
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 env:
-  FOUNDRY_PROFILE: ci
+  FOUNDRY_SRC: V3/src
+  FOUNDRY_TEST: V3/test
+  FOUNDRY_SCRIPT: V3/script
 
 jobs:
   check:
     strategy:
       fail-fast: true
 
-    name: Foundry project
-    runs-on: ubuntu-latest
+    name: Run Gas Tests
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-  
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: v1.1.0
+
+      - name: install-tools
+        uses: ./.github/workflows/install-tools
 
       - name: Run Forge tests
         run: |

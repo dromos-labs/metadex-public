@@ -1,0 +1,21 @@
+UnitLeafVoter::CheckpointOrdering
+├── when a local allocation carries both a gauge and the deallocation sentinel
+│   ├── it should record one checkpoint per allocated gauge
+│   ├── it should record every reward checkpoint before the deallocation dispatch
+│   └── it should dispatch exactly one deallocation return carrying the sentinel amount
+├── when a bridged allocation carries both a gauge and the deallocation sentinel
+│   ├── it should record one checkpoint per allocated gauge
+│   ├── it should record every reward checkpoint before the deallocation dispatch
+│   └── it should dispatch exactly one deallocation return drawing from the orchestrator pool
+├── when the first reward contract rewrites the allocation and the snapshot mid pass
+│   ├── it should checkpoint the second gauge against the allocation recorded for it
+│   └── it should checkpoint the second gauge against the stake end the first one got
+├── when a previously allocated gauge is dropped from the list
+│   ├── it should checkpoint the cleared position at zero
+│   ├── it should carry no payload for the cleared position
+│   └── it should checkpoint the kept gauge at its new allocation with its payload
+├── when the first reward contract resurrects a cleared gauge record mid pass
+│   └── it should still checkpoint the cleared position at zero
+└── when several reward contracts rewrite the snapshot mid pass
+    ├── it should record one checkpoint per allocated gauge
+    └── it should checkpoint every gauge against the stake end read before the loop

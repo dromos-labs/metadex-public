@@ -1,0 +1,19 @@
+UnitPoolOracle::GetSurroundingObservations
+├── when the target is gt or eq to the newest stored observation timestamp
+│   ├── when the target eq the newest stored timestamp
+│   │   ├── it should set _beforeOrAt to the newest stored observation
+│   │   └── it should set _atOrAfter to the newest stored observation
+│   └── when the target is gt the newest stored observation timestamp
+│       ├── it should set _beforeOrAt to the newest stored observation
+│       ├── it should set _atOrAfter timestamp to the target
+│       └── it should set _atOrAfter cumulatives to the interpolation between the newest stored cumulatives and the live cumulatives prorated to the target
+└── when the target is lt the newest stored observation timestamp
+    ├── when the target is lt the oldest reachable observation timestamp
+    │   └── it should revert with ObservationOld
+    └── when the target is within the populated range
+        ├── when the target eq a stored observation timestamp
+        │   ├── it should return the matching observation as either _beforeOrAt or _atOrAfter
+        │   └── it should pair the matching observation with its adjacent stored neighbor
+        └── when the target is strictly between two stored observations
+            ├── it should set _beforeOrAt to the previous observation
+            └── it should set _atOrAfter to the next observation

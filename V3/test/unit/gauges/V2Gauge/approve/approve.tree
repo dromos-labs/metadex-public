@@ -1,0 +1,6 @@
+UnitV2Gauge::Approve
+├── when the operator is the zero address
+│   └── it should revert with ZeroAddress
+└── when the operator is a valid address
+    ├── it should set the withdrawal allowance
+    └── it should emit an Approval event

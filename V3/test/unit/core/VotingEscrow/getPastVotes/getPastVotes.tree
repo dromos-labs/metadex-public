@@ -1,0 +1,11 @@
+UnitVotingEscrow::GetPastVotes
+├── when the timestamp is after the current block
+│   └── it should revert with FutureLookup
+├── when the timestamp equals the current block
+│   └── it should return the votes at the current block
+├── when the timestamp is before the first checkpoint
+│   └── it should return zero
+├── when the timestamp falls between checkpoints
+│   └── it should return the earlier checkpoint delegated balance
+└── when the account is not the checkpoint owner
+    └── it should return zero

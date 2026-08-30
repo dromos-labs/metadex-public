@@ -1,0 +1,16 @@
+forge-std/=node_modules/forge-std/src/
+@hyperlane/contracts/=node_modules/@hyperlane-xyz/core/contracts/
+
+node_modules/@hyperlane-xyz/:@openzeppelin/contracts/=node_modules/@openzeppelin/contracts-v4/
+node_modules/@hyperlane-xyz/:@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable-v4/
+@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/
+@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/
+@openzeppelin4/contracts/=node_modules/@openzeppelin/contracts-v4/
+
+@solady/=node_modules/solady/src/
+
+@nomad-xyz/src/=node_modules/@nomad-xyz/excessively-safe-call/src/
+
+V3/=V3/src/
+V3-script/=V3/script/
+V3-test/=V3/test/

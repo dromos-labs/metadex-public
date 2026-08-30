@@ -1,0 +1,16 @@
+UnitAllocationLib::Allocate
+├── when the growth exceeds the free weight above the reserve
+│   └── it should revert with InsufficientFreeWeight
+├── when the growth fits the free weight above the reserve
+│   └── it should forward the dispatches to the voter
+├── when the share supply is zero
+│   └── it should reserve nothing and let the growth draw the full free weight
+├── when the dispatches carry no growth
+│   └── it should forward even when the reserve exceeds the free weight
+├── when the dispatches carry several deltas adding past the budget
+│   └── it should revert with InsufficientFreeWeight
+├── when the stake holds weight for queued deposits
+│   ├── it should leave that weight out of the reserve
+│   └── it should refuse the growth that reaches past it
+└── when the call carries dispatch value
+    └── it should forward the whole call value to the voter

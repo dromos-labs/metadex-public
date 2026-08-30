@@ -1,0 +1,29 @@
+UnitQueueLib::ProcessOverdueDeposits
+├── when the ids array is empty
+│   └── it should revert with NoPendingDeposits
+├── when an id is zero
+│   └── it should revert with DepositNotFound
+├── when an id was never issued
+│   └── it should revert with DepositNotFound
+├── when a named entry is already processed
+│   └── it should revert with DepositAlreadyProcessed
+├── when a named entry is still within the keeper window
+│   └── it should revert with KeeperWindowNotElapsed
+└── given every named entry is overdue
+    ├── it should price each entry at amount times supply over backing
+    ├── it should credit the shares to the recipient stored at request
+    ├── it should delete each settled entry
+    ├── it should decrease the outstanding count for each settled entry
+    ├── it should accumulate the entry amounts into the backing
+    ├── it should emit a DepositProcessed event per entry
+    ├── it should set the head to zero when the ids process every entry in order
+    ├── when a processed id is not the head
+    │   └── it should not change the head or the earlier entries
+    ├── when the ids arrive out of request order
+    │   ├── it should price the entries in the order given
+    │   └── it should clear the head once the drain empties the queue
+    ├── when a reverse drain is followed by a new deposit
+    │   ├── it should point the head at the new entry
+    │   └── it should let the next walk reach it within one entry of budget
+    └── when a named entry aged exactly the keeper window
+        └── it should process the entry that sits on the boundary

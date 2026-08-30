@@ -1,0 +1,53 @@
+UnitVotingEscrow::IncreaseStakingPeriod
+├── when the caller is not the owner or approved operator
+│   └── it should revert with ERC721InsufficientApproval
+├── when the stake is permanent
+│   ├── it should revert with PermanentStake
+│   └── it should not park anything on the voter
+├── when the new end is not strictly later than the current end
+│   └── it should revert with StakingPeriodNotInFuture
+├── when the stake has expired and the new end is in the past
+│   └── it should revert with StakingPeriodNotInFuture
+├── when the new end exceeds the maximum
+│   └── it should revert with StakingPeriodTooLong
+├── when the new end is the last valid value
+│   └── it should update the stake end to the maximum allowed boundary
+├── when the new end is the first invalid value
+│   └── it should revert with StakingPeriodTooLong
+├── when the stake has expired and the new end is in the future
+│   ├── it should update the stake end timestamp to the new end
+│   ├── it should restore a user point with live slope and bias
+│   └── it should schedule a slope change at the new end
+├── when the staked amount is zero
+│   └── it should revert with StakeNotFunded
+├── when the caller is an approved operator
+│   ├── it should update the stake end timestamp to the new end
+│   ├── it should not change the staked amount
+│   └── it should emit the Deposit event
+├── when the new end is valid using exact decay arithmetic
+│   ├── it should update the stake end timestamp to the new end
+│   ├── it should record a user point with the exact recomputed slope and bias
+│   └── it should reschedule the slope change to the new end and cancel the old end entry
+├── when the new end is valid
+│   ├── it should update the stake end timestamp
+│   ├── it should not change the staked amount
+│   ├── it should leave supply and permanent balance unchanged
+│   ├── it should record a user point with the extended bias
+│   ├── it should advance the global epoch
+│   ├── it should reschedule the slope change to the new end and cancel the old end entry
+│   ├── it should emit the Deposit event
+│   ├── it should emit the MetadataUpdate event
+│   └── it should call parkOnChain0 to reanchor the token shape on the voter
+├── when reviving past an old end the loop has not yet crossed
+│   ├── it should leave the consumed slope change at the old end intact
+│   ├── it should schedule a slope change at the new end
+│   ├── it should fold only the revived contribution into the global point
+│   └── it should match the voting power apis to the revived bias
+├── when reviving past an old end a prior checkpoint already crossed
+│   ├── it should not reapply the slope change at the old end
+│   ├── it should schedule a slope change at the new end
+│   ├── it should fold only the revived contribution into the global point
+│   └── it should match the voting power apis to the revived bias
+└── when reviving twice across two separate expiries
+    ├── it should leave no stale slope change that double applies
+    └── it should match the voting power apis to the second revived bias

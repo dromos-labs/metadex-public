@@ -1,0 +1,38 @@
+UnitVoterPaymentsModule::withdrawToNFT
+├── when destinations is empty
+│   └── it should revert with NoDestinations
+├── when the source authorization fails
+│   └── it should revert with NotApprovedByOwner
+└── when the source authorization passes
+    ├── when a non mint leg carries a nonzero recipient
+    │   └── it should revert with NonMintRecipientNotAllowed
+    ├── when a zero amount non mint leg carries a nonzero recipient
+    │   └── it should revert with NonMintRecipientNotAllowed
+    ├── when total destinations amount is zero
+    │   └── it should revert with ZeroWithdraw
+    └── when total destinations amount is nonzero
+        ├── when the operation is restricted and the caller is unregistered
+        │   └── it should revert with NotRegistered
+        └── when the operation is permissionless or the caller is registered
+            ├── when a mint sentinel trims to zero
+            │   └── it should drop the mint sentinel from the VE destinations
+            ├── when destinations contain mint sentinels
+            │   └── it should rewrite mint sentinels using minted ids
+            ├── when destinations contain accumulator entries
+            │   └── it should accept the entry as additional burn alongside the fee leg
+            ├── when destinations produce trimming dust on a known example
+            │   ├── it should keep destination amounts equal to proportional trim
+            │   └── it should route the dust into the fee leg
+            ├── when destinations produce trimming dust across fuzzed inputs
+            │   └── it should keep the fee dust below the destination count
+            ├── when every destination trims to zero
+            │   └── it should revert with AllDestinationsTrimmedToZero
+            ├── when some destinations trim to zero and some survive
+            │   └── it should drop only the zero trimmed destinations
+            ├── when an earlier destination trims to zero and a later one survives
+            │   └── it should compact the survivor into the leading slot
+            ├── when fee is zero
+            │   ├── it should drop the fee leg from the VE destinations
+            │   └── it should emit WithdrawnToNFT with fee zero
+            └── when fee is non zero
+                └── it should emit WithdrawnToNFT

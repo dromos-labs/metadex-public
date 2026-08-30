@@ -1,0 +1,58 @@
+UnitConcreteVotingRewardsManager::AdvanceGlobalPoints
+├── when there is no prior global checkpoint
+│   └── it should revert with NoGlobalCheckpoint
+└── when there is at least one prior global checkpoint
+    ├── when the latest global point was recorded in the current epoch
+    │   └── it should revert with TooSoon
+    └── when the latest global point was recorded in a prior epoch
+        ├── when history reaches the checkpoint iteration limit
+        │   ├── it should reach the current timestamp in one advance
+        │   ├── it should notify the pending fees
+        │   └── it should snapshot the credited fee accumulator at the current timestamp
+        ├── when history exceeds the checkpoint iteration limit
+        │   ├── it should advance only the maximum number of intervals on the first call
+        │   ├── it should not query the gauge for pending fees during partial recovery
+        │   ├── it should preserve fee accounting during partial recovery
+        │   ├── it should snapshot the unchanged fee accumulator at the partial frontier
+        │   ├── it should resume from that checkpoint and reach the current timestamp on the second call
+        │   ├── it should notify pending fees only when history reaches the current timestamp
+        │   ├── it should credit the pending fees exactly once
+        │   ├── it should snapshot the credited fee accumulator at the current timestamp
+        │   ├── it should apply scheduled slope changes at each epoch boundary
+        │   ├── it should continue the supply accumulators across both calls
+        │   ├── it should not modify any user reward state
+        │   └── it should not modify the permanent lock balance
+        ├── when the advance lands within an epoch
+        │   ├── when the gauge has pending fees
+        │   │   ├── it should credit the pending fees to the accumulator
+        │   │   ├── it should emit the NotifyFeesAmount event
+        │   │   ├── it should record a new global point for each elapsed week and the current timestamp
+        │   │   ├── it should advance globalCheckpointIndex by the number of new global points
+        │   │   ├── it should apply scheduled slope changes at each epoch boundary
+        │   │   ├── it should snapshot the pre-credit accumulator at each intermediate checkpoint index
+        │   │   ├── it should snapshot the credited accumulator at the latest global checkpoint index
+        │   │   ├── it should snapshot the supply accumulators at the new global checkpoint index
+        │   │   ├── it should not modify any user reward state
+        │   │   ├── it should not modify the permanent lock balance
+        │   │   └── it should emit the GlobalPointsAdvanced event
+        │   └── when the gauge has no pending fees
+        │       ├── it should not credit any fees to the accumulator
+        │       ├── it should record a new global point for each elapsed week and the current timestamp
+        │       ├── it should advance globalCheckpointIndex by the number of new global points
+        │       ├── it should apply scheduled slope changes at each epoch boundary
+        │       ├── it should snapshot the unchanged accumulator at each new global checkpoint index
+        │       ├── it should snapshot the supply accumulators at the new global checkpoint index
+        │       ├── it should not modify any user reward state
+        │       ├── it should not modify the permanent lock balance
+        │       └── it should emit the GlobalPointsAdvanced event
+        ├── when the advance lands on an epoch boundary
+        │   ├── it should record a new global point for each elapsed week
+        │   ├── it should advance globalCheckpointIndex by the number of elapsed weeks
+        │   ├── it should apply scheduled slope changes at each epoch boundary
+        │   ├── it should snapshot the fee accumulators at each new global checkpoint index
+        │   ├── it should snapshot the supply accumulators at the new global checkpoint index
+        │   ├── it should not modify any user reward state
+        │   ├── it should not modify the permanent lock balance
+        │   └── it should emit the GlobalPointsAdvanced event
+        └── when the elapsed intervals have zero supply
+            └── it should accumulate zero supply seconds across the elapsed intervals

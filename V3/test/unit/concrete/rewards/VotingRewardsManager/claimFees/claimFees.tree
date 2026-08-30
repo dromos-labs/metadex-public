@@ -1,0 +1,117 @@
+UnitVotingRewardsManager::ClaimFees
+├── when the recipient is the zero address
+│   └── it should revert with ZeroAddress
+└── when the recipient is not the zero address
+    ├── when the checkpoint limit is zero
+    │   └── it should revert with ZeroCheckpoints
+    └── when the checkpoint limit is not zero
+        ├── when the caller is not the voter or the registered operator
+        │   └── it should revert with NotAuthorized
+        └── when the caller is authorized
+            ├── when there are no pending fees
+            │   ├── when the claim does not reach the latest checkpoint
+            │   │   ├── given no fee token is the wrapped native
+            │   │   │   ├── it should not collect the gauge fees
+            │   │   │   ├── it should persist the updated fee claim state
+            │   │   │   ├── it should transfer the owed token rewards to the recipient
+            │   │   │   └── it should emit the ClaimFees event for each owed token
+            │   │   └── given a fee token is the wrapped native
+            │   │       ├── given unwrapping is supported
+            │   │       │   ├── it should unwrap the wrapped native fee token
+            │   │       │   ├── it should send the native token to the recipient
+            │   │       │   ├── it should transfer the other owed token to the recipient
+            │   │       │   └── it should emit the ClaimFees event for each owed token
+            │   │       └── given unwrapping is not supported
+            │   │           ├── it should transfer the wrapped native fee token as an ERC20 token
+            │   │           ├── it should not send native token to the recipient
+            │   │           └── it should emit the ClaimFees event for each owed token
+            │   └── when the claim reaches the latest checkpoint
+            │       ├── when the stake has no active voting power
+            │       │   ├── it should not collect the gauge fees
+            │       │   ├── it should persist the updated fee claim state
+            │       │   ├── it should transfer the owed token rewards to the recipient
+            │       │   └── it should emit the ClaimFees event for each owed token
+            │       └── when the stake has active voting power
+            │           ├── when the credited fees vary
+            │           │   ├── it should collect the gauge fees
+            │           │   ├── it should emit the FeesCollected event for each collected token
+            │           │   ├── it should credit the collected fees to the accumulator
+            │           │   ├── it should persist the updated fee claim state
+            │           │   ├── it should transfer the owed token rewards to the recipient
+            │           │   └── it should emit the ClaimFees event for each owed token
+            │           └── when the credited fees are known
+            │               ├── it should collect the gauge fees
+            │               ├── it should emit the FeesCollected event for each collected token
+            │               ├── it should credit the collected fees to the accumulator
+            │               ├── it should persist the updated fee claim state
+            │               ├── it should transfer the owed token rewards to the recipient
+            │               └── it should emit the ClaimFees event for each owed token
+            └── when there are pending fees
+                ├── when the accumulator was already updated in the current timestamp
+                │   ├── when the accrued fees vary
+                │   │   ├── it should collect the gauge fees
+                │   │   ├── it should emit the FeesCollected event for each collected token
+                │   │   ├── it should buffer the fees accrued since the last update
+                │   │   ├── it should clear the last pending fees
+                │   │   ├── it should persist the updated fee claim state
+                │   │   ├── it should transfer the owed token rewards to the recipient
+                │   │   └── it should emit the ClaimFees event for each owed token
+                │   └── when the accrued fees are known
+                │       ├── it should collect the gauge fees
+                │       ├── it should emit the FeesCollected event for each collected token
+                │       ├── it should buffer the fees accrued since the last update
+                │       ├── it should clear the last pending fees
+                │       ├── it should persist the updated fee claim state
+                │       ├── it should transfer the owed token rewards to the recipient
+                │       └── it should emit the ClaimFees event for each owed token
+                └── when the accumulator was not updated in the current timestamp
+                    ├── when the credit does not advance the accumulator
+                    │   ├── it should collect the gauge fees
+                    │   ├── it should emit the FeesCollected event for each collected token
+                    │   ├── it should not create a new global reward point
+                    │   ├── it should clear the last pending fees
+                    │   ├── it should persist the updated fee claim state
+                    │   ├── it should transfer the owed token rewards to the recipient
+                    │   └── it should emit the ClaimFees event for each owed token
+                    └── when the credit advances the accumulator
+                        ├── when the claim does not reach the latest user checkpoint
+                        │   ├── it should collect the gauge fees
+                        │   ├── it should emit the FeesCollected event for each collected token
+                        │   ├── it should credit the collected fees to the accumulator
+                        │   ├── it should create a new global reward point
+                        │   ├── it should not extend the claim range to the new global checkpoint
+                        │   ├── it should clear the last pending fees
+                        │   ├── it should persist the updated fee claim state
+                        │   ├── it should transfer the owed token rewards to the recipient
+                        │   └── it should emit the ClaimFees event for each owed token
+                        └── when the claim reaches the latest user checkpoint
+                            ├── when the stake is owed rewards
+                            │   ├── when the rewards vary
+                            │   │   ├── it should collect the gauge fees
+                            │   │   ├── it should emit the FeesCollected event for each collected token
+                            │   │   ├── it should credit the collected fees to the accumulator
+                            │   │   ├── it should create a new global reward point
+                            │   │   ├── it should extend the claim range to the new global checkpoint
+                            │   │   ├── it should clear the last pending fees
+                            │   │   ├── it should persist the updated fee claim state
+                            │   │   ├── it should transfer the owed token rewards to the recipient
+                            │   │   └── it should emit the ClaimFees event for each owed token
+                            │   └── when the rewards are known
+                            │       ├── it should collect the gauge fees
+                            │       ├── it should emit the FeesCollected event for each collected token
+                            │       ├── it should credit the collected fees to the accumulator
+                            │       ├── it should create a new global reward point
+                            │       ├── it should extend the claim range to the new global checkpoint
+                            │       ├── it should clear the last pending fees
+                            │       ├── it should persist the updated fee claim state
+                            │       ├── it should transfer the owed token rewards to the recipient
+                            │       └── it should emit the ClaimFees event for each owed token
+                            └── when the stake is not owed rewards
+                                ├── it should collect the gauge fees
+                                ├── it should emit the FeesCollected event for each collected token
+                                ├── it should credit the collected fees to the accumulator
+                                ├── it should create a new global reward point
+                                ├── it should extend the claim range to the new global checkpoint
+                                ├── it should clear the last pending fees
+                                ├── it should persist the updated fee claim state
+                                └── it should not transfer any token rewards

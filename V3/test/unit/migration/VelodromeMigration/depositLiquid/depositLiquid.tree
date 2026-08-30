@@ -1,0 +1,39 @@
+UnitVelodromeMigration::DepositLiquid
+├── when the migration is paused
+│   └── it should revert with EnforcedPause
+└── when the migration is not paused
+    ├── when the migration has not opened
+    │   └── it should revert with MigrationNotOpen
+    └── when the migration has opened
+        ├── when the deposited amount is zero
+        │   └── it should revert with ZeroAmount
+        └── when the deposited amount is not zero
+            ├── when the recipient is the zero address
+            │   └── it should revert with ZeroAddress
+            └── when the recipient is not the zero address
+                ├── when the TOKEN conversion output is zero
+                │   └── it should revert with ZeroConversion
+                └── when the TOKEN conversion output is not zero
+                    ├── when the caller reenters depositLiquid during the native token refund
+                    │   └── it should revert the reentrant deposit with ReentrancyGuardReentrantCall
+                    └── when the caller does not reenter during the native token refund
+                        ├── when the migration parameters are known
+                        │   ├── it should increase the paid basis by the conversion output
+                        │   ├── it should capture the deposited amount in the migration veNFT
+                        │   ├── it should convert the basis output to TOKEN at the configured ratio, rounding down
+                        │   ├── it should increment the dispatch nonce
+                        │   ├── it should dispatch the incremented nonce and liquid settlement parameters to the migration entrypoint on root
+                        │   ├── it should forward the native tokens to the Hyperlane mailbox
+                        │   ├── it should refund surplus native tokens to the caller
+                        │   ├── it should emit the MessageDispatched event
+                        │   └── it should emit the LiquidMigrated event
+                        └── when the migration parameters vary
+                            ├── it should increase the paid basis by the conversion output
+                            ├── it should capture the deposited amount in the migration veNFT
+                            ├── it should convert the basis output to TOKEN at the configured ratio, rounding down
+                            ├── it should increment the dispatch nonce
+                            ├── it should dispatch the incremented nonce and liquid settlement parameters to the migration entrypoint on root
+                            ├── it should forward the native tokens to the Hyperlane mailbox
+                            ├── it should refund surplus native tokens to the caller
+                            ├── it should emit the MessageDispatched event
+                            └── it should emit the LiquidMigrated event

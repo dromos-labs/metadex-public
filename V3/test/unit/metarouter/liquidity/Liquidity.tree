@@ -1,0 +1,25 @@
+UnitLiquidity::RemoveLiquidity
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+└── given the recipient is not the zero address
+    ├── when the pool is not registered
+    │   └── it should revert with PoolNotRegistered
+    └── given the pool is registered
+        ├── when the lp is spent from the execution balance
+        │   ├── when the recipient is the router
+        │   │   ├── it should track both pool tokens
+        │   │   ├── it should push the resolved lp to the pool
+        │   │   ├── it should burn to _recipient
+        │   │   └── it should sweep the returned tokens to _caller at closure
+        │   ├── when the recipient is not the router
+        │   │   ├── it should not track any pool token
+        │   │   ├── it should push the resolved lp to the pool
+        │   │   └── it should burn to _recipient
+        │   ├── when the returned token zero is below its minimum
+        │   │   └── it should revert with InsufficientAmount0
+        │   └── when the returned token one is below its minimum
+        │       └── it should revert with InsufficientAmount1
+        └── when the lp is pulled from the caller
+            ├── it should pull the exact lp amount from _caller
+            ├── it should push the pulled lp to the pool
+            └── it should burn to _recipient

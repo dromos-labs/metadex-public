@@ -1,0 +1,15 @@
+UnitDynamicSwapFeeHook::SetCustomBaseFee
+├── when caller is not Fee Manager
+│   └── it should revert with "NFM"
+└── when caller is Fee Manager
+    ├── when custom fee is gt max base fee and not zero fee indicator
+    │   └── it should revert with "MBF"
+    ├── when pool is invalid
+    │   └── it should revert with "PNP"
+    └── when pool is valid
+        ├── when custom fee is zero fee indicator
+        │   ├── it should set custom fee to zero fee indicator
+        │   └── it should emit CustomFeeSet
+        └── when custom fee is not zero fee indicator
+            ├── it should set custom fee
+            └── it should emit CustomFeeSet

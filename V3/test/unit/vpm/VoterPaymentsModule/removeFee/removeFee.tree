@@ -1,0 +1,16 @@
+UnitVoterPaymentsModule::removeFee
+├── when the caller does not hold the fee manager role
+│   └── it should revert with AccessControlUnauthorizedAccount
+└── when the caller holds the fee manager role
+    ├── when the target is the default slot
+    │   └── it should revert with CannotRemoveDefault
+    └── when the target is a concrete address
+        ├── when the target has no registered record
+        │   └── it should revert with NotRegistered
+        ├── when the record is registered and the operation is restricted
+        │   ├── it should clear the record
+        │   └── it should emit FeeRemoved
+        └── when the record is registered and the operation is not restricted
+            ├── it should clear the record
+            ├── it should leave the target resolving to the default rate
+            └── it should emit FeeRemoved

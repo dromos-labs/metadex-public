@@ -1,0 +1,12 @@
+UnitDiscountRegistry::RegisterPoolFeeFloorExemption
+├── when caller isn't the owner
+│   └── it reverts with OwnableUnauthorizedAccount
+└── when caller is the owner
+    ├── when account address eq zero
+    │   └── it reverts with AccountIsZero
+    └── when account address does not eq zero
+        ├── when pool address eq zero
+        │   └── it reverts with PoolIsZero
+        └── when pool address does not eq zero
+            ├── it sets poolFeeFloorExempt to the new exempt flag
+            └── it emits PoolFeeFloorExemptionSet

@@ -1,0 +1,105 @@
+UnitAerodromeMigration::DepositVeNFT
+├── when the migration is paused
+│   └── it should revert with EnforcedPause
+└── when the migration is not paused
+    ├── when native tokens are sent
+    │   └── it should revert with UnexpectedValue
+    └── when native tokens are not sent
+        ├── when the migration has not opened
+        │   └── it should revert with MigrationNotOpen
+        └── when the migration has opened
+            ├── when the recipient is the zero address
+            │   └── it should revert with ZeroAddress
+            └── when the recipient is not the zero address
+                ├── when the v2 veNFT is restricted
+                │   └── it should revert with Restricted
+                └── when the v2 veNFT is not restricted
+                    ├── when the v2 veNFT is locked
+                    │   └── it should revert with NotNormalVeNFT
+                    ├── when the v2 veNFT is managed
+                    │   └── it should revert with NotNormalVeNFT
+                    └── when the v2 veNFT is normal
+                        ├── when the locked amount is zero
+                        │   └── it should revert with NothingToConvert
+                        └── when the locked amount is not zero
+                            ├── when the v2 veNFT has an active vote
+                            │   └── it should revert with AlreadyVoted
+                            └── when the v2 veNFT does not have an active vote
+                                ├── when the caller does not own the v2 veNFT
+                                │   └── it should revert with NotOwner
+                                └── when the caller owns the v2 veNFT
+                                    ├── when the conversion exceeds the migration budget
+                                    │   └── it should revert with BudgetExhausted
+                                    └── when the conversion fits within the migration budget
+                                        ├── when the v2 lock is permanent
+                                        │   ├── when the conversion is within the migration budget
+                                        │   │   ├── it should increase the paid basis by the conversion output
+                                        │   │   ├── it should record the caller as the depositor
+                                        │   │   ├── it should unlock the permanent v2 veNFT
+                                        │   │   ├── it should merge the v2 veNFT into the migration veNFT
+                                        │   │   ├── it should approve the v3 voting escrow to spend the conversion output
+                                        │   │   ├── it should create a permanent v3 staked position
+                                        │   │   ├── it should transfer the v3 staked position to the recipient
+                                        │   │   └── it should emit the VeNFTMigrated event
+                                        │   └── when the conversion exactly exhausts the migration budget
+                                        │       ├── it should increase the paid basis by the locked amount
+                                        │       ├── it should create a permanent v3 staked position with the locked amount
+                                        │       └── it should revert the next conversion with BudgetExhausted
+                                        └── when the v2 lock is not permanent
+                                            ├── when the v2 lock has expired
+                                            │   ├── it should increase the paid basis by the conversion output
+                                            │   ├── it should record the caller as the depositor
+                                            │   ├── it should not unlock the v2 veNFT
+                                            │   ├── it should merge the v2 veNFT into the migration veNFT
+                                            │   ├── it should transfer the conversion output to the recipient as liquid tokens
+                                            │   ├── it should not create a v3 staked position
+                                            │   └── it should emit the VeNFTMigrated event
+                                            └── when the v2 lock is active
+                                                ├── when the rounded duration is below the maximum v3 stake duration
+                                                │   ├── when the migration parameters are known
+                                                │   │   ├── it should increase the paid basis by the conversion output
+                                                │   │   ├── it should record the caller as the depositor
+                                                │   │   ├── it should not unlock the v2 veNFT
+                                                │   │   ├── it should merge the v2 veNFT into the migration veNFT
+                                                │   │   ├── it should approve the v3 voting escrow to spend the conversion output
+                                                │   │   ├── it should create a decay v3 staked position with the remaining duration rounded up to weeks
+                                                │   │   ├── it should transfer the v3 staked position to the recipient
+                                                │   │   └── it should emit the VeNFTMigrated event
+                                                │   └── when the migration parameters vary
+                                                │       ├── it should increase the paid basis by the conversion output
+                                                │       ├── it should record the caller as the depositor
+                                                │       ├── it should not unlock the v2 veNFT
+                                                │       ├── it should merge the v2 veNFT into the migration veNFT
+                                                │       ├── it should approve the v3 voting escrow to spend the conversion output
+                                                │       ├── it should create a decay v3 staked position with the remaining duration rounded up to weeks
+                                                │       ├── it should transfer the v3 staked position to the recipient
+                                                │       └── it should emit the VeNFTMigrated event
+                                                └── when the rounded duration reaches or exceeds the maximum v3 stake duration
+                                                    ├── when the migration parameters are known_
+                                                    │   ├── when migration occurs during the first three days of the epoch
+                                                    │   │   ├── it should increase the paid basis by the conversion output
+                                                    │   │   ├── it should record the caller as the depositor
+                                                    │   │   ├── it should not unlock the v2 veNFT
+                                                    │   │   ├── it should merge the v2 veNFT into the migration veNFT
+                                                    │   │   ├── it should approve the v3 voting escrow to spend the conversion output
+                                                    │   │   ├── it should create a decay v3 staked position with the maximum duration
+                                                    │   │   ├── it should transfer the v3 staked position to the recipient
+                                                    │   │   └── it should emit the VeNFTMigrated event
+                                                    │   └── when migration occurs during the final four days of the epoch
+                                                    │       ├── it should increase the paid basis by the conversion output
+                                                    │       ├── it should record the caller as the depositor
+                                                    │       ├── it should not unlock the v2 veNFT
+                                                    │       ├── it should merge the v2 veNFT into the migration veNFT
+                                                    │       ├── it should approve the v3 voting escrow to spend the conversion output
+                                                    │       ├── it should create a decay v3 staked position with the maximum duration
+                                                    │       ├── it should transfer the v3 staked position to the recipient
+                                                    │       └── it should emit the VeNFTMigrated event
+                                                    └── when the migration parameters vary_
+                                                        ├── it should increase the paid basis by the conversion output
+                                                        ├── it should record the caller as the depositor
+                                                        ├── it should not unlock the v2 veNFT
+                                                        ├── it should merge the v2 veNFT into the migration veNFT
+                                                        ├── it should approve the v3 voting escrow to spend the conversion output
+                                                        ├── it should create a decay v3 staked position with the maximum duration
+                                                        ├── it should transfer the v3 staked position to the recipient
+                                                        └── it should emit the VeNFTMigrated event

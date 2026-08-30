@@ -1,0 +1,46 @@
+UnitSwaps::ClSwapExactOut
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+└── given the recipient is valid
+    ├── when the pool path is empty
+    │   └── it should revert with InvalidPath
+    ├── when a pool is not registered
+    │   └── it should revert with InvalidPool for the pool
+    ├── when a factory does not recognize the pool
+    │   └── it should revert with InvalidPool for the pool
+    ├── when a pool reports an unsupported pool type
+    │   └── it should revert with InvalidPool for the pool
+    └── given every pool is validated
+        ├── when the input token does not belong to the pool
+        │   └── it should revert with InvalidPath
+        ├── when the requested output exceeds the signed integer maximum
+        │   └── it should revert with AmountOverflow
+        ├── when another callback caller is already armed
+        │   └── it should revert with CallbackNotCleared for the armed caller
+        ├── when the pool returns without consuming its callback
+        │   └── it should revert with CallbackNotCleared for the pool
+        ├── when the pool requests more than the maximum input
+        │   └── it should revert with TooMuchRequested
+        ├── when the pool delivers less than the requested output
+        │   └── it should revert with InvalidAmountOut
+        ├── when the pool delivers more than the requested output
+        │   └── it should revert with InvalidAmountOut
+        ├── when the pool reports a positive output delta
+        │   └── it should revert with InvalidAmountOut
+        └── given the pool delivers the requested output
+            ├── when the payer is the execution owner
+            │   └── it should pay the first pool invoice directly from the execution owner
+            ├── when the payer is the execution address
+            │   ├── it should track the input token for the closure sweep
+            │   └── it should pay the first pool invoice from custody
+            ├── when the input token is token one
+            │   └── it should swap toward token zero using the upper price boundary
+            ├── when the path contains multiple pools
+            │   └── it should settle each invoice by recursing through the callbacks
+            ├── when a user payer routes through three pools with mixed directions
+            │   ├── it should index each hop pool and direction from the route
+            │   └── it should pay the first pool invoice directly from the execution owner
+            ├── when the recipient is the execution address
+            │   └── it should track and return the output at batch closure
+            └── when the requested input equals the maximum
+                └── it should complete at the exact bound

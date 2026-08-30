@@ -1,0 +1,98 @@
+UnitLeafVoter::ApplyChainAllocation
+├── when the caller is not the leaf message orchestrator
+│   └── it should revert with NotMessageOrchestrator
+├── when the chain is suspended
+│   ├── it should not revert
+│   ├── it should mask the emissions scalar to zero
+│   └── it should still record the chain allocation
+├── when the settlement window is empty
+│   ├── it should not advance the index
+│   ├── it should not change the last settlement
+│   ├── it should not snapshot any weekly boundary
+│   ├── it should override the emissions scalar
+│   ├── it should record the chain allocation
+│   ├── it should not set the last voted timestamp
+│   └── it should emit the ChainAllocated event carrying the new scalar
+├── when the settlement window crosses no weekly boundary
+│   ├── it should advance the index using the prior emissions scalar
+│   ├── it should not snapshot any weekly boundary
+│   ├── it should set the last settlement to the current timestamp
+│   ├── it should override the emissions scalar
+│   ├── it should record the chain allocation
+│   ├── it should not set the last voted timestamp
+│   └── it should emit the ChainAllocated event carrying the new scalar
+├── when the settlement window crosses weekly boundaries
+│   ├── it should snapshot the index at each crossed boundary
+│   ├── it should advance the index using the prior emissions scalar
+│   ├── it should set the last settlement to the current timestamp
+│   ├── it should override the emissions scalar
+│   ├── it should record the chain allocation
+│   └── it should emit the ChainAllocated event carrying the new scalar
+├── when the prior emissions scalar is zero
+│   ├── it should not advance the index
+│   ├── it should snapshot the unchanged index at each crossed boundary
+│   ├── it should set the last settlement to the current timestamp
+│   ├── it should override the emissions scalar
+│   ├── it should record the chain allocation
+│   └── it should emit the ChainAllocated event carrying the new scalar
+├── when the index advance uses a fractional scalar on a known example
+│   ├── it should advance the index by the scalar times the elapsed seconds
+│   ├── it should not snapshot any weekly boundary
+│   ├── it should set the last settlement to the current timestamp
+│   ├── it should override the emissions scalar
+│   ├── it should record the chain allocation
+│   └── it should emit the ChainAllocated event carrying the new scalar
+├── when the index settles even without a scalar update
+│   ├── it should settle the index at the prior scalar
+│   └── it should set the last settlement to the current timestamp
+├── when the message is not the newest chain allocation
+│   ├── it should add the allocation delta to the budget
+│   ├── it should leave the index and last settlement unchanged
+│   ├── it should not override the emissions scalar
+│   └── it should still park the delta on the zero gauge
+├── when the budget already holds a prior allocation
+│   ├── it should add the delta on top of the prior allocation
+│   └── it should not overwrite the prior allocation
+├── when no gauge weight is booked yet
+│   ├── it should seed the token snapshot from the message
+│   ├── it should seed the latest snapshot from the message
+│   ├── it should park the delta on the zero gauge at the seeded shape
+│   └── it should track the parked allocation on the zero gauge
+├── when gauge weight is already booked
+│   ├── it should not overwrite the token snapshot
+│   ├── it should stash the message shape as the latest snapshot
+│   └── it should park the delta on the zero gauge at the stored shape
+├── when a stale message arrives with gauge weight booked
+│   └── it should leave the latest snapshot unchanged
+├── when the message is not the newest chain allocation for the snapshot
+│   ├── it should seed the token snapshot from the message shape even when not the newest
+│   ├── it should park the delta on the zero gauge at the seeded decaying shape
+│   ├── it should track the parked allocation on the zero gauge
+│   └── it should not override the emissions scalar
+├── when the message is not the newest but weight is already booked
+│   ├── it should keep the token snapshot pinned to the first shape
+│   ├── it should park the second delta using the pinned first shape not the second message shape
+│   └── it should accumulate both deltas on the zero gauge allocation
+├── when two no weight messages arrive out of order
+│   └── it should keep the shape at the newer message and not roll it back
+├── when a stale positive delta arrives after a newer shape
+│   ├── it should keep the shape at the newer message
+│   └── it should park the stale delta at the newer shape not its own
+├── when the delta is zero
+│   ├── it should not park anything on the zero gauge
+│   └── it should record the unchanged budget
+├── when a position free poke arrives
+│   ├── it should re-read the chain emissions scalar from the poke
+│   ├── it should leave the poking token with no budget
+│   ├── it should give the poking token no gauge position
+│   └── it should park nothing on the zero gauge
+├── when the stored shape differs from the message shape and weight exists
+│   └── it should park using the stored shape not the message shape
+├── when multiple deltas are applied
+│   ├── it should accumulate the parked allocation on the zero gauge
+│   └── it should keep the stored shape pinned across the calls
+├── when a chain allocation is applied
+│   └── it should emit the ChainAllocated event with the delta and resulting budget
+└── when the stored shape is withdrawn
+    ├── it should add the delta to the budget
+    └── it should book no phantom weight on the zero gauge

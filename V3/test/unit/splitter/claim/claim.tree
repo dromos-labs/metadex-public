@@ -1,0 +1,51 @@
+UnitSplitter::Claim
+├── when the recipient already claimed its balance
+│   ├── it should leave the global accrual index unchanged
+│   ├── it should leave _recipient lastSettledIndex unchanged
+│   ├── it should make no transfer
+│   ├── it should emit no event
+│   └── it should return zero
+├── when the recipient owes a balance
+│   ├── it should accrue pending inflow into the global accrual index
+│   ├── it should settle _recipient accrual into claimable
+│   ├── it should zero _recipient claimable
+│   ├── it should decrement the accounted balance by the amount
+│   ├── it should transfer the amount to _recipient
+│   ├── it should emit Claimed with _recipient, _amount
+│   └── it should return the amount
+├── when the recipient was removed with leftover balance
+│   ├── it should accrue no new share of later inflow
+│   ├── it should pay only the balance locked in before removal
+│   ├── it should zero _recipient claimable
+│   ├── it should decrement the accounted balance by the locked balance
+│   ├── it should emit Claimed with _recipient, _amount
+│   └── it should return the locked balance
+├── when the address has never been a recipient
+│   ├── it should accrue pending inflow into the global accrual index
+│   ├── it should leave _recipient lastSettledIndex unchanged
+│   ├── it should make no transfer
+│   ├── it should emit no event
+│   └── it should return zero
+├── when the settled accrual is below one wei
+│   ├── it should make no transfer
+│   ├── it should leave _recipient lastSettledIndex unchanged
+│   └── it should fold the accrual into the next settlement
+├── when the inflow divides evenly across the shares
+│   ├── it should pay each recipient its exact slice
+│   └── it should distribute the full inflow leaving no dust
+├── when the inflow does not divide evenly across the shares
+│   ├── it should pay each recipient its slice floored to whole wei
+│   └── it should strand less than one wei per recipient as dust
+├── when claiming a concrete repeated settlement
+│   ├── it should pay each credited settlement floored to whole wei
+│   ├── it should advance the recipient lastSettledIndex past the stranded fraction
+│   └── it should pay more when the same total inflow is settled once
+├── when claiming a concrete owed balance
+│   ├── it should accrue the inflow into the global accrual index
+│   ├── it should pay the recipient its hardcoded slice
+│   ├── it should advance the recipient lastSettledIndex to the global accrual index
+│   ├── it should zero the recipient claimable
+│   └── it should decrement the accounted balance by the payout
+└── when claiming a concrete uneven split
+    ├── it should pay each recipient its hardcoded floored slice
+    └── it should strand exactly one wei of dust

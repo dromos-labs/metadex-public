@@ -1,0 +1,41 @@
+UnitLeafVoter::ContributionMath
+├── when the contribution resolves a permanent stake
+│   ├── it should return the allocated amount as the permanent component
+│   └── it should return a zero bias and slope
+├── when the contribution resolves a withdrawn stake
+│   └── it should return the zero triple
+├── when the contribution resolves a decaying stake
+│   ├── it should return the slope as the allocated amount over the max stake time
+│   └── it should return the bias as the slope scaled by the time until stake end
+├── when the contribution resolves a stake already expired at the activation timestamp
+│   └── it should return the zero triple
+├── when the allocation rounds down below a single slope unit
+│   └── it should return the zero triple
+├── when a permanent contribution is applied to the gauge
+│   ├── it should increase the gauge permanent stake balance by the allocated amount
+│   ├── it should leave the gauge bias and slope unchanged
+│   └── it should not schedule a slope change
+├── when a decaying contribution is applied to the gauge
+│   ├── it should increase the gauge bias by the resolved bias
+│   ├── it should increase the gauge slope by the resolved slope
+│   ├── it should schedule the slope change at the stake end
+│   └── it should leave the gauge permanent stake balance unchanged
+├── when an applied permanent contribution is unwound
+│   ├── it should net the gauge permanent stake balance back to its prior value
+│   ├── it should leave the gauge bias and slope unchanged
+│   └── it should not schedule a slope change
+├── when an applied decaying contribution is unwound at the same settlement timestamp
+│   ├── it should net the gauge bias back to its prior value
+│   ├── it should net the gauge slope back to its prior value
+│   ├── it should net the scheduled slope change back to its prior value
+│   └── it should leave the gauge permanent stake balance unchanged
+├── when an applied decaying contribution is unwound after the settlement timestamp advanced but before the stake expires
+│   ├── it should net the gauge slope back to its prior value
+│   ├── it should net the scheduled slope change back to its prior value
+│   └── it should leave a residual bias equal to the decay since the apply
+├── when an applied decaying contribution is unwound after the stake has expired
+│   ├── it should subtract nothing from the gauge point
+│   └── it should leave the scheduled slope change unchanged
+└── when a contribution resolving to the zero triple is applied to the gauge
+    ├── it should not write the gauge point
+    └── it should not schedule a slope change

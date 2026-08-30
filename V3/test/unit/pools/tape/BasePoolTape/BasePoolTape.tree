@@ -1,0 +1,38 @@
+UnitBasePoolTape::constructor
+├── when the default cadence interval is eq to zero
+│   └── it reverts with ZeroCadenceInterval
+└── when the default cadence interval is gt zero
+    ├── it sets the owner
+    ├── it stores the default cadence interval
+    └── it emits DefaultCadenceIntervalSet
+
+UnitBasePoolTape::setDefaultCadenceInterval
+├── when the caller is not the owner
+│   └── it reverts with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── when the interval is eq to zero
+    │   └── it reverts with ZeroCadenceInterval
+    └── when the interval is gt zero
+        ├── it updates the default cadence interval
+        └── it emits DefaultCadenceIntervalSet
+
+UnitBasePoolTape::setPoolCadence
+├── when the caller is not the owner
+│   └── it reverts with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── it stores the per pool cadence
+    ├── it emits PoolCadenceSet
+    └── when the cadence is eq to zero
+        └── it stores the default cadence
+
+UnitBasePoolTape::setAllowedCallerAndInitializePool
+├── when the caller is not the owner
+│   └── it reverts with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── it stores the authorized caller
+    ├── it emits AllowedCallerSet
+    ├── when the pool cadence is not set
+    │   ├── it emits PoolCadenceSet
+    │   └── it sets the default cadence into the pool config
+    └── when the pool cadence is set
+        └── it preserves the pool cadence

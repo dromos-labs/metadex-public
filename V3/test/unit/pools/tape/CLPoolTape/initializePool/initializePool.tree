@@ -1,0 +1,13 @@
+UnitClPoolTape::InitializePool
+├── when the accumulator has not been initialized
+│   ├── it pre populates the accumulator slots
+│   ├── it pre warms the observation zero slots written by the first swap
+│   ├── it does not set lastSwapTimestamp
+│   ├── it preserves the volatility values written before registration
+│   ├── when the pool buffer has not been initialized
+│   │   └── it initializes the pool buffer
+│   └── when the pool buffer has been initialized
+│       └── it does not update the pool buffer
+└── when the accumulator has been initialized
+    ├── it does not update the accumulator
+    └── it does not update the pool buffer

@@ -1,0 +1,151 @@
+UnitLeafVoter::AllocateGauges
+├── when the chain status is neither Active nor Sunset
+│   └── it should revert with ChainNotActiveOrSunset
+├── when the chain status is Sunset and the list carries only the deallocation sentinel
+│   ├── it should process the deallocation sentinel and return the budget
+│   └── it should anchor the cooldown at the current timestamp
+├── when the chain status is Sunset and the list carries a non deallocation entry
+│   └── it should revert with SunsetDeallocOnly
+├── when the chain status is Sunset and the list is empty
+│   └── it should revert with SunsetDeallocOnly
+├── when local voting is disabled
+│   └── it should revert with LocalVotingDisabled before reaching the operator check
+├── when the caller is not the registered operator
+│   └── it should revert with NotOperator
+├── when the cooldown since the last vote has not elapsed
+│   └── it should revert with CooldownActive
+├── when the reduced cooldown has not elapsed with a pending reduction seeded
+│   ├── it should revert with CooldownActive
+│   └── it should not consume the pending reduction on revert
+├── when a cooldown reduction exceeds the cooldown
+│   ├── it should persist the rest of the pending reduction
+│   └── it should anchor the cooldown at the current timestamp
+├── when a cooldown reduction is below the cooldown
+│   ├── it should keep the unspent part of the reduction
+│   └── it should anchor the cooldown at the current timestamp
+├── when the cooldown has already elapsed with a pending reduction seeded
+│   └── it should preserve the whole pending reduction
+├── when the stake snapshot is not seeded
+│   └── it should revert with StakeSnapshotMissing
+├── when the snapshot is not seeded and the list is invalid
+│   └── it should revert with StakeSnapshotMissing
+├── when the snapshot is unseeded and also expired
+│   └── it should revert with StakeSnapshotMissing
+├── when the token stake is expired and the list carries only the deallocation sentinel
+│   ├── it should process the deallocation sentinel and return the budget
+│   └── it should book no weight on any gauge
+├── when the token stake is expired and the list carries a non deallocation entry
+│   └── it should revert with StakeExpired
+├── when the token stake is expired and the list is empty
+│   └── it should revert with StakeExpired
+├── when an expired stake returns its budget after a prior allocation
+│   ├── it should unwind the prior gauge contribution and clear its allocation
+│   ├── it should remove the gauge from the voted set
+│   ├── it should clear the prior idle park
+│   └── it should return the whole budget through the sentinel
+├── when the allocation list exceeds maxGauges
+│   └── it should revert with ExceedsMaxGauges
+├── when an allocation is not strictly ascending by gauge
+│   └── it should revert with GaugesNotStrictlyAscending
+├── when a zero gauge entry is not the first in the list
+│   └── it should revert with GaugesNotStrictlyAscending
+├── when an allocation carries a zero amount
+│   └── it should revert with ZeroAllocation
+├── when the allocation total exceeds the chain allocation budget
+│   └── it should revert with ChainAllocationMismatch
+├── when the allocation total is below the chain allocation budget
+│   └── it should revert with ChainAllocationMismatch
+└── when the vote is valid
+    ├── it should anchor the cooldown at the current timestamp
+    ├── it should settle the chain index to the current timestamp
+    ├── it should not checkpoint any reward
+    ├── when an allocation targets a new activated gauge
+    │   ├── it should settle the gauge before applying the contribution
+    │   ├── it should apply the contribution against the new snapshot
+    │   ├── it should add the gauge to the voted set
+    │   └── it should checkpoint the reward for the touched gauge
+    ├── when the snapshot has a future decaying stake end
+    │   ├── it should apply the allocation against the decaying snapshot
+    │   ├── it should forward the snapshot stake end to the reward checkpoint
+    │   └── it should add the gauge to the voted set
+    ├── when the reward checkpoint reverts
+    │   └── it should propagate the revert so the whole vote reverts
+    ├── when an allocation is kept on an already voted gauge
+    │   ├── it should settle the gauge before reapplying the contribution
+    │   ├── it should unwind the prior contribution against the old snapshot
+    │   ├── it should reapply the contribution against the new snapshot
+    │   ├── it should keep the gauge in the voted set
+    │   └── it should checkpoint the reward for the touched gauge
+    ├── when a previously voted gauge is dropped from the allocation
+    │   ├── it should settle the gauge before unwinding the contribution
+    │   ├── it should unwind the prior contribution against the old snapshot
+    │   ├── it should clear the stored allocation
+    │   ├── it should remove the gauge from the voted set
+    │   └── it should checkpoint the reward for the wired touched gauge
+    ├── when a dropped gauge sorts below a kept gauge
+    │   ├── it should find the kept gauge through the lower half of the search
+    │   ├── it should clear the stored allocation of the dropped gauge
+    │   └── it should keep the higher gauge in the voted set
+    ├── when an allocation targets a registered inactive gauge and the token is whitelisted
+    │   ├── it should redirect the allocation to the zero gauge because inactivity is absolute
+    │   ├── it should not add the gauge to the voted set
+    │   └── it should not checkpoint the reward for the redirected gauge
+    ├── when an allocation targets a registered inactive gauge and the token is not whitelisted
+    │   ├── it should redirect the allocation to the zero gauge
+    │   ├── it should not add the gauge to the voted set
+    │   └── it should not checkpoint the reward for the redirected gauge
+    ├── when an allocation targets an activated zero cap gauge and the token is not whitelisted
+    │   ├── it should redirect the allocation to the zero gauge
+    │   ├── it should not add the gauge to the voted set
+    │   └── it should not checkpoint the reward for the redirected gauge
+    ├── when an allocation targets an activated zero cap gauge and the token is whitelisted
+    │   ├── it should route the allocation directly to the gauge
+    │   ├── it should add the gauge to the voted set
+    │   └── it should checkpoint the reward for the touched gauge
+    ├── when an allocation targets an unregistered gauge and the token is not whitelisted
+    │   ├── it should redirect the allocation to the zero gauge
+    │   ├── it should not add the gauge to the voted set
+    │   └── it should not checkpoint any reward
+    ├── when an allocation targets an unregistered gauge and the token is whitelisted
+    │   ├── it should redirect the allocation to the zero gauge because the whitelist does not cover unregistered gauges
+    │   ├── it should not add the gauge to the voted set
+    │   └── it should not checkpoint any reward
+    ├── when idle voting power is parked with an explicit zero gauge entry
+    │   ├── it should settle the zero gauge
+    │   ├── it should park the idle amount on the zero gauge
+    │   └── it should checkpoint the reward for the touched gauge
+    ├── when an unroutable allocation accompanies an explicit idle entry
+    │   ├── it should accumulate the explicit idle entry and the redirected weight on the zero gauge
+    │   └── it should checkpoint the reward for the routable gauge
+    ├── when the allocation total equals the chain budget
+    │   ├── it should park no shortfall on the zero gauge
+    │   └── it should checkpoint the reward for the touched gauge
+    ├── when a prior zero gauge allocation is replaced
+    │   ├── it should settle the zero gauge
+    │   ├── it should unwind the prior zero gauge contribution against the old snapshot
+    │   ├── it should apply the new zero gauge contribution against the new snapshot
+    │   └── it should checkpoint the reward for the touched gauge
+    ├── when the allocation contains the deallocation sentinel
+    │   ├── it should not forward a checkpoint for the sentinel
+    │   ├── it should dispatch a Deallocate message forwarding the caller value
+    │   ├── it should emit the Deallocated event
+    │   ├── it should decrement the chain allocation by the sentinel amount
+    │   └── it should not park the sentinel store an allocation or add it to the voted set
+    ├── when the list carries the deallocation sentinel and the caller funds the return
+    │   ├── it should dispatch a Deallocate message forwarding the whole caller value without drawing from the pool
+    │   ├── it should emit the Deallocated event
+    │   └── it should decrement the chain allocation by the sentinel amount
+    ├── when no sentinel is present and msg value is zero
+    │   ├── it should not dispatch a Deallocate message
+    │   └── it should book the allocation
+    ├── when no sentinel is present and msg value is non zero
+    │   └── it should revert with UnexpectedValue
+    ├── when a gauge allocation is applied
+    │   └── it should emit the GaugesAllocated event with the requested allocations
+    ├── when the latest snapshot is ahead of the stored one
+    │   ├── it should book the vote at the latest shape
+    │   └── it should re-pin the stored snapshot to the latest one
+    └── when the latest snapshot walks the full lifecycle
+        ├── it should stash the chain message shape while the stored one stays pinned
+        ├── it should consume the latest shape on the local vote
+        └── it should keep pending equal to stored after a bridged vote

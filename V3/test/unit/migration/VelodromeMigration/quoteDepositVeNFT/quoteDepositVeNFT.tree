@@ -1,0 +1,37 @@
+UnitVelodromeMigration::QuoteDepositVeNFT
+├── when the final TOKEN amount rounds down to zero
+│   └── it should revert with ZeroConversion
+└── when the final TOKEN amount does not round down to zero
+    ├── when the v2 lock is permanent
+    │   ├── it should quote the next nonce and permanent settlement parameters for the migration entrypoint on root
+    │   ├── it should use the caller as the Hyperlane refund address
+    │   ├── it should return the native token dispatch fee
+    │   ├── it should leave the dispatch nonce unchanged
+    │   └── it should encode the same message as depositVeNFT
+    └── when the v2 lock is not permanent
+        ├── when the v2 lock has expired
+        │   ├── it should quote the next nonce and liquid settlement parameters for the migration entrypoint on root
+        │   ├── it should use the caller as the Hyperlane refund address
+        │   ├── it should return the native token dispatch fee
+        │   ├── it should leave the dispatch nonce unchanged
+        │   └── it should encode the same message as depositVeNFT
+        └── when the v2 lock is active
+            ├── when the rounded duration is below the maximum v3 stake duration
+            │   ├── it should quote the next nonce and decay settlement parameters with the remaining duration rounded up to weeks for the migration entrypoint on root
+            │   ├── it should use the caller as the Hyperlane refund address
+            │   ├── it should return the native token dispatch fee
+            │   ├── it should leave the dispatch nonce unchanged
+            │   └── it should encode the same message as depositVeNFT
+            └── when the rounded duration reaches or exceeds the maximum v3 stake duration
+                ├── when migration occurs during the first three days of the epoch
+                │   ├── it should quote the next nonce and decay settlement parameters with a 208 week maximum duration for the migration entrypoint on root
+                │   ├── it should use the caller as the Hyperlane refund address
+                │   ├── it should return the native token dispatch fee
+                │   ├── it should leave the dispatch nonce unchanged
+                │   └── it should encode the same message as depositVeNFT
+                └── when migration occurs during the final four days of the epoch
+                    ├── it should quote the next nonce and decay settlement parameters with a 209 week maximum duration for the migration entrypoint on root
+                    ├── it should use the caller as the Hyperlane refund address
+                    ├── it should return the native token dispatch fee
+                    ├── it should leave the dispatch nonce unchanged
+                    └── it should encode the same message as depositVeNFT

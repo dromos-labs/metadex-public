@@ -1,0 +1,6 @@
+UnitStablePool::GetAmountOutWithTotalFee
+└── when quoting an exact input swap
+    ├── it should query the fee
+    ├── it should preserve the stable curve invariant
+    └── when testing a concrete example
+        └── it should return the concrete example amountOut

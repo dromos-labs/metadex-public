@@ -1,0 +1,75 @@
+{
+  "name": "metadex-public",
+  "version": "1.0.0",
+  "description": "Metadex Contracts",
+  "keywords": [
+    "metadex"
+  ],
+  "homepage": "https://aero.xyz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dromos-labs/metadex-public.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "DROMOS",
+  "files": [
+    "V3/src"
+  ],
+  "scripts": {
+    "build": "forge build",
+    "build:optimized": "FOUNDRY_PROFILE=optimized forge build",
+    "build:skip-tests": "forge build --skip test",
+    "coverage": "yarn coverage:v3",
+    "coverage:v3": "FOUNDRY_SRC=V3/src FOUNDRY_TEST=V3/test FOUNDRY_SCRIPT=V3/script forge coverage --ir-minimum --report summary --report lcov --report-file lcov-v3.info --match-path 'V3/test/unit/*'",
+    "deploy:mainnet": "bash -c 'source .env && forge script Deploy --rpc-url mainnet --account $MAINNET_DEPLOYER_NAME --broadcast --verify --chain mainnet -vvvvv'",
+    "deploy:sepolia": "bash -c 'source .env && forge script Deploy --rpc-url sepolia --account $SEPOLIA_DEPLOYER_NAME --broadcast --verify --chain sepolia -vvvvv'",
+    "lint:bulloak": "yarn lint:bulloak:v3",
+    "lint:bulloak:v3": "find V3/test/unit -name '*.tree' -exec bulloak check {} +",
+    "lint:check": "yarn lint:check:v3",
+    "lint:check:v3": "forge fmt --check V3 && yarn lint:sol:v3",
+    "lint:fix": "yarn lint:fix:v3",
+    "lint:fix:v3": "forge fmt V3 && find V3/src V3/script V3/test -name '*.sol' -exec solhint --fix {} + && sort-package-json",
+    "lint:natspec": "yarn lint:natspec:v3",
+    "lint:natspec:v3": "lintspec V3/src",
+    "lint:sol": "yarn lint:sol:v3",
+    "lint:sol:v3": "find V3/src V3/script V3/test -name '*.sol' -exec solhint {} +",
+    "lint:v3:changed": "lint-staged --concurrent false",
+    "prepare": "husky",
+    "test": "yarn test:v3",
+    "test:bulloak:fix": "bulloak check --fix ./**/*.tree",
+    "test:bulloak:scaffold": "bulloak scaffold -wS ./**/*.tree",
+    "test:fork": "yarn test:v3 --match-path 'V3/test/fork/*'",
+    "test:integration": "yarn test:v3 --match-path 'V3/test/integration/*'",
+    "test:integration:fork": "FORK=true yarn test:integration",
+    "test:unit": "yarn test:v3 --match-path 'V3/test/unit/*'",
+    "test:unit:deep": "FOUNDRY_FUZZ_RUNS=5000 yarn test:unit",
+    "test:v3": "FOUNDRY_SRC=V3/src FOUNDRY_TEST=V3/test FOUNDRY_SCRIPT=V3/script forge test -vvv",
+    "verify:veartproxy:saero": "FOUNDRY_SRC=V3/src FOUNDRY_TEST=V3/test FOUNDRY_SCRIPT=V3/script forge test --match-contract UnitVeArtProxy --match-test test_SvgWhenRenderingTheCanonicalFixture -q"
+  },
+  "lint-staged": {
+    "*.sol": "forge fmt",
+    "{V3/src,V3/script,V3/test}/**/*.sol": "node tools/solhint-changed-lines.cjs",
+    "V3/test/unit/**/*.tree": "bulloak check",
+    "package.json": "sort-package-json"
+  },
+  "dependencies": {
+    "@hyperlane-xyz/core": "10.1.3",
+    "@nomad-xyz/excessively-safe-call": "https://github.com/nomad-xyz/ExcessivelySafeCall",
+    "@openzeppelin/contracts": "5.6.1",
+    "@openzeppelin/contracts-upgradeable": "5.6.1",
+    "@openzeppelin/contracts-upgradeable-v4": "npm:@openzeppelin/contracts-upgradeable@4.9.6",
+    "@openzeppelin/contracts-v4": "npm:@openzeppelin/contracts@4.9.6",
+    "createx": "https://github.com/pcaversaccio/createx#v1.0.0",
+    "solady": "0.1.1"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "19.3.0",
+    "@commitlint/config-conventional": "19.2.2",
+    "forge-std": "github:foundry-rs/forge-std#v1.10.0",
+    "husky": ">=9",
+    "lint-staged": ">=16",
+    "solhint-community": "4.0.1",
+    "solhint-config-wonderland": "0.0.1",
+    "sort-package-json": "3.4.0"
+  }
+}

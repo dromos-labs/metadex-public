@@ -1,0 +1,71 @@
+UnitVelodromeMigrationEntrypoint::Handle
+├── when the caller is not the Hyperlane mailbox
+│   └── it should revert with CallerNotMailbox
+├── when the origin is not the OP domain
+│   └── it should revert with UnauthorizedOrigin
+├── when the sender is not the entrypoint contract
+│   └── it should revert with UnauthorizedSender
+├── when the message length is invalid
+│   └── it should revert with InvalidMessageLength
+└── when the message is valid
+    ├── when the nonce has already been used
+    │   └── it should revert with NonceAlreadyUsed
+    └── when the nonce has not been used
+        ├── when the token amount exceeds the remaining budget
+        │   ├── it should revert with BudgetExhausted
+        │   └── it should process the same settlement after the entrypoint is topped up
+        └── when the token amount does not exceed the remaining budget
+            ├── when the migration is liquid
+            │   ├── when the token amount exhausts the remaining budget
+            │   │   ├── it should mark the nonce as used
+            │   │   ├── it should increase paid by the token amount
+            │   │   ├── it should transfer the token amount to the recipient
+            │   │   └── it should emit the Migrated event
+            │   └── when the token amount leaves remaining budget
+            │       ├── it should mark the nonce as used
+            │       ├── it should increase paid by the token amount
+            │       ├── it should transfer the token amount to the recipient
+            │       └── it should emit the Migrated event
+            └── when the migration is staked
+                ├── when the stake is permanent
+                │   ├── it should mark the nonce as used
+                │   ├── it should increase paid by the token amount
+                │   ├── it should approve the v3 voting escrow to spend the token amount
+                │   ├── it should create a permanent v3 staked position with zero duration
+                │   ├── it should transfer the v3 staked position to the recipient
+                │   └── it should emit the Migrated event
+                └── when the stake is not permanent
+                    ├── when the duration exceeds the maximum accepted after delivery
+                    │   ├── when settlement occurs during the first three days of the epoch
+                    │   │   ├── it should mark the nonce as used
+                    │   │   ├── it should increase paid by the token amount
+                    │   │   ├── it should clamp the duration to the maximum accepted after delivery
+                    │   │   ├── it should approve the v3 voting escrow to spend the token amount
+                    │   │   ├── it should create a decaying v3 staked position
+                    │   │   ├── it should transfer the v3 staked position to the recipient
+                    │   │   └── it should emit the Migrated event
+                    │   └── when settlement occurs during the final four days of the epoch
+                    │       ├── it should mark the nonce as used
+                    │       ├── it should increase paid by the token amount
+                    │       ├── it should clamp the duration to the maximum accepted after delivery
+                    │       ├── it should approve the v3 voting escrow to spend the token amount
+                    │       ├── it should create a decaying v3 staked position
+                    │       ├── it should transfer the v3 staked position to the recipient
+                    │       └── it should emit the Migrated event
+                    └── when the duration does not exceed the maximum accepted after delivery
+                        ├── when the maximum accepted duration is requested
+                        │   ├── it should mark the nonce as used
+                        │   ├── it should increase paid by the token amount
+                        │   ├── it should leave the duration unchanged
+                        │   ├── it should approve the v3 voting escrow to spend the token amount
+                        │   ├── it should create a decaying v3 staked position
+                        │   ├── it should transfer the v3 staked position to the recipient
+                        │   └── it should emit the Migrated event
+                        └── when the duration is below the maximum accepted after delivery
+                            ├── it should mark the nonce as used
+                            ├── it should increase paid by the token amount
+                            ├── it should leave the duration unchanged
+                            ├── it should approve the v3 voting escrow to spend the token amount
+                            ├── it should create a decaying v3 staked position
+                            ├── it should transfer the v3 staked position to the recipient
+                            └── it should emit the Migrated event

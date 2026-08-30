@@ -1,0 +1,11 @@
+UnitAerodromeMigration::BurnRemaining
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+├── when the migration is not paused
+│   └── it should revert with ExpectedPause
+└── when the migration is paused
+    ├── it should burn the full remaining balance
+    ├── it should emit RemainingBurned with the remaining balance
+    └── when burnRemaining is called repeatedly
+        ├── it should call burn with zero on the repeated call
+        └── it should emit RemainingBurned with zero on the repeated call

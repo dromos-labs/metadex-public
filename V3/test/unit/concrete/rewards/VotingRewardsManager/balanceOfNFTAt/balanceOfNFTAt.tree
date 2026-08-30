@@ -1,0 +1,17 @@
+UnitConcreteVotingRewardsManager::BalanceOfNFTAt
+├── when there are no user checkpoints
+│   └── it should return zero
+└── when there are user checkpoints
+    ├── when there is no checkpoint at or before the timestamp
+    │   └── it should return zero
+    └── when there is a checkpoint at or before the timestamp
+        ├── when the stake is permanent
+        │   └── it should return the permanent balance
+        └── when the stake is not permanent
+            ├── when the timestamp matches the checkpoint timestamp
+            │   └── it should return the recorded bias
+            └── when the timestamp does not match the checkpoint timestamp
+                ├── when the stake has expired
+                │   └── it should return zero
+                └── when the stake has not expired
+                    └── it should return the decayed bias based on the veNFT slope

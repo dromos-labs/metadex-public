@@ -1,0 +1,9 @@
+UnitPoolOracle::Grow
+├── when the requested next is lt or eq to the current
+│   ├── it should not write any slots
+│   └── it should return the current value
+└── when the requested next is greater than the current
+    ├── it should write a placeholder of one into each field of each observation in the new range
+    ├── it should write three placeholder slots per grown observation plus the observationCardinalityNext slot
+    ├── it should set observationCardinalityNext to the requested next
+    └── it should return the requested next

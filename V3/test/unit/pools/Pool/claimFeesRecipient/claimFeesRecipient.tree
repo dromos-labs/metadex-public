@@ -1,0 +1,13 @@
+UnitPool::ClaimFeesRecipient
+├── when recipient is zero address
+│   └── it should revert with ZeroAddress
+└── when recipient is not zero address
+    ├── when account has no claimable fees
+    │   ├── it should return zero amounts
+    │   ├── it should sync the account fee indexes
+    │   └── it should not emit a Claim event
+    └── when account has stored fees
+        ├── it should transfer both fee tokens to the recipient
+        ├── it should clear the account claimable amounts
+        ├── it should return both claimed amounts
+        └── it should emit a Claim event with the account as caller

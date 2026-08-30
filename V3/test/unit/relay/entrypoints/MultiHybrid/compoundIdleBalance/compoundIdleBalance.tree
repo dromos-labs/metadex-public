@@ -1,0 +1,5 @@
+UnitMultiHybrid::CompoundIdleBalance
+├── when the relay is not the bound relay
+│   └── it should revert with WrongRelay
+└── when a keeper drains the idle balance
+    └── it should compound the unaccounted relay token balance

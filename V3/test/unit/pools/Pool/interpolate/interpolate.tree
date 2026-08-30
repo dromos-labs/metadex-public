@@ -1,0 +1,6 @@
+UnitPoolOracle::Interpolate
+├── it should linearly interpolate the reserve cumulatives at the target
+├── when given a concrete example
+│   └── it should match the hand-computed interpolation at a truncation boundary
+└── when given a concrete example with an overflowing intermediate product
+    └── it should match the hand computed interpolation

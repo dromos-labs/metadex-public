@@ -1,0 +1,12 @@
+UnitMultiEntrypoint::AddTargetToken
+├── when the caller is not the config admin
+│   └── it should revert with NotConfigAdmin
+├── when the token is the zero address
+│   └── it should revert with ZeroAddress
+├── when the token is already excluded
+│   └── it should revert with TargetExcludedOverlap
+├── when the token is already a target
+│   └── it should revert with TokenAlreadyConfigured
+└── when the token is new
+    ├── it should add the token to the target set
+    └── it should emit a TargetTokenAdded event

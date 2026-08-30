@@ -1,0 +1,13 @@
+UnitDynamicSwapFeeHook::SetSecondsAgo
+├── when caller is not Fee Manager
+│   └── it should revert with "NFM"
+└── when caller is Fee Manager
+    ├── when seconds ago is less than minimum seconds ago
+    │   └── it should revert with "ISA"
+    ├── when seconds ago is higher than maximum seconds ago
+    │   └── it should revert with "ISA"
+    └── when seconds ago is correct amount
+        ├── it should set the new secondsAgo
+        └── it should emit a {SecondsAgoSet} event
+
+ 

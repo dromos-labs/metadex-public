@@ -1,0 +1,68 @@
+UnitVoter::AllocateGauges
+├── when the caller is not approved or owner of the tokenId
+│   └── it should revert with NotAuthorized
+├── when the chain is not registered
+│   └── it should revert with ChainNotActiveOrSunset
+├── when the chain is chain zero
+│   └── it should revert with ChainNotActiveOrSunset
+├── when the chain is paused or suspended
+│   └── it should revert with ChainNotActiveOrSunset
+├── when the chain is sunset and the gauge list carries only the deallocation sentinel
+│   ├── it should flag the dispatch to charge the deallocation return
+│   └── it should dispatch one AllocateGauge message to the chain
+├── when the chain is sunset and the gauge list carries a non deallocation entry
+│   └── it should revert with SunsetDeallocOnly
+├── when the chain is sunset and the gauge list is empty
+│   └── it should revert with SunsetDeallocOnly
+├── when the destination gas limit is zero for a non root chain
+│   └── it should revert with MissingDestinationGasLimit
+├── when the token has been withdrawn
+│   └── it should revert with StakeWithdrawn
+├── when the gauge list is invalid
+│   ├── when gauges are not strictly ascending
+│   │   └── it should revert with GaugesNotStrictlyAscending
+│   └── when a gauge allocation amount is zero
+│       └── it should revert with ZeroAllocation
+├── when the gauge list is valid
+│   ├── it should snapshot the live stake into the dispatched message
+│   ├── it should stamp the global emissions per VP scalar onto the message
+│   ├── it should dispatch one AllocateGauge message to the chain
+│   └── it should emit the GaugesAllocated event carrying the gauge array
+├── when the gauge total exceeds the booked chain allocation
+│   └── it should revert with ChainAllocationMismatch
+├── when the gauge total is below the booked chain allocation
+│   └── it should revert with ChainAllocationMismatch
+├── when the gauge total equals the booked chain allocation
+│   ├── it should snapshot the live stake into the dispatched message
+│   ├── it should stamp a zero emissions per VP scalar when the total weight is zero
+│   └── it should dispatch one AllocateGauge message to the chain
+├── when the gauge list is empty
+│   └── it should dispatch one AllocateGauge message to the chain when the booked allocation is zero
+├── when the deallocation sentinel amount pushes the total over the booked chain allocation
+│   └── it should revert with ChainAllocationMismatch
+├── when the deallocation sentinel amount brings the total to the booked chain allocation
+│   ├── it should forward the full value to the orchestrator
+│   └── it should dispatch one AllocateGauge message to the chain
+├── when the gauge list carries only the deallocation sentinel
+│   ├── it should forward the full value to the orchestrator
+│   └── it should flag the dispatch to charge the deallocation return
+├── when the stake is expired and the gauge list carries only the deallocation sentinel
+│   └── it should dispatch one AllocateGauge message to the chain
+├── when the stake is expired and the gauge list carries a non deallocation entry
+│   └── it should revert with StakeExpired
+├── when the stake is expired and the gauge list is empty
+│   └── it should revert with StakeExpired
+├── when no deallocation sentinel is present
+│   ├── it should forward the full value to the orchestrator
+│   └── it should leave the dispatch unflagged
+├── when the dispatch synchronously returns the deallocation
+│   ├── it should process the deallocation return within the same call
+│   └── it should credit the returned amount to chain zero
+├── when the live stake shape differs from the stored root shape
+│   └── it should revert with StaleShape
+├── when a stale shape is reconciled with an empty chain allocation
+│   ├── it should re-anchor the stored root shape to the live stake
+│   └── it should let the retried gauge allocation dispatch
+└── when a prior total weight change left the global emissionsPerVP stale
+    ├── it should ship the freshly resampled emissionsPerVP in the dispatched message
+    └── it should resample the stored global emissionsPerVP against the current total weight

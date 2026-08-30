@@ -1,0 +1,27 @@
+UnitVotingEscrow::Constructor
+├── when the token address is zero
+│   └── it should revert with ZeroAddress
+├── when the voter address is zero
+│   └── it should revert with ZeroAddress
+├── when the art proxy address is zero
+│   └── it should revert with ZeroAddress
+├── when the vpm role admin address is zero
+│   └── it should revert with ZeroAddress
+├── when the art proxy admin address is zero
+│   └── it should revert with ZeroAddress
+├── when the burn fees admin address is zero
+│   └── it should revert with ZeroAddress
+└── when the contract is deployed
+    ├── it should set the token
+    ├── it should set the voter
+    ├── it should set the art proxy
+    ├── it should grant the vpm role admin role to the vpm role admin
+    ├── it should grant the art proxy admin role to the configured admin
+    ├── it should grant the burn fees admin role to the configured admin
+    ├── it should set the vpm role admin as the admin of the vpm role
+    ├── it should set the vpm role admin role as self administered
+    ├── it should set the art proxy admin role as self administered
+    ├── it should set the burn fees admin as the admin of the burn fees role
+    ├── it should set the burn fees admin role as self administered
+    ├── it should not grant the default admin role to the deployer
+    └── it should record the initial point history timestamp

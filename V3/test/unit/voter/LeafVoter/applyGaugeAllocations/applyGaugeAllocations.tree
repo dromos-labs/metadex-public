@@ -1,0 +1,142 @@
+UnitLeafVoter::ApplyGaugeAllocations
+├── when the caller is not the leaf message orchestrator
+│   └── it should revert with NotMessageOrchestrator
+├── when the chain is suspended
+│   └── it should still distribute the allocation without reverting
+├── when the cooldown has not elapsed after applying the reduction
+│   ├── it should revert with CooldownActive
+│   └── it should not consume the pending reduction on revert
+├── when a sufficient reduction brings the effective cooldown to zero
+│   ├── it should clear the pending reduction it consumed
+│   └── it should set the last voted timestamp to the current timestamp
+├── when a partial reduction exceeds the cooldown
+│   ├── it should persist the leftover pending reduction
+│   └── it should set the last voted timestamp to the current timestamp
+├── when a partial reduction fully clears a reduced cooldown that just elapsed
+│   ├── it should clear the pending reduction
+│   └── it should set the last voted timestamp to the current timestamp
+├── when the allocation set exceeds the max gauges
+│   └── it should revert with ExceedsMaxGauges
+├── when the allocation sum exceeds the chain allocation
+│   └── it should revert with ChainAllocationMismatch
+├── when a stale allocation exceeds a chain allocation reduced by a prior deallocation
+│   └── it should revert with ChainAllocationMismatch
+├── when the allocation set is empty and the token has no prior voted gauges
+│   ├── it should set the last voted timestamp to the current timestamp
+│   └── it should return an empty call params list
+├── when the allocation set is empty and the token has prior voted gauges
+│   ├── it should set the last voted timestamp to the current timestamp
+│   ├── it should decrease the stored gauge allocation by the prior amount
+│   ├── it should decrease the chain weight by the prior allocated amount
+│   ├── it should remove the gauge from the voted set
+│   └── it should return a call params entry per prior voted gauge
+├── when every allocation targets a routable gauge
+│   ├── it should set the last voted timestamp to the current timestamp
+│   ├── it should increase the chain weight by each allocated amount
+│   ├── it should add each gauge to the voted set
+│   ├── it should store each gauge allocation
+│   └── it should return one call params entry per gauge
+├── when a routable gauge receives a decaying stake
+│   ├── it should book the decaying bias and slope on the gauge point
+│   ├── it should schedule the slope change at the stake expiry
+│   ├── it should add the gauge to the voted set
+│   ├── it should store the gauge allocation
+│   ├── it should unwind the prior bias and slope when the gauge is re-voted with a new expiry
+│   └── it should rewrite the scheduled slope change at the new expiry
+├── when an allocation keeps a previously voted gauge
+│   ├── given the new allocation equals the prior allocation
+│   │   ├── it should leave the net chain weight unchanged
+│   │   ├── it should overwrite the stored gauge allocation
+│   │   ├── it should leave the gauge in the voted set
+│   │   └── it should return one call params entry for the gauge
+│   ├── given the new allocation is greater than the prior allocation
+│   │   ├── it should increase the net chain weight by the allocation difference
+│   │   ├── it should overwrite the stored gauge allocation
+│   │   ├── it should leave the gauge in the voted set
+│   │   └── it should return one call params entry for the gauge
+│   └── given the new allocation is less than the prior allocation
+│       ├── it should decrease the net chain weight by the allocation difference
+│       ├── it should overwrite the stored gauge allocation
+│       ├── it should leave the gauge in the voted set
+│       └── it should return one call params entry for the gauge
+├── when a previously voted gauge is omitted from the allocation set
+│   ├── it should decrease the stored gauge allocation by the prior amount
+│   ├── it should decrease the chain weight by the prior allocated amount
+│   ├── it should remove the gauge from the voted set
+│   └── it should return a call params entry for the dropped gauge
+├── when an allocation targets an unregistered gauge
+│   ├── it should park the allocation weight on the zero gauge
+│   └── it should not add the gauge to the voted set
+├── when an allocation targets an inactive gauge and the token is not whitelisted
+│   ├── it should park the allocation weight on the zero gauge
+│   └── it should not add the gauge to the voted set
+├── when several allocations target unroutable gauges
+│   ├── it should sum the redirected weight from unregistered and inactive gauges into a single zero gauge contribution
+│   └── it should not add any of the gauges to the voted set
+├── when the token is whitelisted for an inactive gauge
+│   ├── it should park the allocation weight on the zero gauge
+│   └── it should not add the gauge to the voted set
+├── when an allocation targets a zero cap gauge and the token is not whitelisted
+│   ├── it should park the allocation weight on the zero gauge
+│   └── it should not add the gauge to the voted set
+├── when the token is whitelisted for a zero cap gauge
+│   ├── it should increase the chain weight by the allocated amount
+│   └── it should add the gauge to the voted set
+├── when the new snapshot is expired
+│   ├── it should contribute nothing to any incoming gauge
+│   ├── it should decrease the stored gauge allocation by the prior amount
+│   ├── it should decrease the chain weight by the prior allocated amount
+│   ├── it should remove every prior voted gauge from the voted set
+│   ├── it should return a call params entry per prior voted gauge
+│   ├── it should decrease the chain weight by the prior zero gauge allocated amount
+│   └── it should clear the zero gauge allocation
+├── when a fresh allocation rounds down to zero weight on a gauge pending settlement
+│   ├── it should leave the gauge settlement cursor unchanged
+│   ├── it should leave the gauge ceiling unchanged
+│   ├── it should not store the gauge allocation
+│   ├── it should not add the gauge to the voted set
+│   └── it should not return a call params entry for the gauge
+├── when a kept gauge allocation rounds down to zero weight
+│   ├── it should decrease the stored gauge allocation by the prior amount
+│   ├── it should decrease the chain weight by the prior allocated amount
+│   ├── it should remove the gauge from the voted set
+│   └── it should return a call params entry for the gauge
+├── when the token carried a prior zero gauge allocation
+│   ├── it should decrease the chain weight by the prior zero gauge allocated amount
+│   └── it should increase the chain weight by the new zero gauge allocated amount
+├── when the allocation message has expired
+│   └── it should revert with AllocationExpired
+├── when the message expiry has not passed
+│   └── it should apply the allocation normally
+├── when the allocation contains the deallocation sentinel
+│   ├── it should dispatch a Deallocate message drawing from the orchestrator pool on the inbound path
+│   ├── it should emit the Deallocated event
+│   ├── it should decrement the chain allocation by the sentinel amount
+│   ├── it should book the routable gauge exactly as usual
+│   ├── it should not park the sentinel store an allocation add it to the voted set or checkpoint it
+│   └── it should return only the routable gauge in the call params list
+├── when the message is the newest gauge allocation and the chain is active
+│   ├── it should emit GaugesAllocated carrying the stored scalar
+│   └── it should set the emissions scalar to the passed value
+├── when the message does not update the scalar
+│   ├── it should emit GaugesAllocated carrying the unchanged prior scalar
+│   └── it should leave the emissions scalar unchanged
+├── when the message updates the scalar but the chain is suspended
+│   ├── it should emit GaugesAllocated carrying the masked zero scalar
+│   └── it should mask the emissions scalar to zero
+├── when the message updates the scalar but the chain is sunset
+│   ├── it should emit GaugesAllocated carrying the masked zero scalar
+│   └── it should mask the emissions scalar to zero
+├── when the scalar update is applied after the index settles at the old scalar
+│   ├── it should settle the index at the old scalar before applying the new one
+│   ├── it should set the last settlement to the current timestamp
+│   └── it should store the new scalar after settling
+├── when a gauge allocation is applied
+    └── it should emit the GaugesAllocated event with the requested allocations
+├── when a bridged gauge message applies
+│   └── it should sync the latest snapshot to the message shape
+├── when the message snapshot is staler than the latest
+│   └── it should book the vote at the latest shape not the stale one
+└── when local voting is disabled
+    ├── it should still apply the bridged allocation
+    └── it should still add the gauge to the voted set

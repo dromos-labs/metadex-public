@@ -1,0 +1,7 @@
+UnitFlatFeeQuoter::constructor
+└── it should set factory to the provided factory address
+
+UnitFlatFeeQuoter::getFeeForAmountIn
+└── when the factory quotes a fee
+    ├── it should forward the pool caller amounts and reserves to the factory
+    └── it should return the total fee the factory quotes

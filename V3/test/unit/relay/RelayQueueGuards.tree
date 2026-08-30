@@ -1,0 +1,53 @@
+UnitRelayQueueGuards
+├── when processing overdue deposits by id
+│   ├── it should revert on an empty ids array
+│   ├── it should emit the request under its list id
+│   ├── it should advance the emitted id request by request
+│   ├── it should revert on an id that was never issued
+│   ├── it should revert while the named entry is still fresh
+│   ├── it should process only the named overdue entries, permissionlessly
+│   ├── it should not process the same entry twice
+│   └── it should let the keeper walk skip the processed entry and process the fresh tail
+├── when the oldest deposit is exactly at the keeper window
+│   └── it should process the entry whose age equals the window
+├── when requesting an invalid deposit
+│   └── it should reject bad callers, bad recipients and dust amounts
+├── when the shares would floor to zero
+│   └── it should revert with ZeroShares
+├── when the deposit prices to exactly one share
+│   └── it should admit the request sitting on the boundary
+├── when the supply is zero
+│   └── it should admit the request whatever the backing holds
+├── when requests keep arriving
+│   └── it should admit every request, unbounded, with ids in sequence
+├── when the module charges a deposit fee
+│   ├── it should queue the net weight the relay actually received
+│   └── it should mint against the net rather than the request
+├── when the fee drags the net below the floor
+│   └── it should revert with BelowMinimumDeposit
+├── when the fee takes the whole request
+│   └── it should revert with BelowMinimumDeposit
+├── when registering an invalid exit
+│   ├── it should revert under the withdrawal floor
+│   ├── it should revert when the callers free pair cannot cover the escrow
+│   └── it should admit an exit behind a long backlog, since the queue has no capacity
+├── when the whole free position sits under the withdrawal floor
+│   ├── it should still refuse a partial exit under the floor
+│   ├── it should still refuse a zero exit
+│   ├── it should let the holder exit the entire free position
+│   └── it should hold the floor for a holder whose free position covers it
+├── when a closed relay mints a principal under the floor
+│   └── it should let the holder exit the principal in full
+├── when the named destination belongs to someone else
+│   ├── it should register the exit and escrow the shares without reading the escrow
+│   └── it should return the named destination from the withdrawals getter
+├── when the named destination is the relay sAERO
+│   └── it should revert with InvalidDestination
+├── when the named destination does not fit the stored destination field
+│   └── it should revert with InvalidDestination
+├── when registering an exit with the mint sentinel
+│   ├── it should store the entry fields under the issued id
+│   └── it should rebuild the sentinel on the withdrawals getter
+└── when registering successive exits
+    ├── it should accumulate the escrow and price the free pair against the total
+    └── it should measure the floor against the free remainder, not the whole balance

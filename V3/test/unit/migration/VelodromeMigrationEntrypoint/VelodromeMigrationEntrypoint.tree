@@ -1,0 +1,50 @@
+UnitVelodromeMigrationEntrypoint::constructor
+├── when the owner is the zero address
+│   └── it should revert with OwnableInvalidOwner
+├── when the v3 token is the zero address
+│   └── it should revert with ZeroAddress
+├── when the v3 voting escrow is the zero address
+│   └── it should revert with ZeroAddress
+├── when the Hyperlane mailbox is the zero address
+│   └── it should revert with ZeroAddress
+├── when the OP domain is zero
+│   └── it should revert with InvalidDomain
+├── when the OP domain is equal to the mailbox local domain
+│   └── it should revert with InvalidDomain
+└── when passing valid parameters
+    ├── it should call localDomain on the Hyperlane mailbox
+    ├── it should set the owner
+    └── it should set the entrypoint configuration
+
+UnitVelodromeMigrationEntrypoint::onERC721Received
+├── when the caller is not the v3 voting escrow
+│   └── it should revert with InvalidERC721Transfer
+└── when the caller is the v3 voting escrow
+    ├── when the operator is not the entrypoint contract
+    │   └── it should revert with InvalidERC721Transfer
+    └── when the operator is the entrypoint contract
+        └── it should return the ERC721 receiver selector
+
+UnitVelodromeMigrationEntrypoint::burnRemaining
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+├── when the remaining balance is zero
+│   ├── it should return zero from remaining
+│   ├── it should burn zero
+│   └── it should emit RemainingBurned with zero
+├── when the remaining balance is positive
+│   ├── it should return the remaining balance
+│   ├── it should burn the full remaining balance
+│   └── it should emit RemainingBurned with the remaining balance
+└── when burnRemaining is called repeatedly
+    ├── it should burn zero on the repeated call
+    └── it should emit RemainingBurned with zero on the repeated call
+
+UnitVelodromeMigrationEntrypoint::renounceOwnership
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+├── when the remaining balance is positive
+│   └── it should revert with RemainingBalance
+└── when the remaining balance is zero
+    ├── it should renounce ownership
+    └── it should emit OwnershipTransferred

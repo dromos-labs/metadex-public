@@ -1,0 +1,18 @@
+UnitMultiEntrypoint::Requires
+├── when requiring a bound relay
+│   ├── when the relay is not the bound relay
+│   │   └── it should revert with WrongRelay
+│   └── when the relay matches the bound relay
+│       └── it should allow the call
+├── when requiring a convertible pair
+│   ├── when the convert input is excluded
+│   │   └── it should revert with TokenExcluded
+│   ├── when the target is not configured
+│   │   └── it should revert with NotTargetToken
+│   └── when the pair is convertible
+│       └── it should allow the call
+└── when requiring a non excluded input
+    ├── when the compound input is excluded
+    │   └── it should revert with TokenExcluded
+    └── when the input is allowed
+        └── it should allow the call

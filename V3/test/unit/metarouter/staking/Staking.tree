@@ -1,0 +1,74 @@
+UnitStaking::stakeGauge
+├── given a lite deployment with no leaf voter
+│   └── it should revert with CommandDisabled
+├── when the gauge is not registered
+│   └── it should revert with GaugeNotRegistered
+└── given the gauge is registered
+    ├── given the gauge is a cl gauge
+    │   ├── when the token id is the in flight sentinel
+    │   │   ├── it should not pull the position from the sender
+    │   │   ├── it should approve the gauge
+    │   │   ├── it should deposit for _owner
+    │   │   └── it should clear the in flight slots at closure
+    │   ├── given the position is already in custody
+    │   │   ├── when the custodied position was not tracked this batch
+    │   │   │   └── it should revert with NftNotInCustody
+    │   │   └── when the custodied position was tracked this batch
+    │   │       ├── it should not pull the position from the sender
+    │   │       ├── it should approve the gauge
+    │   │       └── it should deposit for _owner
+    │   └── when the position is not already in custody
+    │       ├── it should pull the position from _owner
+    │       ├── it should approve the gauge
+    │       └── it should deposit for _owner
+    └── given the gauge target is a v2 gauge
+        ├── when the payer is internal and the spend mode is amount
+        │   ├── it should approve the gauge for the funded amount
+        │   └── it should deposit the funded amount for _owner
+        ├── when the payer is external and the token charges a fee on transfer
+        │   ├── it should pull the requested amount from _owner
+        │   ├── it should approve the gauge for the measured received amount
+        │   └── it should deposit the measured received amount for _owner
+        └── when the payer is internal and the spend mode is pips
+            ├── it should approve the gauge for the resolved proportion
+            └── it should deposit the resolved proportion for _owner
+
+UnitStaking::unstakeGauge
+├── given a lite deployment with no leaf voter
+│   └── it should revert with CommandDisabled
+├── when the gauge is not registered
+│   └── it should revert with GaugeNotRegistered
+└── given the gauge is registered
+    ├── given the gauge is a cl gauge
+    │   ├── when the router carries claim approval
+    │   │   ├── it should track the emission token
+    │   │   └── it should withdraw for _owner
+    │   ├── when the router lacks claim approval
+    │   │   ├── it should withdraw for _owner
+    │   │   └── it should not sweep the emission token
+    │   ├── when the gauge returns the position
+    │   │   ├── it should set the gauge and position as expected while withdrawing
+    │   │   └── it should clear the expected nft after withdrawing
+    │   ├── when the returned position is transferred in the same batch
+    │   │   ├── it should transfer the returned position to _recipient
+    │   │   ├── it should clear the expected nft after withdrawing
+    │   │   └── it should clear the nft tracking at closure
+    │   ├── when no later command sends the returned position onward
+    │   │   └── it should revert with NftNotCleared
+    │   └── when an expected sender is already set
+    │       └── it should revert with NftSenderNotCleared
+    └── given the gauge is a v2 gauge
+        ├── when the penalty is active and the penalty is not allowed
+        │   └── it should revert with PenaltyNotAccepted
+        ├── when the penalty is active and the penalty is allowed
+        │   └── it should withdraw despite the active penalty
+        ├── when the penalty window has elapsed
+        │   └── it should withdraw after the penalty window
+        ├── when the router holds claim approval
+        │   ├── it should track the lp token
+        │   ├── it should track the emission token
+        │   └── it should withdraw for _owner
+        └── when the router does not hold claim approval
+            ├── it should track the lp token
+            ├── it should withdraw for _owner
+            └── it should not sweep the emission token

@@ -1,0 +1,71 @@
+UnitHyperlaneAdapter::constructor
+├── when remoteChainId is zero
+│   └── it should revert with InvalidChainId
+├── when remoteChainId is equal to block chainid
+│   └── it should revert with InvalidChainId
+├── when remoteDomainId is zero
+│   └── it should revert with InvalidDomain
+├── when orchestrator is the zero address
+│   └── it should revert with ZeroAddress
+├── when mailbox is the zero address
+│   └── it should revert with ZeroAddress
+├── when adapter authority is the zero address
+│   └── it should revert with ZeroAddress
+├── when remoteDomainId is equal to local domain
+│   └── it should revert with InvalidDomain
+└── when all inputs are valid
+    ├── it should call localDomain on MAILBOX
+    ├── it should set REMOTE_CHAIN_ID to _remoteChainId
+    ├── it should set REMOTE_DOMAIN_ID to _remoteDomainId
+    ├── it should set ORCHESTRATOR to _orchestrator
+    ├── it should set MAILBOX to _mailbox
+    └── it should set ADAPTER_AUTHORITY_SOURCE to _adapterAuthority
+
+UnitHyperlaneAdapter::sendMessage
+├── when msgSender is not ORCHESTRATOR
+│   └── it should revert with CallerNotOrchestrator
+└── given msgSender is ORCHESTRATOR
+    ├── when gasLimit is zero
+    │   └── it should revert with InvalidGasLimit
+    ├── when remoteAdapter is zero
+    │   └── it should revert with RemoteAdapterNotSet
+    └── when remoteAdapter is set
+        ├── it should call dispatch on MAILBOX with REMOTE_DOMAIN_ID, _remoteAdapter, _message and the formatted hook metadata forwarding msg.value
+        └── it should emit MessageSent with _messageId and _remoteAdapter
+
+UnitHyperlaneAdapter::quoteMessage
+├── when gasLimit is zero
+│   └── it should revert with InvalidGasLimit
+├── when remoteAdapter is zero
+│   └── it should revert with RemoteAdapterNotSet
+└── when remoteAdapter is set
+    ├── it should call quoteDispatch on MAILBOX with REMOTE_DOMAIN_ID, _remoteAdapter, _message and the same formatted hook metadata sendMessage dispatches with
+    └── it should return the fee quoted by MAILBOX
+
+UnitHyperlaneAdapter::handle
+├── when msgSender is not MAILBOX
+│   └── it should revert with CallerNotMailbox
+└── given msgSender is MAILBOX
+    ├── when origin is not equal to remoteDomainId
+    │   └── it should revert with UnauthorizedOrigin
+    └── given origin is equal to remoteDomainId
+        ├── when remoteAdapter is zero
+        │   └── it should revert with RemoteAdapterNotSet
+        └── given remoteAdapter is set
+            ├── when sender is not the remoteAdapter
+            │   └── it should revert with UnauthorizedSender
+            ├── when all inputs are valid
+            │   └── it should call route on ORCHESTRATOR with REMOTE_CHAIN_ID and _message
+            └── when the delivery carries relayer value
+                ├── it should forward the full value to route
+                └── it should accept the value carrying delivery
+
+UnitHyperlaneAdapter::setRemoteAdapter
+├── when msgSender is not adapter authority
+│   └── it should revert with CallerNotAdapterAuthority
+└── given msgSender is adapter authority
+    ├── when remoteAdapter is zero
+    │   └── it should revert with InvalidRemoteAdapter
+    └── when remoteAdapter is nonzero
+        ├── it should set remoteAdapter to _remoteAdapter
+        └── it should emit RemoteAdapterUpdated with _remoteAdapter

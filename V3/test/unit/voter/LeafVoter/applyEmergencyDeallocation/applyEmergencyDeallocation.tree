@@ -1,0 +1,35 @@
+UnitLeafVoter::ApplyEmergencyDeallocation
+├── when the caller is not the message orchestrator
+│   └── it should revert with NotMessageOrchestrator
+├── when the amount is at least the chain budget
+│   ├── it should unwind every voted gauge
+│   ├── it should clear the stored gauge allocations
+│   ├── it should empty the voted gauge set
+│   ├── it should park nothing on the zero gauge
+│   ├── it should zero the chain allocation budget
+│   └── it should emit EmergencyDeallocationApplied
+├── when the amount is below the chain budget and the snapshot is permanent
+│   ├── it should unwind every voted gauge
+│   ├── it should clear the stored gauge allocations
+│   ├── it should empty the voted gauge set
+│   ├── it should repark the surviving remainder on the zero gauge
+│   ├── it should set the chain allocation budget to the remainder
+│   └── it should emit EmergencyDeallocationApplied
+├── when the amount is below the chain budget and the snapshot is decaying
+│   ├── it should unwind every voted gauge
+│   ├── it should repark the surviving remainder as decaying weight on the zero gauge
+│   ├── it should set the chain allocation budget to the remainder
+│   └── it should emit EmergencyDeallocationApplied
+├── when the token snapshot has expired
+│   ├── it should not revert
+│   ├── it should fully unwind the voted gauge
+│   ├── it should empty the voted gauge set
+│   ├── it should zero the chain allocation budget
+│   └── it should emit EmergencyDeallocationApplied
+├── when the token has no position
+│   ├── it should not revert
+│   ├── it should leave the chain allocation at zero
+│   └── it should emit EmergencyDeallocationApplied
+└── when the snapshot has expired and the drain is partial
+    ├── it should set the chain allocation budget to the remainder
+    └── it should repark the remainder against the latest live snapshot

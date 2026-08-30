@@ -1,0 +1,5 @@
+UnitVotingEscrow::SupportsInterface
+├── when the interface is supported
+│   └── it should return true
+└── when the interface is not supported
+    └── it should return false

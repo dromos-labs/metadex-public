@@ -1,0 +1,13 @@
+UnitVoterPaymentsModule::getFee
+├── when the caller is registered
+│   ├── when the caller rate is below the default
+│   │   └── it should return the caller rate
+│   ├── when the caller rate is above the default
+│   │   └── it should return the default rate
+│   └── when the caller rate equals the default
+│       └── it should return the default rate
+└── when the caller is unregistered
+    ├── when restricted is true
+    │   └── it should revert with NotRegistered
+    └── when restricted is false
+        └── it should return the default rate

@@ -1,0 +1,9 @@
+UnitDynamicSwapFeeHook::GetBeforeSwapFee
+├── when block fee is zero
+│   └── it computes and returns the first fee
+├── when first tx initial fee is not zero
+│   └── it returns first tx initial fee
+├── when block fee is not ZERO_FEE_INDICATOR
+│   └── it returns block fee
+└── when block fee is ZERO_FEE_INDICATOR
+    └── it returns 0

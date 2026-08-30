@@ -1,0 +1,89 @@
+UnitV2Gauge::WithdrawFrom
+├── when the account is the zero address
+│   └── it should revert with ZeroAddress
+├── when the amount is zero
+│   └── it should revert with ZeroAmount
+├── when the caller is the account without self approval
+│   └── it should revert with InsufficientAllowance
+└── when the caller is an operator
+    ├── when the allowance is insufficient
+    │   └── it should revert with InsufficientAllowance
+    ├── when the allowance is bounded and sufficient
+    │   ├── when the amount is less than the account balance
+    │   │   ├── it should request a leaf voter settlement
+    │   │   ├── it should update the account's rewardPerTokenPaid
+    │   │   ├── it should keep the account rewards cleared
+    │   │   ├── it should not mint emissions
+    │   │   ├── it should decrement the allowance
+    │   │   ├── it should decrease the account balance
+    │   │   ├── it should decrease total supply
+    │   │   ├── it should keep the account deposit block
+    │   │   ├── it should transfer staking tokens to the caller
+    │   │   └── it should emit a Withdraw event
+    │   └── when the amount equals the account balance
+    │       ├── it should request a leaf voter settlement
+    │       ├── it should update the account's rewardPerTokenPaid
+    │       ├── it should keep the account rewards cleared
+    │       ├── it should not mint emissions
+    │       ├── it should decrement the allowance
+    │       ├── it should decrease the account balance to zero
+    │       ├── it should decrease total supply
+    │       ├── it should clear the account deposit block
+    │       ├── it should transfer staking tokens to the caller
+    │       └── it should emit a Withdraw event
+    ├── when the operator has blanket approval
+    │   ├── it should not decrement the allowance
+    │   ├── it should decrease total supply
+    │   └── it should allow repeated withdrawals
+    ├── when the operator has max allowance through approve
+    │   ├── it should report blanket approval
+    │   ├── it should not decrement the allowance
+    │   ├── it should decrease total supply
+    │   └── it should allow repeated withdrawals
+    ├── when the operator has no claim approval
+    │   ├── it should request a leaf voter settlement
+    │   ├── it should update the account's rewardPerTokenPaid
+    │   ├── it should clear the account rewards
+    │   ├── it should emit the EmissionsClaimed event
+    │   ├── it should emit the ReferralEmissionsDeferred event
+    │   ├── it should clear the account deferred emissions
+    │   ├── it should emit the DeferredEmissionsClaimed event
+    │   ├── it should accumulate the referral emissions
+    │   ├── it should mint live and deferred LP emissions to the account
+    │   ├── it should withdraw without requiring claim approval
+    │   ├── it should decrease the account balance
+    │   ├── it should decrease total supply
+    │   ├── it should transfer staking tokens to the caller
+    │   └── it should emit a Withdraw event
+    ├── when the operator has claim approval
+    │   ├── it should request a leaf voter settlement
+    │   ├── it should update the account's rewardPerTokenPaid
+    │   ├── it should clear the account rewards
+    │   ├── it should emit the EmissionsClaimed event
+    │   ├── it should emit the ReferralEmissionsDeferred event
+    │   ├── it should clear the account deferred emissions
+    │   ├── it should emit the DeferredEmissionsClaimed event
+    │   ├── it should accumulate the referral emissions
+    │   ├── it should mint live and deferred LP emissions to the caller
+    │   ├── it should keep claim approval active after withdrawal
+    │   ├── it should decrease the account balance
+    │   ├── it should decrease total supply
+    │   ├── it should transfer staking tokens to the caller
+    │   └── it should emit a Withdraw event
+    ├── when the operator has claim approval and emission minting reverts
+    │   ├── it should request a leaf voter settlement
+    │   ├── it should attempt to mint live and deferred LP emissions to the caller
+    │   ├── it should store the live LP emissions with the existing account deferred balance
+    │   ├── it should store the referral emissions with the existing referral balance
+    │   ├── it should emit the ReferralEmissionsDeferred event
+    │   ├── it should emit the EmissionsDeferred event
+    │   ├── it should keep claim approval active after withdrawal
+    │   ├── it should decrease the account balance
+    │   ├── it should decrease total supply
+    │   ├── it should transfer staking tokens to the caller
+    │   └── it should emit a Withdraw event
+    └── when the settlement pulls a nonzero delta
+        ├── it should fold the pulled delta into reward per token stored
+        ├── it should advance the cumulative reward share cursor
+        ├── it should mint the folded emissions to the account
+        └── it should transfer staking tokens to the caller

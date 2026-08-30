@@ -1,0 +1,8 @@
+UnitPoolOracle::ObserveSingle
+├── when secondsAgo is zero
+│   └── it should return the current cumulative prices
+└── when secondsAgo is positive
+    ├── when the target lands on the at or after observation
+    │   └── it should return the at or after cumulatives
+    └── when the target falls between the before and after observations
+        └── it should return the interpolation

@@ -1,0 +1,13 @@
+UnitVoterPaymentsModule::setRestricted
+├── when the caller does not hold the fee manager role
+│   └── it should revert with AccessControlUnauthorizedAccount
+└── when the caller holds the fee manager role
+    ├── when toggling to true
+    │   ├── it should set restricted[sig] to true
+    │   └── it should emit RestrictedSet
+    ├── when toggling to false
+    │   ├── it should set restricted[sig] to false
+    │   └── it should emit RestrictedSet
+    └── when the value is unchanged
+        ├── it should not emit RestrictedSet
+        └── it should leave the restricted flag unchanged

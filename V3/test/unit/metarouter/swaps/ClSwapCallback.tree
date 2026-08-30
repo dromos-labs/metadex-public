@@ -1,0 +1,33 @@
+UnitSwaps::ClSwapCallback
+├── when reached through delegatecall
+│   └── it should revert with DirectCallRequired
+├── when no callback caller is expected
+│   └── it should revert with InvalidCallbackCaller for the caller
+├── when another caller invokes the callback
+│   └── it should revert with InvalidCallbackCaller for the caller
+├── when a completed callback is replayed
+│   └── it should revert with InvalidCallbackCaller for the caller
+└── given the caller is the expected pool
+    ├── when neither token delta is positive
+    │   └── it should revert with InvalidCallbackDeltas
+    ├── when both token deltas are positive
+    │   └── it should revert with InvalidCallbackDeltas
+    ├── when both token deltas are zero
+    │   └── it should revert with InvalidCallbackDeltas
+    └── given exactly one token delta is positive
+        ├── given unexecuted route pools remain
+        │   └── it should settle the invoice by swapping the previous pool to the caller
+        └── given no unexecuted route pools remain
+            ├── when the amount owed exceeds the encoded maximum
+            │   └── it should revert with TooMuchRequested
+            └── given the amount owed is within the encoded maximum
+                ├── when the payer is invalid
+                │   └── it should revert with InvalidPayer
+                ├── when the payer is the execution address
+                │   └── it should clear authorization and transfer the owed token
+                ├── when the execution address owes the native mirror token beyond the batch native
+                │   └── it should revert with InsufficientBalance for the token
+                ├── when the payer is the execution owner
+                │   └── it should clear authorization and pull the owed token
+                └── when token one is owed
+                    └── it should transfer the encoded input token

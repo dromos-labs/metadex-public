@@ -1,0 +1,42 @@
+UnitV2Gauge::DepositFor
+├── when the owner is zero address
+│   └── it should revert with ZeroAddress
+├── when the penalty is active
+│   ├── when the caller is not an approved meta router
+│   │   └── it should revert with PenaltyActive
+│   └── when the caller is an approved meta router
+│       ├── it should pull staking tokens from the caller
+│       ├── it should credit the owner balance
+│       ├── it should increase total supply
+│       ├── it should update the owner's deposit block
+│       └── it should emit a Deposit event
+├── when the amount is zero
+│   └── it should revert with ZeroAmount
+├── when the penalty is inactive
+│   ├── it should pull staking tokens from the caller
+│   ├── it should credit the owner balance
+│   ├── it should increase total supply
+│   ├── it should update the owner's deposit block
+│   └── it should emit a Deposit event
+├── when depositing for the caller
+│   ├── it should pull staking tokens from the caller
+│   ├── it should advance reward per token stored
+│   ├── it should advance the cumulative reward share cursor
+│   ├── it should update the caller's rewards before the deposit
+│   ├── it should update the caller's rewardPerTokenPaid
+│   ├── it should credit the caller balance
+│   ├── it should increase total supply
+│   ├── it should update the caller's deposit block
+│   └── it should emit a Deposit event
+└── when depositing for another owner
+    ├── it should pull staking tokens from the caller
+    ├── it should advance reward per token stored
+    ├── it should advance the cumulative reward share cursor
+    ├── it should update the owner's rewards before the deposit
+    ├── it should update the owner's rewardPerTokenPaid
+    ├── it should not update the caller's rewards
+    ├── it should not update the caller's rewardPerTokenPaid
+    ├── it should credit the owner balance
+    ├── it should increase total supply
+    ├── it should update the owner's deposit block
+    └── it should emit a Deposit event

@@ -1,0 +1,18 @@
+UnitPoolTape::ObserveSingle
+├── when the pool has no recorded swap
+│   └── it returns a zeroed observation
+├── when secondsAgo is eq to zero
+│   └── it returns the current accumulator as an observation
+└── when secondsAgo is gt zero
+    ├── when secondsAgo is gte the current block time
+    │   └── it sets the target to zero and returns the oldest observation
+    └── when secondsAgo is lt the current block time
+        ├── when the target is gte the last swap timestamp
+        │   └── it returns the current accumulator as an observation with the target timestamp
+        └── when the target is lt the last swap timestamp
+            ├── when the target is gte the upper bound
+            │   └── it returns the upper bound observation
+            ├── when the target is lte the lower bound
+            │   └── it returns the lower bound observation
+            └── when the target is strictly between the bounds
+                └── it returns the interpolation between the bounds

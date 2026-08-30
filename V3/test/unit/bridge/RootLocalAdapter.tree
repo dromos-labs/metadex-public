@@ -1,0 +1,34 @@
+UnitRootLocalAdapter::constructor
+├── when rootMessageOrchestrator is the zero address
+│   └── it should revert with ZeroAddress
+├── when leafMessageOrchestrator is the zero address
+│   └── it should revert with ZeroAddress
+├── when rootMessageOrchestrator and leafMessageOrchestrator have the same address
+│   └── it should revert with IdenticalOrchestrators
+└── when all inputs are valid
+    ├── it should set REMOTE_CHAIN_ID to block.chainid
+    ├── it should set ROOT_MESSAGE_ORCHESTRATOR to _rootMessageOrchestrator
+    └── it should set LEAF_MESSAGE_ORCHESTRATOR to _leafMessageOrchestrator
+
+UnitRootLocalAdapter::sendMessage
+├── when msg value is nonzero
+│   └── it should revert with NoFeeRequired
+└── given msg value is zero
+    ├── when message sender is the root message orchestrator
+    │   └── it should call route on LEAF_MESSAGE_ORCHESTRATOR with REMOTE_CHAIN_ID and _message
+    ├── when message sender is the leaf message orchestrator
+    │   └── it should call route on ROOT_MESSAGE_ORCHESTRATOR with REMOTE_CHAIN_ID and _message
+    └── when message sender is not a registered orchestrator
+        └── it should revert with CallerNotOrchestrator
+
+UnitRootLocalAdapter::quoteMessage
+└── when called with any inputs
+    └── it should return zero
+
+UnitRootLocalAdapter::handle
+└── when called with any inputs
+    └── it should revert with NotSupported
+
+UnitRootLocalAdapter::setRemoteAdapter
+└── when called with any inputs
+    └── it should revert with NotSupported

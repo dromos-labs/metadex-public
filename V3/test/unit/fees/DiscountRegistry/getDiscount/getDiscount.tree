@@ -1,0 +1,21 @@
+UnitDiscountRegistry::GetDiscount
+├── when origin eq caller and has pool discount
+│   ├── it uses 2 SLOADs
+│   └── it returns pool discount
+├── when origin eq caller and has no pool discount or it is zero
+│   ├── it uses at least 1 SLOAD and at most 2 SLOADs
+│   └── it returns discount value for origin
+├── when origin doesn't eq caller and caller has pool discount and it is gt zero
+│   ├── it uses 2 SLOADs
+│   └── it returns caller's pool discount
+└── when origin doesn't eq caller and caller doesn't have pool discount or it is zero
+    ├── when caller has discount
+    │   ├── it uses at least 1 SLOAD and at most 2 SLOADs
+    │   └── it returns caller's discount
+    └── when caller doesn't have discount
+        ├── when origin has pool discount and it is gt zero
+        │   ├── it uses at least 3 SLOADs and at most 4 SLOADs
+        │   └── it returns origin's pool discount
+        └── when origin doesn't have pool discount or it is zero
+            ├── it uses at least 2 SLOADs and at most 4 SLOADs
+            └── it returns discount value for origin

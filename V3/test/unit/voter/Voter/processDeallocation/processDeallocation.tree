@@ -1,0 +1,31 @@
+UnitVoter::ProcessDeallocation
+├── when the caller is not the orchestrator
+│   └── it should revert with NotAuthorized
+├── when the origin chain is not registered
+│   └── it should revert with ChainNotRegistered
+├── when the token has no remaining allocation on the origin chain
+│   ├── it should credit nothing to chain zero
+│   └── it should emit DeallocationProcessed with a zero amount
+├── when the reported amount exceeds the tokens origin chain allocation
+│   ├── it should clamp the credit to the remaining origin chain allocation
+│   ├── it should move the clamped amount from the origin chain to chain zero
+│   ├── it should remove the origin chain from the tokens allocation set
+│   └── it should emit DeallocationProcessed with the clamped amount
+├── when the reported amount is within the tokens origin chain allocation
+│   ├── when the amount drains the full origin chain allocation
+│   │   ├── it should move the full amount from the origin chain to chain zero
+│   │   ├── it should remove the origin chain from the tokens allocation set
+│   │   ├── it should leave the total weight conserved
+│   │   ├── it should advance the global settlement cursor to the current timestamp
+│   │   ├── it should anchor both chain cursors at the advanced global index
+│   │   ├── it should accrue both chain ceilings from the global index delta at their pre move weights
+│   │   ├── it should resample the global emissions per voting power scalar against the post move total weight
+│   │   └── it should emit DeallocationProcessed with the amount
+│   └── when the amount drains part of the origin chain allocation
+│       ├── it should move the amount from the origin chain to chain zero
+│       ├── it should leave the origin chain in the tokens allocation set with the remainder
+│       ├── it should conserve the total weight across the intra-token move
+│       └── it should emit DeallocationProcessed with the amount
+└── when a held deallocation lands after emergency and reallocation
+    ├── it should double subtract the held amount leaving the origin chain below the reallocated budget
+    └── it should credit chain zero an extra time on top of the emergency drain

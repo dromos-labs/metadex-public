@@ -1,0 +1,9 @@
+UnitPool::CurrentCumulativePrices
+├── when the reserves were last updated in the current block
+│   ├── it should return the stored cumulative reserves
+│   └── it should return the current block timestamp
+└── when time has elapsed since the last reserve update
+    ├── it should extrapolate each cumulative reserve by reserve times elapsed time
+    ├── it should return the current block timestamp
+    └── when using a known extrapolation example
+        └── it should match the hand computed cumulative reserves

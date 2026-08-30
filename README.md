@@ -1,7 +1,70 @@
-# README
+# Metadex
 
-Basic Foundry project, uses:
-- bulloak for branching test tree structure
-- foundry for compilation and testing
-- forge fmt for formatting
-- forge test --isolate for gas tests
+Smart contracts for [Metadex](https://aero.xyz): AMM pools, voting escrow, gauges, rewards, cross-chain messaging, Metarouter, and Relay.
+
+Concentrated-liquidity contracts live in [`metadex-slipstream-public`](https://github.com/dromos-labs/metadex-slipstream-public).
+
+Solidity `0.8.36`, Prague EVM. Source is under `V3/src`.
+
+## Setup
+
+1. Install [Foundry](https://github.com/foundry-rs/foundry#installation).
+2. Copy `.env.example` to `.env` and set RPC / explorer variables as needed.
+3. `yarn install`
+
+For NatSpec and bulloak lint scripts, also install:
+
+```bash
+cargo install lintspec
+cargo install bulloak
+```
+
+If Foundry commands fail after install, run `foundryup` and retry.
+
+## Build
+
+```bash
+yarn build
+```
+
+Optimized (via IR):
+
+```bash
+yarn build:optimized
+```
+
+## Tests
+
+```bash
+yarn test            # unit, integration, and fork tests
+yarn test:unit
+yarn test:unit:deep  # 5000 fuzz runs
+yarn test:integration
+yarn test:fork
+yarn coverage
+```
+
+Default fuzz runs: 1000 (`foundry.toml`). Use `FOUNDRY_PROFILE=dev` for 64-run local loops; confirm with the default profile before merging.
+
+## Lint
+
+```bash
+yarn lint:check
+yarn lint:fix
+yarn lint:natspec
+yarn lint:bulloak
+```
+
+## Deploy
+
+Deploy scripts and chain parameter classes are documented in [`V3/script/README.md`](V3/script/README.md). Addresses are written to `deployment-addresses/`.
+
+## Audits
+
+Prior reports are under [`audits/reports`](audits/reports). `audit.md` records accepted known behaviors.
+
+## Licensing
+
+This project follows the [Apache Foundation](https://infra.apache.org/licensing-howto.html) guideline for licensing. See `LICENSE` and `NOTICE`. Each source file declares its governing license in an `SPDX-License-Identifier` header; the header controls for that file.
+
+New protocol files use the Dromos Restricted Use License 1.0 (`LicenseRef-Dromos-Restricted-Use-1.0`). That license does not allow production use. Each version converts to GPL-2.0-or-later five years after its first public distribution; see `VERSIONS`. Interfaces are MIT unless they inherit GPL. Inherited files keep their original license (`LICENSE.MIT`, `LICENSE.GPL3`).

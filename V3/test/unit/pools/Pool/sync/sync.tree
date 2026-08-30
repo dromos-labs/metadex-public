@@ -1,0 +1,7 @@
+UnitPool::Sync
+├── when the pool total supply eq zero
+│   └── it should revert with InsufficientLiquidity
+└── when the pool total supply is gt zero
+    ├── it should emit the Sync event
+    ├── it should set the reserves to the current token balances
+    └── it should set the last block timestamp

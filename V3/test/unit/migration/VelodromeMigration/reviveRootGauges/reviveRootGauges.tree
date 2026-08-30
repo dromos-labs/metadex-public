@@ -1,0 +1,10 @@
+UnitVelodromeMigration::ReviveRootGauges
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── when the gauges array is empty
+    │   └── it should not call the V2 emergency council
+    ├── when gauges are provided
+    │   └── it should revive every root gauge through the V2 emergency council
+    └── given the contract is paused
+        └── it should revive every root gauge through the V2 emergency council

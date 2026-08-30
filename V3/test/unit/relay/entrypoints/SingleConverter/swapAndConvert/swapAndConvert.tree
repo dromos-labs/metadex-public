@@ -1,0 +1,6 @@
+UnitSingleConverter::SwapAndConvert
+├── when the caller is not the keeper
+│   └── it should revert with NotKeeper
+└── when a keeper converts a reward
+    ├── it should swap the reward into the target token
+    └── it should notify the landed delta

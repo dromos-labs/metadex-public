@@ -1,0 +1,9 @@
+UnitVelodromeMigration::QuoteDepositLiquid
+├── when the final TOKEN amount rounds down to zero
+│   └── it should revert with ZeroConversion
+└── when the final TOKEN amount does not round down to zero
+    ├── it should quote the next nonce and liquid settlement parameters for the migration entrypoint on root
+    ├── it should use the caller as the Hyperlane refund address
+    ├── it should return the native token dispatch fee
+    ├── it should leave the dispatch nonce unchanged
+    └── it should encode the same message as depositLiquid

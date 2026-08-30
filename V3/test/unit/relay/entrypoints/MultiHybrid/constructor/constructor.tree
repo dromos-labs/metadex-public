@@ -1,0 +1,5 @@
+UnitMultiHybrid::Constructor
+├── when the compound weight exceeds the maximum
+│   └── it should revert with InvalidCompoundWeight
+└── when the parameters are valid
+    └── it should set the compound weight

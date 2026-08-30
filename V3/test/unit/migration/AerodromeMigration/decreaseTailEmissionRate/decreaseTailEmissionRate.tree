@@ -1,0 +1,17 @@
+UnitAerodromeMigration::DecreaseTailEmissionRate
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── when the V2 tail emission rate increases
+    │   ├── it should revert with TailEmissionRateNotDecreased
+    │   └── it should succeed after setting the result to Defeated
+    ├── when the V2 tail emission rate remains unchanged
+    │   ├── it should revert with TailEmissionRateNotDecreased
+    │   └── it should succeed after setting the result to Defeated
+    └── when the V2 tail emission rate decreases
+        ├── when the contract is unpaused
+        │   ├── it should nudge the V2 Minter
+        │   └── it should emit the NudgeExecuted event
+        └── when the contract is paused
+            ├── it should nudge the V2 Minter
+            └── it should emit the NudgeExecuted event

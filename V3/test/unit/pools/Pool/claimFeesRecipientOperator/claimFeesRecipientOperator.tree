@@ -1,0 +1,15 @@
+UnitPool::ClaimFeesRecipientOperator
+├── when operator is not approved by account
+│   └── it should revert with NotAuthorized
+└── when operator is approved by account
+    ├── when account has stored fees
+    │   ├── it should transfer both fee tokens to the recipient
+    │   ├── it should clear the account claimable amounts
+    │   ├── it should return both claimed amounts
+    │   └── it should emit a Claim event with the operator as caller
+    └── when account has newly accrued fees
+        ├── it should update the account fee indexes
+        ├── it should clear the account claimable amounts
+        ├── it should not change another account pending fees
+        ├── it should transfer both fee tokens to the recipient
+        └── it should return both claimed amounts

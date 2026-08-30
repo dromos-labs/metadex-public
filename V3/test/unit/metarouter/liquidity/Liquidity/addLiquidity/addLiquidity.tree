@@ -1,0 +1,66 @@
+UnitLiquidity::AddLiquidity
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+└── given the recipient is not the zero address
+    ├── when the factory is not approved
+    │   └── it should revert with FactoryNotApproved
+    └── given the factory is approved
+        ├── when the resolved pool holds a different pair
+        │   └── it should revert with PoolTokenMismatch
+        ├── when the factory has no pool and creation is not requested
+        │   └── it should revert with PoolNotFound
+        ├── when the factory has no pool and creation is requested
+        │   ├── it should create the pool through the factory
+        │   ├── it should push both funded amounts to the created pool
+        │   └── it should mint to _recipient
+        ├── when a stable and a volatile factory each resolve their own pool
+        │   ├── it should deposit into the pool of the selected factory
+        │   └── it should mint to _recipient
+        ├── when the pair is passed in reverse pool order
+        │   ├── it should trim the deposit with the realigned reserves
+        │   ├── it should push the trimmed amounts to the pool
+        │   └── it should mint to _recipient
+        ├── when token A has an external payer and charges a fee on transfer
+        │   ├── it should pull the requested token A amount from _caller
+        │   ├── it should push the measured received token A amount to the pool
+        │   └── it should mint to _recipient
+        ├── given the pool is unseeded
+        │   ├── when the funded token A is below its minimum
+        │   │   └── it should revert with InsufficientAmountA
+        │   ├── when the funded token B is below its minimum
+        │   │   └── it should revert with InsufficientAmountB
+        │   └── given both funded amounts meet their minimums
+        │       ├── when the recipient is the router
+        │       │   ├── it should push both funded amounts to the pool
+        │       │   ├── it should track the minted lp token
+        │       │   └── it should mint to _recipient
+        │       └── when the recipient is not the router
+        │           ├── it should push both funded amounts to the pool
+        │           └── it should mint to _recipient
+        └── given the pool is seeded
+            ├── when the minted liquidity is below its minimum
+            │   └── it should revert with InsufficientLiquidityMinted
+            ├── when the minted liquidity equals its minimum
+            │   └── it should accept the minted liquidity
+            ├── given the full token B quote fits uint
+            │   ├── given the optimal token B does not exceed the funded token B
+            │   │   ├── when the floored token B quote equals the funded amount
+            │   │   │   ├── it should push both funded amounts to the pool
+            │   │   │   └── it should mint to _recipient
+            │   │   ├── when the optimal token B is below its minimum
+            │   │   │   └── it should revert with InsufficientAmountB
+            │   │   └── when the optimal token B meets its minimum
+            │   │       ├── it should push the funded token A and the optimal token B
+            │   │       ├── it should mint to _recipient
+            │   │       └── it should sweep the unspent token B to _caller at closure
+            │   └── given the optimal token B exceeds the funded token B
+            │       ├── when the optimal token A is below its minimum
+            │       │   └── it should revert with InsufficientAmountA
+            │       └── when the optimal token A meets its minimum
+            │           ├── it should push the optimal token A and the funded token B
+            │           ├── it should mint to _recipient
+            │           └── it should sweep the unspent token A to _caller at closure
+            └── when the full token B quote exceeds uint max
+                ├── it should push the optimal token A and the funded token B
+                ├── it should mint to _recipient
+                └── it should sweep the unspent token A to _caller at closure

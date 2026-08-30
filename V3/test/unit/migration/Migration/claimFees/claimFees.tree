@@ -1,0 +1,16 @@
+UnitMigration::ClaimFees
+├── when the caller is not the owner
+│   └── it should revert with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── given the recipient is the zero address
+    │   └── it should revert with ZeroAddress
+    └── given the recipient is not the zero address
+        ├── when fee contracts and token arrays are provided
+        │   ├── it should forward the arrays and migration token id
+        │   └── it should transfer the requested token balances to the recipient
+        ├── when the outer arrays are empty
+        │   └── it should forward the empty arrays
+        ├── when the outer array lengths differ
+        │   └── it should forward the arrays without local validation
+        └── given the contract is paused
+            └── it should forward the arrays and migration token id

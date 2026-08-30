@@ -1,0 +1,9 @@
+UnitVotingEscrow::GrantRole
+├── when the caller is not the vpm role admin
+│   └── it should revert with AccessControlUnauthorizedAccount
+├── when granting the vpm role to a valid candidate
+│   └── it should grant the vpm role to the candidate
+├── when granting a non vpm role to a valid candidate
+│   └── it should grant the non vpm role to the candidate
+└── when the candidate already holds the vpm role
+    └── it should keep the vpm role on the holder

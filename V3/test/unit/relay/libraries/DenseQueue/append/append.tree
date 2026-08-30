@@ -1,0 +1,9 @@
+UnitDenseQueue::Append
+├── when the queue holds live entries
+│   ├── it should issue the id after the tail
+│   ├── it should count the new entry in
+│   └── it should leave the head where it is
+├── when the queue is empty and the head is zero
+│   └── it should point the head at the new entry
+└── when the queue is empty and the head was left on a consumed entry
+    └── it should point the head at the new entry

@@ -1,0 +1,15 @@
+UnitPool::PendingFees
+├── when account has no liquidity
+│   └── it should return stored claimable amounts
+├── when account has no liquidity and stale indexes
+│   └── it should ignore index deltas
+├── when account has liquidity and no new fee index
+│   └── it should return stored claimable amounts
+├── when account has liquidity and only token0 accrued
+│   └── it should include the token0 index delta
+├── when account has liquidity and only token1 accrued
+│   └── it should include the token1 index delta
+├── when account has liquidity and both tokens accrued
+│   └── it should include stored claimable amounts and both index deltas
+└── when accrual rounds down
+    └── it should return the rounded down pending fees

@@ -1,0 +1,241 @@
+UnitGaugeFactory::constructor
+├── when leaf voter is the zero address
+│   └── it should revert with ZeroAddress
+├── when leaf voter reports a zero gauge manager
+│   └── it should revert with ZeroAddress
+├── when voting rewards factory is the zero address
+│   └── it should revert with ZeroAddress
+├── when cap admin is the zero address
+│   └── it should revert with ZeroAddress
+├── when referral admin is the zero address
+│   └── it should revert with ZeroAddress
+├── when penalty admin is the zero address
+│   └── it should revert with ZeroAddress
+├── when cap operator is the zero address
+│   └── it should revert with ZeroAddress
+├── when default cap is zero
+│   └── it should revert with ZeroDefaultCap
+├── when operator min cap is zero
+│   └── it should revert with InvalidCapRange
+├── when operator min cap exceeds operator max cap
+│   └── it should revert with InvalidCapRange
+├── when max min stake blocks is less than the default
+│   └── it should revert with InvalidMinStakeBlocks
+└── when constructor arguments are valid
+    ├── it should set immutable views
+    ├── it should set default cap views
+    ├── it should set referral and penalty defaults
+    ├── it should grant initial roles
+    ├── it should set role admin relationships
+    ├── it should expose the gauge type
+    └── it should disable the implementation
+
+UnitGaugeFactory::createGauge
+├── when the caller is not the gauge manager
+│   └── it should revert with NotAuthorized
+└── when the caller is the gauge manager
+    ├── when params are empty
+    │   ├── it should deploy the voting rewards manager against the predicted gauge
+    │   ├── it should deploy a gauge
+    │   ├── it should mark the gauge
+    │   ├── it should initialize the emission cap to the current default cap
+    │   ├── it should leave referral config empty
+    │   └── it should emit GaugeCreated
+    ├── when params are unknown
+    │   ├── it should deploy a gauge
+    │   └── it should leave referral config empty
+    ├── when params are referral
+    │   ├── it should deploy a gauge
+    │   ├── it should set referral config
+    │   └── it should emit ReferralConfigSet
+    ├── when params are a truncated referral payload
+    │   └── it should revert with MalformedReferral
+    ├── when params are an oversized referral payload
+    │   └── it should revert with MalformedReferral
+    └── when a gauge was already deployed over the target
+        └── it should revert on the clone collision
+
+UnitGaugeFactory::computeGaugeAddress
+└── when called with a pool
+    └── it should return the deterministic clone address
+
+UnitGaugeFactory::setDefaultCap
+├── when the caller does not have the cap admin role
+│   └── it should revert with AccessControlUnauthorizedAccount
+└── when the caller has the cap admin role
+    ├── when the cap is zero
+    │   └── it should revert with ZeroDefaultCap
+    └── when the cap is nonzero
+        ├── it should update defaultCap
+        ├── it should preserve the existing gauge cap
+        └── it should emit DefaultCapSet
+
+UnitGaugeFactory::setOperatorCapRange
+├── when the caller does not have the cap admin role
+│   └── it should revert with AccessControlUnauthorizedAccount
+└── when the caller has the cap admin role
+    ├── when min cap is zero
+    │   └── it should revert with InvalidCapRange
+    ├── when min cap exceeds max cap
+    │   └── it should revert with InvalidCapRange
+    └── when the range is valid
+        ├── it should update operator cap range
+        └── it should emit OperatorCapRangeSet
+
+UnitGaugeFactory::setEmissionCap
+├── when the gauge is invalid
+│   └── it should revert with InvalidGauge
+└── when the gauge is valid
+    ├── when the caller has the cap admin role
+    │   ├── when the cap is zero for cap admin
+    │   │   ├── when fee flushing reverts
+    │   │   │   └── it should revert with FeeCollectionFailed
+    │   │   └── when fee flushing succeeds
+    │   │       ├── it should settle the gauge
+    │   │       ├── it should flush fees
+    │   │       ├── it should write the zero cap
+    │   │       └── it should emit EmissionCapSet
+    │   ├── when the cap is the maximum value for cap admin
+    │   │   ├── it should settle the gauge
+    │   │   └── it should write the maximum cap
+    │   └── when the cap is nonzero for cap admin
+    │       ├── it should settle the gauge
+    │       ├── it should write the cap
+    │       └── it should emit EmissionCapSet
+    ├── when the caller has the cap operator role
+    │   ├── when the current cap is zero
+    │   │   └── it should revert with NotAuthorized
+    │   └── when the current cap is nonzero
+    │       ├── when the new cap is below the operator range
+    │       │   └── it should revert with CapOutOfOperatorRange
+    │       ├── when the new cap is above the operator range
+    │       │   └── it should revert with CapOutOfOperatorRange
+    │       └── when the new cap is in the operator range
+    │           ├── it should settle the gauge
+    │           └── it should write the cap
+    ├── when the caller is the emergency council
+    │   ├── when the cap is nonzero for emergency council
+    │   │   └── it should revert with NotAuthorized
+    │   └── when the cap is zero for emergency council
+    │       ├── when fee flushing reverts_
+    │       │   └── it should revert with FeeCollectionFailed
+    │       └── when fee flushing succeeds_
+    │           ├── it should settle the gauge
+    │           ├── it should flush fees
+    │           ├── it should write the zero cap
+    │           └── it should emit EmissionCapSet
+    └── when the caller is not authorized
+        └── it should revert with NotAuthorized
+
+UnitGaugeFactory::setEmissionCapRoles
+├── when the caller has all roles
+│   ├── it should allow setting the emission cap to zero
+│   ├── it should allow setting the emission cap within the operator range
+│   └── it should allow setting the emission cap to another nonzero value
+├── when the caller has the emergency council role
+│   ├── when the caller has the cap admin role
+│   │   ├── it should allow setting the emission cap to zero
+│   │   ├── it should allow setting the emission cap within the operator range
+│   │   └── it should allow setting the emission cap to another nonzero value
+│   ├── when the caller has the cap operator role
+│   │   ├── it should allow setting the emission cap to zero
+│   │   ├── it should allow setting the emission cap within the operator range
+│   │   └── it should not allow setting the emission cap to another nonzero value
+│   └── when the caller has no other role
+│       ├── it should allow setting the emission cap to zero
+│       ├── it should not allow setting the emission cap within the operator range
+│       └── it should not allow setting the emission cap to another nonzero value
+├── when the caller has the cap admin role_
+│   ├── when the caller has the cap operator role_
+│   │   ├── it should allow setting the emission cap to zero
+│   │   ├── it should allow setting the emission cap within the operator range
+│   │   └── it should allow setting the emission cap to another nonzero value
+│   └── when the caller has no other role_
+│       ├── it should allow setting the emission cap to zero
+│       ├── it should allow setting the emission cap within the operator range
+│       └── it should allow setting the emission cap to another nonzero value
+└── when the caller has only the cap operator role
+    ├── it should not allow setting the emission cap to zero
+    ├── it should allow setting the emission cap within the operator range
+    └── it should not allow setting the emission cap to another nonzero value
+
+UnitGaugeFactory::clearEmissionCap
+├── when the gauge is invalid
+│   └── it should revert with InvalidGauge
+└── when the gauge is valid
+    ├── when the caller is not the emergency council
+    │   └── it should revert with NotAuthorized
+    └── when the caller is the emergency council
+        ├── when fee flushing reverts
+        │   ├── it should settle the gauge
+        │   ├── it should attempt to flush fees
+        │   ├── it should emit FeeFlushFailed
+        │   ├── it should write the zero cap
+        │   └── it should emit EmissionCapSet
+        └── when fee flushing succeeds
+            ├── it should settle the gauge
+            ├── it should flush fees
+            ├── it should write the zero cap
+            └── it should emit EmissionCapSet
+
+UnitGaugeFactory::setMaxShareCap
+├── when the caller does not have the referral admin role
+│   └── it should revert with AccessControlUnauthorizedAccount
+└── when the caller has the referral admin role
+    ├── when the cap exceeds max pips
+    │   └── it should revert with InvalidMaxShareCap
+    └── when the cap is valid
+        ├── it should update maxShareCap
+        └── it should emit MaxShareCapSet
+
+UnitGaugeFactory::setReferralConfig
+├── when the caller does not have the referral admin role
+│   └── it should revert with AccessControlUnauthorizedAccount
+└── when the caller has the referral admin role
+    ├── when the gauge is invalid
+    │   └── it should revert with InvalidGauge
+    ├── when the share exceeds max share cap
+    │   └── it should revert with ShareExceedsMax
+    ├── when share is nonzero and referral is the zero address
+    │   └── it should revert with InvalidReferral
+    ├── when the config is valid
+    │   ├── it should update referral config
+    │   └── it should emit ReferralConfigSet
+    └── when clearing the config
+        ├── it should clear referral config
+        └── it should emit ReferralConfigSet
+
+UnitGaugeFactory::setPenaltyConfig
+├── when the caller does not have the penalty admin role
+│   └── it should revert with AccessControlUnauthorizedAccount
+└── when the caller has the penalty admin role
+    ├── when penalty rate exceeds max pips
+    │   └── it should revert with InvalidPenaltyRate
+    ├── when min stake blocks exceeds max min stake blocks
+    │   └── it should revert with InvalidMinStakeBlocks
+    └── when the config is valid
+        ├── it should update penaltyConfig
+        └── it should emit PenaltyConfigSet
+
+UnitGaugeFactory::setMinStakeBlocks
+├── when the caller does not have the penalty admin role
+│   └── it should revert with AccessControlUnauthorizedAccount
+└── when the caller has the penalty admin role
+    ├── when the gauge is invalid
+    │   └── it should revert with InvalidGauge
+    ├── when min stake blocks exceeds max min stake blocks
+    │   └── it should revert with InvalidMinStakeBlocks
+    ├── when the override is nonzero
+    │   ├── it should update minStakeBlocks
+    │   └── it should emit MinStakeBlocksSet
+    └── when clearing the override
+        ├── it should set minStakeBlocks to the minimum value
+        └── it should emit MinStakeBlocksSet
+
+UnitGaugeFactory::effectivePenaltyConfig
+├── when the gauge has no min stake blocks override
+│   ├── it should return the default min stake blocks
+│   └── it should return the factory penalty rate
+└── when the gauge has a min stake blocks override
+    ├── it should return the override min stake blocks
+    └── it should return the factory penalty rate

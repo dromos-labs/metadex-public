@@ -1,0 +1,196 @@
+UnitCrosschain::bridgeToken
+├── given a lite deployment with no interchain account router
+│   ├── when the recipient is the zero address
+│   │   └── it should revert with CommandDisabled
+│   └── when a direct recipient is supplied on the lite deployment
+│       └── it should bridge to the direct recipient without the interchain account router
+├── when the recipient is the metarouter
+│   └── it should revert with InvalidRecipient
+├── when a direct recipient is combined with a custom interchain account configuration
+│   └── it should revert with InvalidInterchainAccountConfig
+├── when a direct recipient is supplied for an ERC20
+│   ├── it should not read the interchain account router
+│   ├── it should track the token
+│   ├── it should approve the bridge for the resolved amount
+│   ├── it should bridge the token to the direct recipient
+│   └── it should clear the bridge approval
+├── when an erc20 bridge names a message fee above the available native balance
+│   └── it should revert with InsufficientBalance for the native asset
+├── when the interchain account configuration names an ISM without a router
+│   └── it should revert with InvalidInterchainAccountConfig
+├── when a custom interchain account configuration uses the zero ISM
+│   ├── it should derive the recipient with the custom router and zero ISM
+│   └── it should not require an enrolled router for the domain
+├── when a custom interchain account configuration is used for an ERC20
+│   ├── it should derive the recipient with the custom router and non-zero ISM
+│   ├── it should track the token
+│   ├── it should approve the bridge for the resolved amount
+│   ├── it should bridge the token to the custom-derived recipient
+│   └── it should clear the bridge approval
+├── given the token is the zero address
+│   ├── when the native spend is an absolute amount
+│   │   ├── it should resolve the spend against the available native balance
+│   │   ├── it should derive _recipient from the interchain account router with the logical sender as salt
+│   │   ├── it should forward the whole spend as value to transferRemote with the delivery amount
+│   │   └── it should neither approve nor track the native route
+│   ├── when the native spend takes the full available balance in pips
+│   │   ├── it should resolve the full available native balance
+│   │   ├── it should forward the whole spend as value to transferRemote with the delivery amount
+│   │   └── it should neither approve nor track the native route
+│   └── when the router holds native predating the batch
+│       ├── it should resolve only the batch introduced native
+│       ├── it should ignore _messageFee
+│       ├── it should forward the whole spend as value to transferRemote with the delivery amount
+│       ├── it should leave the pre batch balance untouched
+│       └── it should clear the transient execution slots at closure
+└── given the token is not the zero address
+    ├── when the destination domain is not registered
+    │   └── it should revert with UnregisteredDomain
+    └── given the destination domain is registered
+        ├── when the bridge does not manage the token
+        │   └── it should revert with BridgeTokenMismatch
+        └── given the bridge manages the token
+            ├── when the resolved amount is zero
+            │   └── it should revert with ZeroAmount
+            ├── when a pips spend resolves to zero
+            │   └── it should revert with ZeroAmount
+            ├── when an amount spend of the native mirror token exceeds the batch native less the message fee
+            │   └── it should revert with InsufficientBalance for the token
+            ├── when a lower decimals mirror spend exceeds the batch native less the converted message fee
+            │   └── it should revert with InsufficientBalance for the token
+            ├── when a converted message fee consumes the whole batch mirror balance
+            │   └── it should revert with ZeroAmount
+            ├── when a pips spend message fee equals the batch native
+            │   └── it should revert with ZeroAmount
+            └── given the resolved amount is positive
+                ├── when a pips spend names a max fee above the denominator
+                │   └── it should revert with InvalidPips
+                ├── when the quoted total is below the amount
+                │   └── it should revert with InvalidBridgeQuote
+                └── given the quoted total covers the amount
+                    ├── when the token fee exceeds the max token fee
+                    │   └── it should revert with TokenFeeExceedsMax
+                    ├── when a pips spend fee exceeds the max token fee
+                    │   └── it should revert with TokenFeeExceedsMax
+                    ├── when using a known ceil rounded pip fee at the maximum
+                    │   └── it should accept the hand computed ceiling fee boundary
+                    ├── when using a known ceil rounded pip fee above the maximum
+                    │   └── it should revert with TokenFeeExceedsMax
+                    ├── when the token fee consumes the whole amount
+                    │   └── it should revert with TokenFeeExceedsAmount
+                    ├── when a pips spend fee consumes the whole amount
+                    │   └── it should revert with TokenFeeExceedsAmount
+                    ├── when the route charges no fee
+                    │   ├── it should track _token
+                    │   ├── it should derive _recipient from the interchain account router with the logical sender as salt
+                    │   ├── it should approve _bridge for the resolved amount
+                    │   ├── it should call transferRemote on _bridge with _recipient and the whole amount forwarding _messageFee
+                    │   └── it should clear the _bridge approval
+                    ├── when the spend selects a pips proportion
+                    │   ├── it should track _token
+                    │   ├── it should derive _recipient from the interchain account router with the logical sender as salt
+                    │   ├── it should approve _bridge for the resolved proportion
+                    │   ├── it should call transferRemote on _bridge with _recipient and the proportion less the quoted fee forwarding _messageFee
+                    │   └── it should clear the _bridge approval
+                    ├── when a full pips spend selects the native mirror token
+                    │   ├── it should resolve the batch native less the message fee
+                    │   ├── it should approve _bridge for the reduced amount
+                    │   ├── it should call transferRemote on _bridge with _recipient and the reduced amount less the quoted fee forwarding _messageFee
+                    │   ├── it should clear the _bridge approval
+                    │   └── it should refund the unresolved batch native to the caller at closure
+                    ├── when a mirror amount spend equals the batch native less the message fee
+                    │   ├── it should resolve the spend at the fee reserved batch balance
+                    │   ├── it should approve _bridge for the amount
+                    │   ├── it should call transferRemote on _bridge with _recipient and the amount forwarding _messageFee
+                    │   ├── it should clear the _bridge approval
+                    │   └── it should refund the unpulled batch native to the caller at closure
+                    ├── when the bridge pulls the approved mirror amount
+                    │   ├── it should call transferRemote on the bridge with the resolved amount forwarding _messageFee
+                    │   ├── it should leave no closing refund for the caller
+                    │   └── it should leave the pre batch native with the router at closure
+                    ├── when the bridge pulls the approved six decimal mirror amount
+                    │   ├── it should call transferRemote on the bridge with the converted raw unit amount forwarding _messageFee
+                    │   ├── it should refund the fee reservation and flooring remainders to the caller at closure
+                    │   └── it should leave the fractional pre batch native with the router at closure
+                    ├── when the route charges a fee within the maximum
+                    │   ├── it should track _token
+                    │   ├── it should derive _recipient from the interchain account router with the logical sender as salt
+                    │   ├── it should approve _bridge for the resolved amount
+                    │   ├── it should call transferRemote on _bridge with _recipient and the amount less the quoted fee forwarding _messageFee
+                    │   └── it should clear the _bridge approval
+                    └── when the quote spreads the token total across entries
+                        ├── it should track _token
+                        ├── it should derive _recipient from the interchain account router with the logical sender as salt
+                        ├── it should approve _bridge for the resolved amount
+                        ├── it should call transferRemote on _bridge with _recipient and the amount less the summed fee ignoring entries in other denominations forwarding _messageFee
+                        └── it should clear the _bridge approval
+
+UnitCrosschain::executeCrosschain
+├── given a lite deployment with no interchain account router
+│   └── it should revert with CommandDisabled
+├── when the message fee exceeds the available native balance
+│   └── it should revert with InsufficientBalance for the native asset
+├── when the interchain account configuration names an ISM without a router
+│   └── it should revert with InvalidInterchainAccountConfig
+├── when a custom interchain account configuration uses the zero ISM
+│   ├── it should dispatch with the custom router and zero ISM
+│   └── it should not read the enrolled router or ISM
+├── when a custom interchain account configuration uses a nonzero ISM
+│   ├── it should dispatch with the custom router and ISM
+│   └── it should not read the enrolled router or ISM
+├── when the destination domain is not registered
+│   └── it should revert with UnregisteredDomain
+└── given the destination domain is registered
+    ├── when the hook metadata is shorter than the refund offset
+    │   └── it should revert with InvalidHookMetadata
+    └── given the hook metadata carries a refund address
+        ├── when the hook metadata stops before the fee token field
+        │   └── it should call callRemoteCommitReveal with _commitment and the logical sender as salt forwarding _messageFee
+        ├── when the hook metadata names the zero address as fee token
+        │   └── it should call callRemoteCommitReveal with _commitment and the logical sender as salt forwarding _messageFee
+        ├── when the hook metadata names a fee token
+        │   ├── it should track the metadata fee token
+        │   ├── it should approve the interchain account router for _tokenFee
+        │   ├── it should call callRemoteCommitReveal with _commitment and the logical sender as salt forwarding _messageFee
+        │   └── it should clear the metadata fee token approval
+        ├── when the hook metadata names the native mirror token beyond the batch native
+        │   └── it should revert with InsufficientBalance for the fee token
+        ├── when the native mirror fee grant equals the batch native less the message fee
+        │   ├── it should approve the interchain account router for the fee grant
+        │   ├── it should call callRemoteCommitReveal with _commitment and the logical sender as salt forwarding _messageFee
+        │   ├── it should clear the metadata fee token approval
+        │   └── it should leave the stranded pre batch native with the router at closure
+        ├── when the hook metadata names a lower decimals mirror beyond the converted batch native
+        │   └── it should revert with InsufficientBalance for the fee token
+        └── when the command allows revert
+            └── it should call callRemoteCommitReveal with the logical sender as salt from the self called child frame
+
+UnitCrosschain::redeem
+├── when the deployment has no leaf voter
+│   └── it should revert with CommandDisabled
+├── when the recipient is the metarouter
+│   └── it should revert with InvalidRecipient
+├── when the message fee exceeds the available native balance
+│   └── it should revert with InsufficientBalance for the native asset
+├── when the payer is the user and the spend mode is pips
+│   └── it should revert with InvalidSpendMode
+├── when the payer is the user and the spend mode is an amount
+│   ├── it should pull the amount from the logical sender
+│   └── it should call redeem on the leaf voter with the measured delta
+├── when the payer is internal and the spend mode is an amount
+│   ├── it should track the receipt token
+│   ├── it should call redeem on the leaf voter with the amount _recipient and _gasLimit forwarding _messageFee
+│   ├── it should name itself as the refund recipient for a zero input
+│   ├── it should return the unredeemed receipt balance to the caller at closure
+│   └── it should clear the transient execution slots at closure
+├── when the payer is internal and the spend mode is pips
+│   ├── it should track the receipt token
+│   ├── it should call redeem on the leaf voter with the resolved proportion _recipient and _gasLimit forwarding _messageFee
+│   ├── it should return the unredeemed receipt balance to the caller at closure
+│   └── it should clear the transient execution slots at closure
+├── when the payer is internal and the spend consumes the whole receipt balance
+│   ├── it should call redeem on the leaf voter with the full balance
+│   ├── it should not transfer the receipt token at closure
+│   └── it should clear the transient execution slots at closure
+└── when the refund recipient is not the zero address
+    └── it should call redeem on the leaf voter with the supplied refund recipient

@@ -1,0 +1,25 @@
+UnitConcreteVotingRewardsManager::AdvanceGlobalPointsWithMaxIterations
+├── when max iterations is invalid
+│   ├── when max iterations is zero
+│   │   └── it should revert with InvalidCheckpointIterations
+│   └── when max iterations exceeds the maximum
+│       └── it should revert with InvalidCheckpointIterations
+└── when max iterations is valid
+    ├── when there is no prior global checkpoint
+    │   └── it should revert with NoGlobalCheckpoint
+    └── when there is at least one prior global checkpoint
+        ├── when the latest global point was recorded in the current epoch
+        │   └── it should revert with TooSoon
+        └── when the latest global point was recorded in a prior epoch
+            ├── when history reaches the checkpoint iteration limit
+            │   ├── it should reach the current timestamp in one advance
+            │   ├── it should notify the pending fees
+            │   ├── it should snapshot the credited fee accumulator at the current timestamp
+            │   └── it should emit the GlobalPointsAdvanced event
+            └── when history exceeds the checkpoint iteration limit
+                ├── it should advance the selected number of intervals
+                ├── it should not query the gauge for pending fees
+                ├── it should not notify pending fees
+                ├── it should preserve fee accounting at the partial frontier
+                ├── it should resume from the partial frontier on later calls
+                └── it should emit the GlobalPointsAdvanced event

@@ -1,0 +1,10 @@
+UnitVotingEscrow::RevokeRole
+├── when the vpm role admin revokes the role from a holder
+│   ├── it should remove the vpm role from the holder
+│   └── it should no longer mark the holder as authorized via isAuthorizedVPM
+├── when the caller is not the vpm role admin
+│   └── it should revert with AccessControlUnauthorizedAccount
+├── when revoking the last holder of a self administering role
+│   └── it should revert with LastRoleHolder
+└── when revoking a non last holder of a self administering role
+    └── it should remove the role from the holder

@@ -1,0 +1,95 @@
+UnitVoter::ProcessRedeem
+├── when the caller is not the orchestrator
+│   └── it should revert with NotAuthorized
+└── given the caller is the orchestrator
+    ├── when the origin chain is not registered
+    │   └── it should revert with ChainNotRegistered
+    ├── when the origin chain is paused
+    │   ├── it should advance the chain ceiling at the sampled emissions per VP
+    │   ├── it should advance the global last settlement to the current timestamp
+    │   ├── it should anchor the chain ceiling cursor at the advanced index
+    │   └── it should emit RedeemProcessed
+    ├── when the origin chain is suspended
+    │   └── it should revert with RouteSuspended
+    ├── when the origin chain is sunset
+    │   ├── it should accrue cumulativeSuspendedSurplus at the sampled emissions per VP
+    │   ├── it should leave the ceiling unchanged
+    │   ├── it should anchor the chain ceiling cursor at the advanced index
+    │   └── it should emit RedeemProcessed
+    ├── given the redeem stays within the ceiling
+    │   ├── when the reported surplus is greater than the surplus already reported
+    │   │   ├── it should advance the surplus already reported to _surplusAccrued
+    │   │   ├── it should advance the global last settlement to the current timestamp
+    │   │   └── it should emit RedeemProcessed with _chainId, _recipient, _amount and _surplusReported
+    │   ├── when the reported surplus is not greater than the surplus already reported
+    │   │   ├── it should leave the surplus already reported unchanged
+    │   │   └── it should emit RedeemProcessed with _chainId, _recipient, _amount and _surplusReported
+    │   ├── when the same surplus is reported again on a later redeem
+    │   │   ├── it should leave the surplus already reported unchanged
+    │   │   └── it should emit RedeemProcessed with _chainId, _recipient, _amount and _surplusReported on each redeem
+    │   └── when multiple redeems are processed
+    │       ├── it should only increase total redeemed
+    │       └── it should emit RedeemProcessed with _chainId, _recipient, _amount and _surplusReported on each redeem
+    ├── when the redeem would exceed the ceiling
+    │   └── it should revert with CeilingExceeded
+    ├── when the surplus already reported would exceed the ceiling
+    │   └── it should revert with CeilingExceeded
+    ├── when the redeem exactly meets the ceiling
+    │   ├── it should process the redeem at the solvency boundary
+    │   └── it should emit RedeemProcessed with _chainId, _recipient, _amount and _surplusReported
+    ├── when the redeem exceeds the ceiling and the buffer covers the shortfall
+    │   ├── it should mint the ceiling headroom to the recipient
+    │   ├── it should transfer the shortfall to the recipient
+    │   ├── it should decrease the donated buffer by the shortfall
+    │   ├── it should charge only the minted part to total redeemed
+    │   ├── it should emit BufferDrawn with the shortfall
+    │   └── it should emit RedeemProcessed with the full amount
+    ├── when the ceiling is exhausted and the buffer covers the redeem
+    │   ├── it should mint nothing
+    │   ├── it should transfer the full amount to the recipient
+    │   ├── it should decrease the donated buffer by the full amount
+    │   ├── it should leave total redeemed unchanged
+    │   ├── it should emit BufferDrawn with the full amount
+    │   └── it should emit RedeemProcessed with the full amount
+    ├── when the reported surplus exceeds the ceiling and the buffer covers the redeem
+    │   ├── it should mint nothing
+    │   ├── it should transfer the full amount to the recipient
+    │   ├── it should decrease the donated buffer by the full amount
+    │   ├── it should leave total redeemed unchanged
+    │   ├── it should store the advanced surplus report
+    │   ├── it should emit BufferDrawn with the full amount
+    │   └── it should emit RedeemProcessed with the full amount
+    ├── when the surplus already reported exceeds the ceiling and the buffer covers the redeem
+    │   ├── it should mint nothing
+    │   ├── it should transfer the full amount to the recipient
+    │   ├── it should decrease the donated buffer by the full amount
+    │   ├── it should leave total redeemed unchanged
+    │   ├── it should leave the surplus already reported unchanged
+    │   ├── it should emit BufferDrawn with the full amount
+    │   └── it should emit RedeemProcessed with the full amount
+    ├── when replaying the audited buffer backed surplus double spend scenario
+    │   ├── it should pay the redeem from the buffer
+    │   └── it should clamp the spendable surplus to the remaining mint entitlement
+    ├── when the redeem exceeds the ceiling plus the buffer
+    │   └── it should revert with CeilingExceeded
+    ├── when the redeem stays within the ceiling with a donated buffer
+    │   ├── it should mint the full amount to the recipient
+    │   ├── it should transfer nothing
+    │   └── it should leave the donated buffer untouched
+    ├── when the headroom is below the minter minimum and the buffer covers the redeem
+    │   ├── it should mint nothing
+    │   ├── it should transfer the full amount to the recipient
+    │   ├── it should decrease the donated buffer by the full amount
+    │   └── it should leave total redeemed unchanged
+    ├── when the headroom is below the minter minimum and the buffer cannot cover the redeem
+    │   └── it should forward the sub minimum leg to the minter and bubble its revert
+    ├── when sequential redeems exhaust the same buffer
+    │   ├── it should decrease the donated buffer on each draw
+    │   ├── it should empty the buffer after the final draw
+    │   ├── it should leave total redeemed unchanged
+    │   └── it should revert with CeilingExceeded once the buffer is empty
+    └── when the buffer transfer reverts
+        ├── it should bubble the transfer revert
+        ├── it should leave the donated buffer unchanged
+        ├── it should leave total redeemed unchanged
+        └── it should leave the surplus already reported unchanged

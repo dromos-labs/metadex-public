@@ -1,0 +1,297 @@
+UnitTokenRegistry::constructor
+├── when the leaf voter is the zero address
+│   └── it should revert with ZeroAddress
+├── when the deposit is zero
+│   └── it should revert with ZeroDeposit
+└── when the parameters are valid
+    ├── it should set the leaf voter to _leafVoter
+    ├── it should set the deposit amount to _depositAmount
+    ├── it should expose the MAX WEIGHT constant
+    └── it should seed the next id at one
+
+UnitTokenRegistry::requestRegistration
+├── when the token is the zero address
+│   └── it should revert with ZeroAddress
+└── given the token is not the zero address
+    ├── when the canonical chain id is the local chain
+    │   └── it should revert with InvalidCanonical
+    ├── when the token is already registered
+    │   └── it should revert with AlreadyRegistered
+    └── given the token was not registered
+        ├── when the token has an open request
+        │   └── it should revert with RequestPending
+        └── given the token has no open request
+            ├── when the sent value does not equal the deposit
+            │   └── it should revert with WrongDeposit
+            ├── when no nft contract is configured
+            │   └── it should revert with NoNFTContract
+            ├── when the request is valid
+            │   ├── it should set the requester to the caller
+            │   ├── it should set the deposit to the deposit amount
+            │   ├── it should set the records to _records
+            │   ├── it should set the canonical to _canonical
+            │   ├── it should increase the balance by the deposit
+            │   ├── it should lock the deposit
+            │   └── it should emit RegistrationRequested with _token, _requester
+            └── when another token has an open request
+                ├── it should add the deposit to the locked funds
+                └── it should leave the other request untouched
+
+UnitTokenRegistry::registerExempt
+├── when the canonical chain id is the local chain
+│   └── it should revert with InvalidCanonical
+├── when the caller is not exempt
+│   └── it should revert with NotExempt
+└── given the caller is exempt
+    ├── when the token is already registered
+    │   └── it should revert with AlreadyRegistered
+    └── given the token was not registered
+        ├── when the token is the zero address
+        │   └── it should revert with ZeroAddress
+        └── given the token is not the zero address
+            ├── when no nft contract is configured
+            │   └── it should revert with NoNFTContract
+            └── given an nft contract is configured
+                ├── when the token has no open request
+                │   ├── it should assign the next id and record the mapping
+                │   ├── it should mint the nft to the recipient
+                │   └── it should emit Registered with _token, _id, _to
+                ├── when the token has an open request
+                │   ├── it should credit the refund to the original requester
+                │   ├── it should close the request
+                │   ├── it should keep the credited refund locked
+                │   ├── it should emit RefundCredited with _requester, _amount
+                │   ├── it should emit RegistrationPreempted with _token, _requester
+                │   ├── it should mint the nft to the recipient
+                │   └── it should emit Registered with _token, _id, _to
+                ├── when the open requester cannot receive eth
+                │   └── it should credit the refund without reverting
+                ├── when the recipient cancels the request during the mint
+                │   └── it should revert with NotRequester
+                ├── when the canonical reference is set
+                │   ├── it should set the canonical reference to _canonical
+                │   └── it should emit CanonicalSet with _token, _chainId, _nftId
+                ├── when the canonical reference is empty
+                │   └── it should leave the canonical reference untouched
+                ├── when registering two tokens in sequence
+                │   └── it should assign strictly increasing unique ids
+                └── when a newer nft contract is registered
+                    ├── it should mint on the newest contract
+                    └── it should record the newest contract index
+
+UnitTokenRegistry::resolveRequest
+├── when the caller is not a delegate
+│   └── it should revert with NotReviewer
+└── given the caller is a delegate
+    ├── when no request is open
+    │   └── it should revert with NotPending
+    └── given a request is open
+        ├── when approving the zero address token
+        │   └── it should revert with ZeroAddress
+        ├── when approving with no nft contract configured
+        │   └── it should revert with NoNFTContract
+        ├── when the request is approved
+        │   ├── it should close the request
+        │   ├── it should assign the next id and record the mapping
+        │   ├── it should mint the nft to the requester
+        │   ├── it should emit Registered with _token, _id, _to
+        │   ├── it should credit the refund to the requester
+        │   ├── it should keep the credited refund locked
+        │   ├── it should emit RefundCredited with _requester, _amount
+        │   └── it should emit RegistrationApproved with _token, _requester
+        ├── when the approved request carries records
+        │   └── it should mint with the requested records
+        ├── when the approved request carries a canonical reference
+        │   ├── it should set the canonical reference to the requested one
+        │   └── it should emit CanonicalSet with _token, _chainId, _nftId
+        ├── when the approved request has an empty canonical reference
+        │   └── it should leave the canonical reference untouched
+        ├── when the approved request is minting the nft
+        │   └── it should keep the deposit locked
+        ├── when the requester cancels the request during the mint
+        │   └── it should revert with NotRequester
+        ├── when the approved requester cannot receive eth
+        │   └── it should credit the refund without reverting
+        ├── when the request is rejected
+        │   ├── it should close the request
+        │   ├── it should keep the deposit as a sweepable fee
+        │   ├── it should not credit a refund
+        │   ├── it should not register the token
+        │   ├── it should not set the canonical reference
+        │   └── it should emit RegistrationRejected with _token, _requester
+        └── when approving one of several open requests
+            ├── it should assign the next id to the approved token
+            ├── it should credit only the approved deposit
+            └── it should leave the other requests untouched
+
+UnitTokenRegistry::cancel
+├── when no request is open
+│   └── it should revert with NotRequester
+├── when the caller is not the requester
+│   └── it should revert with NotRequester
+└── given the caller is the requester
+    ├── when the request is cancelled
+    │   ├── it should close the request
+    │   ├── it should credit the refund to the requester
+    │   ├── it should keep the credited refund locked
+    │   ├── it should emit RefundCredited with _requester, _amount
+    │   └── it should emit RegistrationCancelled with _token, _requester
+    ├── when the requester cannot receive eth
+    │   └── it should credit the refund without reverting
+    └── when cancelling one of several open requests
+        └── it should credit only the cancelled deposit
+
+UnitTokenRegistry::claimRefund
+├── when the recipient is the zero address
+│   └── it should revert with ZeroAddress
+└── given the recipient is not the zero address
+    ├── when the caller has no refund
+    │   └── it should revert with NoRefund
+    ├── when the recipient cannot receive eth
+    │   └── it should revert with TransferFailed
+    └── when the claim succeeds
+        ├── it should send the refund to the recipient
+        ├── it should clear the credited refund
+        ├── it should release the locked funds
+        └── it should emit RefundClaimed with _requester, _recipient, _amount
+
+UnitTokenRegistry::registerNFTContract
+├── when the caller is not governance
+│   └── it should revert with NotGovernance
+└── given the caller is governance
+    ├── when the nft contract is the zero address
+    │   └── it should revert with ZeroAddress
+    └── given the nft contract is not the zero address
+        ├── when the nft contract has a different leaf voter
+        │   └── it should revert with InvalidNFTContract
+        └── given the nft contract has the same leaf voter
+            ├── when the nft contract has a different token registry
+            │   └── it should revert with InvalidNFTContract
+            └── when the nft contract is valid
+                ├── it should append the contract
+                └── it should emit NFTContractRegistered with _nftContract
+
+UnitTokenRegistry::withdraw
+├── when the caller is not governance
+│   └── it should revert with NotGovernance
+└── given the caller is governance
+    ├── when the recipient is the zero address
+    │   └── it should revert with ZeroAddress
+    └── given the recipient is not the zero address
+        ├── when the recipient cannot receive eth
+        │   └── it should revert with TransferFailed
+        └── when the transfer succeeds
+            ├── it should send the balance above the locked funds to the recipient
+            ├── it should leave the locked funds in the contract
+            └── it should emit Withdrawn with _recipient, _amount
+
+UnitTokenRegistry::setListing
+├── when the caller is not governance
+│   └── it should revert with NotGovernance
+└── when the caller is governance
+    ├── it should set the listing to _listed
+    └── it should emit ListingSet with _token, _listed
+
+UnitTokenRegistry::setType
+├── when the caller is not governance
+│   └── it should revert with NotGovernance
+└── given the caller is governance
+    ├── when the type is not zero
+    │   ├── it should set the type to _tierType keeping the weight
+    │   └── it should emit TypeSet with _token, _tierType
+    └── when the type is zero
+        ├── it should clear the type keeping the weight
+        └── it should emit TypeSet with _token, _tierType
+
+UnitTokenRegistry::setWeight
+├── when the caller is not governance
+│   └── it should revert with NotGovernance
+└── given the caller is governance
+    ├── when the weight exceeds the maximum
+    │   └── it should revert with InvalidWeight
+    ├── when the weight equals the maximum
+    │   └── it should set the weight to the maximum
+    └── when the weight is within range
+        ├── it should set the weight to _weight keeping the type
+        └── it should emit WeightSet with _token, _weight
+
+UnitTokenRegistry::setTier
+├── when the caller is not governance
+│   └── it should revert with NotGovernance
+└── given the caller is governance
+    ├── when the weight exceeds the maximum
+    │   └── it should revert with InvalidWeight
+    ├── when the weight equals the maximum
+    │   └── it should set the weight to the maximum
+    └── when the weight is within range
+        ├── it should set the type and weight to _tierType and _weight
+        └── it should emit TierSet with _token, _tierType, _weight
+
+UnitTokenRegistry::setCanonical
+├── when the caller is not governance
+│   └── it should revert with NotGovernance
+└── given the caller is governance
+    ├── when the chain id is the local chain
+    │   └── it should revert with InvalidCanonical
+    ├── when setting a reference
+    │   ├── it should set the canonical reference to _chainId and _nftId
+    │   └── it should emit CanonicalSet with _token, _chainId, _nftId
+    └── when clearing a reference
+        ├── it should clear the canonical reference
+        └── it should emit CanonicalSet with _token, _chainId, _nftId
+
+UnitTokenRegistry::setDepositAmount
+├── when the caller is not governance
+│   └── it should revert with NotGovernance
+└── when the caller is governance
+    ├── it should set the deposit amount to _amount
+    └── it should emit DepositAmountSet with _amount
+
+UnitTokenRegistry::setExemptActor
+├── when the caller is not governance
+│   └── it should revert with NotGovernance
+└── when the caller is governance
+    ├── it should set the exemption to _exempt
+    └── it should emit ExemptSet with _account, _exempt
+
+UnitTokenRegistry::setDelegateReviewer
+├── when the caller is not governance
+│   └── it should revert with NotGovernance
+└── when the caller is governance
+    ├── it should set the delegate status to _allowed
+    └── it should emit DelegateSet with _account, _allowed
+
+UnitTokenRegistry::tier
+├── when the token has no tier set
+│   └── it should return zero type and zero weight
+├── when the token has weight without a type
+│   └── it should return zero type and the weight
+├── when the token has a type without a weight
+│   └── it should return the type and zero weight
+└── when the token has a tier set
+    └── it should return the decoded type and weight
+
+UnitTokenRegistry::metadata
+├── when the token has a canonical reference
+│   ├── it should return the reference
+│   └── it should return empty values without reading the local nft
+├── when the token is native and has no nft
+│   ├── it should return an empty reference
+│   └── it should return an empty array
+├── when the token is native and its nft was minted on the current contract
+│   ├── it should return an empty reference
+│   └── it should forward the read to the current contract
+├── when the token is native and its nft was minted on an older contract
+│   ├── it should return an empty reference
+│   └── it should forward the read to the older contract
+└── when the token is native and its nft was minted on a newer contract
+    ├── it should return an empty reference
+    └── it should forward the read to the newer contract
+
+UnitTokenRegistry::pendingRequest
+├── when no request is open
+│   └── it should return an empty request
+└── when a request is open
+    ├── it should return the requester and deposit
+    ├── it should return the records
+    └── it should return the canonical reference

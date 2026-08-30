@@ -1,0 +1,23 @@
+UnitPoolTape::WriteObservation
+├── when it is the first swap
+│   ├── it updates the block timestamp of slot zero to the swap timestamp
+│   ├── it does not commit a new observation
+│   ├── it does not increase cardinality
+│   └── it does not increase index
+└── when it is not the first swap
+    ├── when the elapsed time since the last observation is lt or eq to the cadence interval
+    │   ├── it does not commit a new observation
+    │   ├── it does not increase cardinality
+    │   ├── it does not increase index
+    │   └── it does not write to storage
+    └── when the elapsed time since the last observation is gt the cadence interval
+        ├── when the buffer is not full
+        │   ├── it should write the new observation at the newly grown slot
+        │   ├── it should increase cardinality by one
+        │   ├── it should increase index by one modulo cardinality
+        │   └── it emits ObservationRecorded
+        └── when the buffer is full
+            ├── it overwrites the first slot
+            ├── it keeps the cardinality unchanged
+            ├── it wraps the index to zero
+            └── it emits ObservationRecorded

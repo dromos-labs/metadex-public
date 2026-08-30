@@ -1,0 +1,12 @@
+UnitDynamicSwapFeeHook::SetDefaultFeeCap
+├── when caller is not Fee Manager
+│   └── it should revert with "NFM"
+└── when caller is Fee Manager
+    ├── when default fee cap is higher than max fee cap
+    │   └── it should revert with "MFC"
+    └── when default fee cap is less than or equal to max fee cap
+        ├── when default fee cap is zero
+        │   └── it should revert with "FC0"
+        └── when default fee cap is gt zero
+            ├── it should set defaultFeeCap
+            └── it should emit a DefaultFeeCapSet event

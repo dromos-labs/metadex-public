@@ -1,0 +1,49 @@
+UnitV2Gauge::Deposit
+├── when the amount is zero
+│   └── it should revert with ZeroAmount
+└── when the amount is not zero
+    ├── when unused emissions are zero
+    │   ├── when the reward parameters are known
+    │   │   ├── it should request a voter settlement
+    │   │   ├── it should advance reward per token stored
+    │   │   ├── it should advance the cumulative reward share cursor
+    │   │   ├── it should not forfeit emissions
+    │   │   ├── it should update the caller's rewards before the deposit
+    │   │   ├── it should update the caller's rewardPerTokenPaid
+    │   │   ├── it should pull staking tokens from the caller
+    │   │   ├── it should credit the caller balance
+    │   │   ├── it should increase total supply
+    │   │   ├── it should update the caller's deposit block
+    │   │   └── it should emit the Deposit event
+    │   └── when the reward parameters vary
+    │       ├── it should request a voter settlement
+    │       ├── it should advance reward per token stored
+    │       ├── it should advance the cumulative reward share cursor
+    │       ├── it should not forfeit emissions
+    │       ├── it should update the caller's rewards before the deposit
+    │       ├── it should update the caller's rewardPerTokenPaid
+    │       ├── it should pull staking tokens from the caller
+    │       ├── it should credit the caller balance
+    │       ├── it should increase total supply
+    │       ├── it should update the caller's deposit block
+    │       └── it should emit the Deposit event
+    ├── when unused emissions are greater than zero
+    │   ├── it should request a voter settlement
+    │   ├── it should leave reward per token unchanged
+    │   ├── it should advance the cumulative reward share cursor
+    │   ├── it should forfeit unused emissions
+    │   ├── it should leave the caller's rewards unchanged
+    │   ├── it should update the caller's rewardPerTokenPaid
+    │   ├── it should pull staking tokens from the caller
+    │   ├── it should credit the caller balance
+    │   ├── it should increase total supply
+    │   ├── it should update the caller's deposit block
+    │   └── it should emit the Deposit event
+    ├── when the first deposit lands on an empty gauge and a staker follows
+    │   ├── it should forfeit the emissions accrued while the gauge was empty
+    │   ├── it should advance the cursor past the forfeited span
+    │   ├── it should leave reward per token stored at zero after the empty span
+    │   ├── it should fold only the post deposit delta once the gauge has a staker
+    │   └── it should not back pay the forfeited span to the first staker
+    └── when the voter reenters the gauge during settlement
+        └── it should revert with ReentrancyGuardReentrantCall

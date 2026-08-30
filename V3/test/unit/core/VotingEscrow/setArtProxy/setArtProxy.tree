@@ -1,0 +1,12 @@
+UnitVotingEscrow::SetArtProxy
+├── when the caller does not hold the art proxy admin role
+│   └── it should revert with AccessControlUnauthorizedAccount
+├── when the proxy is the zero address
+│   └── it should revert with ZeroAddress
+├── when the proxy is unchanged
+│   ├── it should not emit any event
+│   └── it should leave the art proxy unchanged
+└── when the caller holds the art proxy admin role
+    ├── it should update the art proxy address
+    ├── it should emit the ArtProxyUpdated event
+    └── it should emit the BatchMetadataUpdate event

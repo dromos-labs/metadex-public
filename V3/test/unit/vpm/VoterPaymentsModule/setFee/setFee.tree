@@ -1,0 +1,19 @@
+UnitVoterPaymentsModule::setFee
+├── when the caller does not hold the fee manager role
+│   └── it should revert with AccessControlUnauthorizedAccount
+└── when the caller holds the fee manager role
+    ├── when the rate exceeds PIPS
+    │   └── it should revert with InvalidFeeRate
+    └── when the rate is within bounds
+        ├── when the entry is already registered at the same rate
+        │   ├── it should not emit FeeSet
+        │   └── it should leave the fee record unchanged
+        ├── when the entry is already registered at a different rate
+        │   ├── it should store the new rate
+        │   └── it should emit FeeSet
+        ├── when caller is the default sentinel address zero
+        │   ├── it should store the rate with registered true
+        │   └── it should emit FeeSet
+        └── when caller is a concrete address
+            ├── it should store the rate with registered true
+            └── it should emit FeeSet

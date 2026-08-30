@@ -1,0 +1,65 @@
+UnitSplitter::constructor
+├── when recipients and shares lengths mismatch
+│   └── it should revert with LengthMismatch
+├── when the initial list is empty
+│   └── it should revert with EmptyRecipients
+├── when the initial list exceeds the maximum
+│   └── it should revert with TooManyRecipients
+├── when token is zero address
+│   └── it should revert with ZeroAddress
+├── when voter is zero address
+│   └── it should revert with ZeroAddress
+└── when the initial list is valid
+    ├── it should set the TOKEN immutable to _token
+    ├── it should set the VOTER immutable to _voter
+    ├── it should write _initialRecipients in insertion order
+    ├── it should set each recipient share from _initialShares
+    ├── it should seed each recipient lastSettledIndex at zero
+    └── it should leave the global accrual index at zero
+
+UnitSplitter::setRecipients
+├── when recipients and shares lengths mismatch
+│   └── it should revert with LengthMismatch
+├── when the new list is empty
+│   └── it should revert with EmptyRecipients
+├── when the new list exceeds the maximum
+│   └── it should revert with TooManyRecipients
+├── when the caller is not the splitter config authority
+│   └── it should revert with UnauthorizedCaller
+└── given the caller is the splitter config authority
+    ├── when a new recipient is the zero address
+    │   └── it should revert with InvalidRecipient
+    ├── when a new recipient is the splitter itself
+    │   └── it should revert with InvalidRecipient
+    ├── when a new recipient share is zero
+    │   └── it should revert with ZeroShare
+    ├── when a new recipient appears more than once
+    │   └── it should revert with DuplicateRecipient
+    ├── when the new list is valid
+    │   ├── it should accrue pending inflow into the global accrual index
+    │   ├── it should settle each old recipient at its old share into claimable
+    │   ├── it should clear each old recipient share to zero
+    │   ├── it should replace the recipients array with _newRecipients
+    │   ├── it should set each new recipient share from _newShares
+    │   ├── it should set each new recipient lastSettledIndex to the global accrual index
+    │   └── it should emit RecipientsSet with _newRecipients, _newShares
+    ├── when the new list keeps the same recipients with new shares
+    │   ├── it should accrue pending inflow into the global accrual index
+    │   ├── it should keep the same recipients in the array
+    │   ├── it should preserve each recipient settled balance as claimable
+    │   ├── it should update each recipient share to the new value
+    │   └── it should reset each recipient lastSettledIndex to the global accrual index
+    └── when the new shares do not sum to the maximum
+        └── it should revert with InvalidShareSum
+
+UnitSplitter::earned
+├── when there is no pending inflow
+│   └── it should return the settled claimable balance
+├── when there is pending inflow
+│   └── it should return claimable plus the projected accrual
+└── when reading a concrete pending inflow
+    └── it should return the hardcoded claimable plus projected accrual
+
+UnitSplitter::allRecipients
+└── when called
+    └── it should return the entire active list

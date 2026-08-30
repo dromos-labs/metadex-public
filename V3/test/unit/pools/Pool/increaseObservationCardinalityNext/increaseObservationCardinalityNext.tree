@@ -1,0 +1,5 @@
+UnitPool::IncreaseObservationCardinalityNext
+├── when the value returned by grow equals the current observationCardinalityNext
+│   └── it should leave observationCardinalityNext unchanged and emit nothing
+└── when the value returned by grow differs from the current observationCardinalityNext
+    └── it should emit IncreaseObservationCardinalityNext with the old and new values

@@ -1,0 +1,5 @@
+UnitLeafMessageOrchestratorComposed::Route
+├── when a shape stale gauge vote follows a higher nonce chain allocation
+│   └── it should book the gauge at the live decaying shape and not resurrect the stale permanent shape
+└── when an older chain allocation follows a higher nonce gauge shape
+    └── it should park the chain delta at the live shape without reshaping it

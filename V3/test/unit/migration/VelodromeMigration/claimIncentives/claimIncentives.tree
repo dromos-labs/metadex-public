@@ -1,0 +1,10 @@
+UnitVelodromeMigration::ClaimIncentives
+├── when the reward contract reports the Optimism chain identifier
+│   ├── given the claimed token balance is positive
+│   │   └── it should transfer the locally claimed token balance
+│   └── given the claimed token balance is zero
+│       └── it should query the token balance without transferring
+├── when the reward contract reports another chain identifier
+│   └── it should skip token calls for the remote reward
+└── when the reward contract chain identifier call reverts
+    └── it should transfer the locally claimed token balance

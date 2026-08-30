@@ -1,0 +1,6 @@
+{
+  "extends": "wonderland",
+  "rules": {
+    "state-visibility": "warn"
+  }
+}

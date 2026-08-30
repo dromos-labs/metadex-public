@@ -1,0 +1,22 @@
+UnitPoolOracle::Write
+├── when time elapsed since last observation is lt or eq to period size
+│   ├── it should not push a new observation
+│   ├── it should not increase cardinality
+│   └── it should not increase index
+└── when time elapsed since last observation is gt period size
+    ├── when cardinalityNext is lt or eq to cardinality
+    │   ├── when index is lt the last available slot
+    │   │   ├── it should not increase cardinality
+    │   │   ├── it should write the new observation at the advanced slot
+    │   │   └── it should increase index by one modulo cardinality
+    │   └── when index eq the last available slot
+    │       ├── it should not increase cardinality
+    │       ├── it should wrap the write index to zero
+    │       └── it should overwrite the oldest observation
+    ├── when cardinalityNext is gt cardinality and index eq the last available slot
+    │   ├── it should increase cardinality by one
+    │   ├── it should write the new observation at the newly grown slot
+    │   └── it should increase index by one modulo cardinality
+    └── when the block timestamp has wrapped past the newest stored observation timestamp
+        ├── it should increase index by one modulo cardinality
+        └── it should write the new observation at the wrapped block timestamp

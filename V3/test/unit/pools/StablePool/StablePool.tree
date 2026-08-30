@@ -1,0 +1,18 @@
+UnitStablePool::initialize
+└── given a freshly deployed stable pool
+    ├── it should derive the name from the stable prefix and the token symbols
+    └── it should derive the symbol from the stable prefix and the token symbols
+
+UnitStablePool::MINIMUM_K
+└── it should expose the hard coded stable invariant floor
+
+UnitStablePool::getK
+├── when reserves are zero
+│   └── it should return zero
+├── when reserves are within the invariant ceiling
+│   └── it should return the cubic stable invariant
+└── when reserves exceed the invariant ceiling
+    └── it should revert with an arithmetic overflow
+
+UnitStablePool::POOL_TYPE
+└── it should return the stable pool identifier

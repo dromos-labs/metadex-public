@@ -1,0 +1,50 @@
+UnitVoter::SpendSurplus
+├── when the caller lacks the governance role
+│   └── it should revert with AccessControlUnauthorizedAccount
+├── when the recipient is the zero address
+│   └── it should revert with ZeroAddress
+├── when the chain is neither chain zero nor registered
+│   └── it should revert with ChainNotRegistered
+├── when the amount exceeds the spendable surplus
+│   └── it should revert with InsufficientSurplus carrying the settled spendable amount
+├── when the reported surplus exceeds the remaining mint entitlement
+│   ├── it should revert with InsufficientSurplus carrying the clamped entitlement on the full report
+│   └── it should spend the clamped entitlement
+├── when replaying the audited double spend scenario after the buffer backed redeem
+│   ├── it should revert with InsufficientSurplus one wei above the clamped entitlement
+│   ├── it should spend the clamped entitlement in full
+│   ├── it should leave the donated buffer untouched
+│   └── it should revert with InsufficientSurplus on any further spend
+├── when the minter rejects the amount
+│   └── it should bubble the minter revert
+├── when spending from an active chain
+│   ├── it should increment the spent surplus by the amount
+│   ├── it should call the minter with the amount and recipient
+│   ├── it should emit SurplusSpent with the chain recipient and amount
+│   ├── it should settle the chain ceiling before the check
+│   ├── it should anchor the chain cursor at the advanced global index
+│   └── it should leave the ceiling total redeemed and reported surplus untouched by the spend
+├── when spending from a suspended chain
+│   ├── it should route the pending accrual into the cumulative suspended surplus before the check
+│   ├── it should keep the ceiling frozen
+│   └── it should allow spending the freshly settled surplus in the same call
+├── when spending from a sunset chain
+│   ├── it should route the pending accrual into the cumulative suspended surplus before the check
+│   ├── it should keep the ceiling frozen
+│   └── it should allow spending the freshly settled surplus in the same call
+├── when the amount exceeds the freshly settled suspended surplus
+│   └── it should revert with InsufficientSurplus carrying the settled suspended pot
+├── when spending from chain zero
+│   ├── it should settle the chain zero ceiling first
+│   └── it should allow spending up to the settled ceiling
+├── when the amount exceeds the freshly settled chain zero ceiling
+│   └── it should revert with InsufficientSurplus carrying the settled ceiling
+├── when the amount exactly equals the spendable surplus
+│   ├── it should spend at the boundary
+│   └── it should revert with InsufficientSurplus on any further spend
+├── when spending twice
+│   ├── it should accumulate the spent surplus across both spends
+│   └── it should leave the redeem headroom terms unchanged
+└── when redeeming after a spend
+    ├── it should revert with CeilingExceeded one wei above the remaining headroom
+    └── it should redeem the exact remaining headroom after the spend

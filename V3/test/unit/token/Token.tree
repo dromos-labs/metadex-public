@@ -1,0 +1,181 @@
+UnitToken::constructor
+├── when minter is zero address
+│   └── it should revert with ZeroAddress
+├── when voting escrow is zero address
+│   └── it should revert with ZeroAddress
+├── when migration is zero address
+│   └── it should revert with ZeroAddress
+├── when Velodrome migration is zero address
+│   └── it should revert with ZeroAddress
+├── when the migration opening timestamp is not week aligned
+│   └── it should revert with InvalidMigrationOpen
+├── when the migration opening timestamp is not in the future
+│   └── it should revert with InvalidMigrationOpen
+└── when parameters are valid
+    ├── it should set the MINTER immutable to _minter
+    ├── it should set the VOTING_ESCROW immutable to _votingEscrow
+    ├── it should set the MIGRATION immutable to _migration
+    ├── it should set the VELODROME_MIGRATION immutable to _velodromeMigration
+    ├── it should set TRANSFERS_ENABLED_AT to one week after _migrationOpen
+    ├── it should set the name to _name
+    ├── it should set the symbol to _symbol
+    ├── it should set the name hash to a hash of _name bytes
+    ├── it should mint _migrationAllocation to _migration
+    ├── it should mint _velodromeAllocation to _velodromeMigration
+    ├── it should set total supply to the sum of both migration allocations
+    ├── it should emit Transfer for the migration allocation
+    └── it should emit Transfer for the Velodrome migration allocation
+
+UnitToken::mint
+├── when caller is not minter
+│   └── it should revert with NotMinter
+├── when caller is minter and recipient is zero address
+│   └── it should revert with ZeroAddress
+├── when caller is minter and total supply overflows
+│   └── it should revert with TotalSupplyOverflow
+└── when caller is minter and recipient is valid
+    ├── it should mint tokens to the recipient
+    ├── it should increase total supply by the amount
+    └── it should emit Transfer with address(0), _recipient, _amount
+
+UnitToken::burn
+├── when caller is not an authorized burner
+│   └── it should revert with CallerNotBurner
+├── when voting escrow has insufficient balance
+│   └── it should revert with InsufficientBalance
+├── when voting escrow has enough balance
+│   ├── it should burn tokens from voting escrow
+│   ├── it should decrease total supply by the amount
+│   └── it should emit Transfer with _VOTING_ESCROW, address(0), _amount
+├── when migration has insufficient balance
+│   └── it should revert with InsufficientBalance
+├── when migration has enough balance
+│   ├── it should burn tokens from migration
+│   ├── it should decrease total supply by the amount
+│   └── it should emit Transfer with _MIGRATION, address(0), _amount
+├── when Velodrome migration has insufficient balance
+│   └── it should revert with InsufficientBalance
+└── when Velodrome migration has enough balance
+    ├── it should burn tokens from Velodrome migration
+    ├── it should decrease total supply by the amount
+    └── it should emit Transfer with _VELODROME_MIGRATION, address(0), _amount
+
+UnitToken::transfer
+├── when transfers are disabled and caller is not a migration sender
+│   └── it should revert with TransfersDisabled
+├── when transfers are disabled and caller is migration
+│   └── it should transfer tokens to the recipient
+├── when transfers are disabled and caller is Velodrome migration
+│   └── it should transfer tokens to the recipient
+├── when transfers are disabled and only the recipient is migration
+│   └── it should revert with TransfersDisabled
+├── when transfers are disabled and only the recipient is Velodrome migration
+│   └── it should revert with TransfersDisabled
+├── when transfers are disabled and recipient is zero address
+│   └── it should revert with TransfersDisabled
+├── when current timestamp equals the transfer activation timestamp
+│   └── it should transfer tokens to the recipient
+├── when recipient is zero address
+│   └── it should revert with ZeroAddress
+├── when caller has insufficient balance
+│   └── it should revert with InsufficientBalance
+├── when caller has enough balance
+│   ├── it should transfer tokens to the recipient
+│   ├── it should keep total supply unchanged
+│   └── it should emit Transfer with _caller, _recipient, _amount
+└── when recipient is caller
+    ├── it should keep the caller balance unchanged
+    ├── it should keep total supply unchanged
+    └── it should emit Transfer with _caller, _caller, _amount
+
+UnitToken::transferFrom
+├── when transfers are disabled and from is not a migration sender
+│   └── it should revert with TransfersDisabled
+├── when transfers are disabled and from is migration
+│   └── it should transfer tokens to the recipient
+├── when transfers are disabled and from is Velodrome migration
+│   └── it should transfer tokens to the recipient
+├── when transfers are disabled and only the caller is migration
+│   └── it should revert with TransfersDisabled
+├── when transfers are disabled and only the recipient is migration
+│   └── it should revert with TransfersDisabled
+├── when transfers are disabled and recipient is zero address
+│   └── it should revert with TransfersDisabled
+├── when current timestamp equals the transfer activation timestamp
+│   └── it should transfer tokens to the recipient
+├── when recipient is zero address
+│   └── it should revert with ZeroAddress
+├── when from address has insufficient balance
+│   └── it should revert with InsufficientBalance
+├── when caller has insufficient allowance
+│   └── it should revert with InsufficientAllowance
+├── when caller is PermitTwo and no approval has been given
+│   └── it should revert with InsufficientAllowance
+├── when caller has finite allowance
+│   ├── when finite allowance recipient is not from
+│   │   ├── it should transfer tokens to the recipient
+│   │   ├── it should decrease the caller allowance
+│   │   ├── it should keep total supply unchanged
+│   │   └── it should emit Transfer with _from, _recipient, _amount
+│   └── when finite allowance recipient is from
+│       ├── it should keep the from balance unchanged
+│       ├── it should decrease the caller allowance
+│       ├── it should keep total supply unchanged
+│       └── it should emit Transfer with _from, _from, _amount
+└── when caller has infinite allowance
+    ├── when infinite allowance recipient is not from
+    │   ├── it should transfer tokens to the recipient
+    │   ├── it should keep the caller allowance unchanged
+    │   ├── it should keep total supply unchanged
+    │   └── it should emit Transfer with _from, _recipient, _amount
+    └── when infinite allowance recipient is from
+        ├── it should keep the from balance unchanged
+        ├── it should keep the caller allowance unchanged
+        ├── it should keep total supply unchanged
+        └── it should emit Transfer with _from, _from, _amount
+
+UnitToken::approve
+├── when called
+│   ├── it should approve the spender
+│   └── it should emit Approval with _owner, _spender, _amount
+└── when spender is PermitTwo
+    ├── it should approve PermitTwo
+    └── it should emit Approval with _owner, PermitTwo, _amount
+
+UnitToken::allowance
+├── when spender is PermitTwo and no approval has been given
+│   └── it should return zero
+├── when spender is PermitTwo and approval has been given
+│   └── it should return its allowance
+├── when spender is any non PermitTwo address and no approval has been given
+│   └── it should return zero
+└── when spender is any non PermitTwo address and approval has been given
+    └── it should return its allowance
+
+UnitToken::permit
+├── when deadline has expired
+│   └── it should revert with PermitExpired
+├── when signature is invalid
+│   └── it should revert with InvalidPermit
+├── when signature is replayed
+│   └── it should revert with InvalidPermit
+├── when spender is PermitTwo and signature is valid
+│   ├── it should approve PermitTwo
+│   ├── it should increment the owner nonce
+│   └── it should emit Approval with _permitOwner, PermitTwo, _amount
+└── when spender is not PermitTwo and signature is valid
+    ├── it should approve the spender
+    ├── it should increment the owner nonce
+    └── it should emit Approval with _permitOwner, _spender, _amount
+
+UnitToken::DOMAIN_SEPARATOR
+└── when called
+    └── it should return the expected domain separator
+
+UnitToken::name
+└── when called
+    └── it should return the token name
+
+UnitToken::symbol
+└── when called
+    └── it should return the token symbol

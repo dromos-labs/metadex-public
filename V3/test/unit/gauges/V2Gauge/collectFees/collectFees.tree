@@ -1,0 +1,16 @@
+UnitV2Gauge::CollectFees
+├── when caller is not the voting rewards manager
+│   └── it should revert with NotVotingRewardsManager
+├── when the gauge is not a pool
+│   └── it should return zero amounts
+├── when the emission cap is zero
+│   └── it should return zero amounts
+├── when the gauge is not activated
+│   └── it should return zero amounts
+├── when the pool claims zero fees
+│   ├── it should return zero amounts
+│   └── it should not emit a ClaimFees event
+└── when the pool claims fees
+    ├── it should claim fees to the voting rewards manager
+    ├── it should return the claimed amounts
+    └── it should emit a ClaimFees event

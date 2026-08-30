@@ -1,0 +1,37 @@
+UnitDiscountRegistry::RegisterPoolDiscount
+├── when caller isn't owner
+│   └── it reverts with OwnableUnauthorizedAccount
+└── when caller is owner
+    ├── when account to discount is address zero
+    │   └── it reverts with AccountIsZero
+    └── when account to discount isn't address zero
+        ├── when new discount exceeds max discount
+        │   └── it reverts with NewDiscountGtMax
+        └── when new discount is lt or eq max discount
+            ├── when pool is address zero
+            │   └── it reverts with PoolIsZero
+            └── when pool isn't address zero
+                ├── when new discount equals old discount
+                │   └── it reverts with OldDiscountEqNewDiscount
+                └── when new discount is different from old discount
+                    ├── when pool is in discounted single element set and new discount is zero
+                    │   ├── it removes pool from discounted pools set
+                    │   ├── it flips isPoolDiscountSet to false
+                    │   ├── it sets poolDiscount to zero
+                    │   └── it emits PoolDiscountSet
+                    ├── when pool is in discounted multi element set and new discount is zero
+                    │   ├── it removes pool from discounted pools set
+                    │   ├── it sets poolDiscount to zero
+                    │   └── it emits PoolDiscountSet
+                    ├── when pool is in discounted multi element set and new discount is gt zero
+                    │   ├── it sets poolDiscount to new discount
+                    │   └── it emits PoolDiscountSet
+                    ├── when pool isn't discounted and the set is empty
+                    │   ├── it adds pool to discounted pools set
+                    │   ├── it marks isPoolDiscountSet as true
+                    │   ├── it sets poolDiscount to new discount
+                    │   └── it emits PoolDiscountSet
+                    └── when pool isn't discounted and the set is multi element
+                        ├── it adds pool to discounted pools set
+                        ├── it sets poolDiscount to new discount
+                        └── it emits PoolDiscountSet

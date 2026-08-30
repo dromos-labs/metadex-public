@@ -1,0 +1,74 @@
+UnitDefaultGaugeCreationModule::constructor
+├── when the leaf voter is the zero address
+│   └── it should revert with ZeroAddress
+├── when the leaf voter reports a zero factory registry
+│   └── it should revert with ZeroAddress
+├── when the leaf voter reports a zero gauge manager
+│   └── it should revert with ZeroAddress
+└── when the leaf voter reports nonzero links
+    ├── it should set the leaf voter
+    ├── it should set the factory registry reported by the leaf voter
+    └── it should set the gauge manager reported by the leaf voter
+
+UnitDefaultGaugeCreationModule::activate
+├── when the factory registry records no target for the gauge
+│   └── it should revert with GaugeNotRegistered
+└── when the gauge has a recorded target
+    ├── when the first pool token is not listed
+    │   └── it should revert with TokenNotListed carrying the first token
+    ├── when the second pool token is not listed
+    │   └── it should revert with TokenNotListed carrying the second token
+    └── when both pool tokens are listed
+        ├── it should allow any caller
+        ├── it should read the live token registry pointer from the factory registry
+        └── it should activate the gauge through the gauge manager
+
+UnitDefaultGaugeCreationModule::addListedBaseAsset
+├── when the caller does not hold the module admin role on the leaf voter
+│   └── it should revert with NotAuthorized
+└── when the caller holds the module admin role on the leaf voter
+    ├── when the token is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the token is not in the set
+    │   ├── it should add the token to the set
+    │   └── it should emit ListedBaseAssetAdded
+    └── when the token is already in the set
+        ├── it should succeed
+        ├── it should keep the token in the set
+        └── it should not emit ListedBaseAssetAdded
+
+UnitDefaultGaugeCreationModule::removeListedBaseAsset
+├── when the caller does not hold the module admin role on the leaf voter
+│   └── it should revert with NotAuthorized
+└── when the caller holds the module admin role on the leaf voter
+    ├── when the token is in the set
+    │   ├── it should remove the token from the set
+    │   └── it should emit ListedBaseAssetRemoved
+    └── when the token is not in the set
+        ├── it should succeed
+        ├── it should leave the set unchanged
+        └── it should not emit ListedBaseAssetRemoved
+
+UnitDefaultGaugeCreationModule::addAllowedGaugeFactory
+├── when the caller does not hold the module admin role on the leaf voter
+│   └── it should revert with NotAuthorized
+└── when the caller holds the module admin role on the leaf voter
+    ├── when the gauge factory is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the gauge factory is already allowed
+    │   └── it should revert with GaugeFactoryAlreadyAllowed
+    └── when the gauge factory is not yet allowed
+        ├── it should add the gauge factory to the set
+        ├── it should emit GaugeFactoryAllowed
+        └── it should expose the gauge factory through the set views
+
+UnitDefaultGaugeCreationModule::removeAllowedGaugeFactory
+├── when the caller does not hold the module admin role on the leaf voter
+│   └── it should revert with NotAuthorized
+└── when the caller holds the module admin role on the leaf voter
+    ├── when the gauge factory is not in the set
+    │   └── it should revert with GaugeFactoryNotAllowed
+    └── when the gauge factory is in the set
+        ├── it should remove the gauge factory from the set
+        ├── it should emit GaugeFactoryDisallowed
+        └── it should hide the gauge factory from the set views

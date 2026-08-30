@@ -1,0 +1,9 @@
+UnitDynamicSwapFeeHook::SetDefaultScalingFactor
+├── when caller is not Fee Manager
+│   └── it should revert with "NFM"
+└── when caller is Fee Manager
+    ├── when default scaling factor is higher than max scaling factor cap
+    │   └── it should revert with "ISF"
+    └── when default scaling factor is less than max scaling factor cap
+        ├── it should set default scaling factor
+        └── it should emit a {DefaultScalingFactorSet} event

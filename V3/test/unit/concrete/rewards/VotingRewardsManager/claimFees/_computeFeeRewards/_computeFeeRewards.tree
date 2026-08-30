@@ -1,0 +1,90 @@
+UnitVotingRewardsManager::ComputeFeeRewards
+├── when there are no user checkpoints to process
+│   ├── it should claim no rewards
+│   └── it should preserve the fee claim state
+└── when there are user checkpoints to process
+    ├── when the checkpoint limit is zero
+    │   └── it should return no rewards
+    └── when the checkpoint limit is not zero
+        ├── when there are no new global checkpoints to claim
+        │   ├── it should claim no rewards
+        │   └── it should preserve the fee claim state
+        └── when there are new global checkpoints to claim
+            ├── when the stake has no voting power in any checkpoint
+            │   ├── it should claim no rewards
+            │   └── it should advance the fee claim state
+            └── when the stake has voting power in at least one checkpoint
+                ├── when the claim reaches the latest user checkpoint
+                │   ├── when the range starts at the user checkpoint
+                │   │   ├── when the stake has voting power in some user checkpoints
+                │   │   │   ├── when the partial range reward is known
+                │   │   │   │   ├── it should skip the user checkpoints without voting power
+                │   │   │   │   ├── it should claim rewards for the user checkpoints with voting power
+                │   │   │   │   ├── it should set the last claimed user checkpoint to the latest user checkpoint
+                │   │   │   │   └── it should set the last claimed global checkpoint to the latest global checkpoint
+                │   │   │   └── when the partial range reward varies
+                │   │   │       ├── it should skip the user checkpoints without voting power
+                │   │   │       ├── it should claim rewards for the user checkpoints with voting power
+                │   │   │       ├── it should set the last claimed user checkpoint to the latest user checkpoint
+                │   │   │       └── it should set the last claimed global checkpoint to the latest global checkpoint
+                │   │   └── when the stake has voting power in every user checkpoint
+                │   │       ├── when the stake is permanent
+                │   │       │   ├── it should claim the reward as a single accumulator delta
+                │   │       │   ├── it should set the last claimed user checkpoint to the latest user checkpoint
+                │   │       │   └── it should set the last claimed global checkpoint to the latest global checkpoint
+                │   │       └── when the stake is decaying
+                │   │           ├── when the stake expired before the range start
+                │   │           │   ├── it should claim no rewards for the user checkpoint
+                │   │           │   ├── it should set the last claimed user checkpoint to the latest user checkpoint
+                │   │           │   └── it should set the last claimed global checkpoint to the latest global checkpoint
+                │   │           └── when the stake is active at the range start
+                │   │               ├── when the stake remains active through the range
+                │   │               │   ├── when the full range reward is known
+                │   │               │   │   ├── it should account for the decay at each global checkpoint
+                │   │               │   │   ├── it should claim the rewards over the full range
+                │   │               │   │   ├── it should set the last claimed user checkpoint to the latest user checkpoint
+                │   │               │   │   └── it should set the last claimed global checkpoint to the latest global checkpoint
+                │   │               │   └── when the full range reward varies
+                │   │               │       ├── it should account for the decay at each global checkpoint
+                │   │               │       ├── it should claim the rewards over the full range
+                │   │               │       ├── it should set the last claimed user checkpoint to the latest user checkpoint
+                │   │               │       └── it should set the last claimed global checkpoint to the latest global checkpoint
+                │   │               └── when the stake expires within the range
+                │   │                   ├── when the capped reward is known
+                │   │                   │   ├── it should account for the decay at each global checkpoint
+                │   │                   │   ├── it should claim up to the global checkpoint before the expiry
+                │   │                   │   ├── it should set the last claimed user checkpoint to the latest user checkpoint
+                │   │                   │   └── it should set the last claimed global checkpoint to the latest global checkpoint
+                │   │                   └── when the capped reward varies
+                │   │                       ├── it should account for the decay at each global checkpoint
+                │   │                       ├── it should claim up to the global checkpoint before the expiry
+                │   │                       ├── it should set the last claimed user checkpoint to the latest user checkpoint
+                │   │                       └── it should set the last claimed global checkpoint to the latest global checkpoint
+                │   └── when the range starts after the user checkpoint
+                │       ├── when the resumed stake reward is known
+                │       │   ├── it should resume from the cached global checkpoint
+                │       │   ├── it should claim only the rewards accrued since the prior claim
+                │       │   ├── it should account for the intermediate global checkpoints
+                │       │   ├── it should set the last claimed user checkpoint to the latest user checkpoint
+                │       │   └── it should set the last claimed global checkpoint to the latest global checkpoint
+                │       └── when the resumed stake reward varies
+                │           ├── it should resume from the cached global checkpoint
+                │           ├── it should claim only the rewards accrued since the prior claim
+                │           ├── it should set the last claimed user checkpoint to the latest user checkpoint
+                │           └── it should set the last claimed global checkpoint to the latest global checkpoint
+                └── when the claim does not reach the latest user checkpoint
+                    ├── when it is a first bounded claim
+                    │   ├── when the bounded reward is known
+                    │   │   ├── it should claim rewards only up to the bounded user checkpoint
+                    │   │   ├── it should set the last claimed user checkpoint to the bounded range end
+                    │   │   ├── it should set the last claimed global checkpoint to the bounded range end
+                    │   │   └── it should settle the remaining range on a later claim
+                    │   └── when the bounded reward varies
+                    │       ├── it should claim rewards only up to the bounded user checkpoint
+                    │       ├── it should set the last claimed user checkpoint to the bounded range end
+                    │       └── it should set the last claimed global checkpoint to the bounded range end
+                    └── when it resumes a prior bounded claim
+                        ├── it should continue from the cached user and global checkpoints
+                        ├── it should claim rewards only up to the bounded user checkpoint
+                        ├── it should set the last claimed user checkpoint to the bounded range end
+                        └── it should set the last claimed global checkpoint to the bounded range end

@@ -1,0 +1,119 @@
+UnitVelodromeMigration::DepositVeNFT
+├── when the migration is paused
+│   └── it should revert with EnforcedPause
+└── when the migration is not paused
+    ├── when the migration has not opened
+    │   └── it should revert with MigrationNotOpen
+    └── when the migration has opened
+        ├── when the recipient is the zero address
+        │   └── it should revert with ZeroAddress
+        └── when the recipient is not the zero address
+            ├── when the v2 veNFT is restricted
+            │   └── it should revert with Restricted
+            └── when the v2 veNFT is not restricted
+                ├── when the v2 veNFT is locked
+                │   └── it should revert with NotNormalVeNFT
+                ├── when the v2 veNFT is managed
+                │   └── it should revert with NotNormalVeNFT
+                └── when the v2 veNFT is normal
+                    ├── when the locked amount is zero
+                    │   └── it should revert with NothingToConvert
+                    └── when the locked amount is not zero
+                        ├── when the v2 veNFT has an active vote
+                        │   └── it should revert with AlreadyVoted
+                        └── when the v2 veNFT does not have an active vote
+                            ├── when the caller does not own the v2 veNFT
+                            │   └── it should revert with NotOwner
+                            └── when the caller owns the v2 veNFT
+                                ├── when the TOKEN conversion output is zero
+                                │   └── it should revert with ZeroConversion
+                                └── when the TOKEN conversion output is not zero
+                                    ├── when the v2 lock is permanent
+                                    │   ├── it should increase the paid basis by the conversion output
+                                    │   ├── it should record the caller as the depositor
+                                    │   ├── it should unlock the permanent v2 veNFT
+                                    │   ├── it should merge the v2 veNFT into the migration veNFT
+                                    │   ├── it should convert the basis output to TOKEN at the configured ratio, rounding down
+                                    │   ├── it should increment the dispatch nonce
+                                    │   ├── it should dispatch the incremented nonce and permanent settlement parameters to the migration entrypoint on root
+                                    │   ├── it should forward the native tokens to the Hyperlane mailbox
+                                    │   ├── it should refund surplus native tokens to the caller
+                                    │   ├── it should emit the MessageDispatched event
+                                    │   └── it should emit the VeNFTMigrated event
+                                    └── when the v2 lock is not permanent
+                                        ├── when the v2 lock has expired
+                                        │   ├── it should increase the paid basis by the conversion output
+                                        │   ├── it should record the caller as the depositor
+                                        │   ├── it should not unlock the v2 veNFT
+                                        │   ├── it should merge the v2 veNFT into the migration veNFT
+                                        │   ├── it should convert the basis output to TOKEN at the configured ratio, rounding down
+                                        │   ├── it should increment the dispatch nonce
+                                        │   ├── it should dispatch the incremented nonce and liquid settlement parameters to the migration entrypoint on root
+                                        │   ├── it should forward the native tokens to the Hyperlane mailbox
+                                        │   ├── it should refund surplus native tokens to the caller
+                                        │   ├── it should emit the MessageDispatched event
+                                        │   └── it should emit the VeNFTMigrated event
+                                        └── when the v2 lock is active
+                                            ├── when the rounded duration is below the maximum v3 stake duration
+                                            │   ├── when the migration parameters are known
+                                            │   │   ├── it should increase the paid basis by the conversion output
+                                            │   │   ├── it should record the caller as the depositor
+                                            │   │   ├── it should not unlock the v2 veNFT
+                                            │   │   ├── it should merge the v2 veNFT into the migration veNFT
+                                            │   │   ├── it should convert the basis output to TOKEN at the configured ratio, rounding down
+                                            │   │   ├── it should increment the dispatch nonce
+                                            │   │   ├── it should dispatch the incremented nonce and decay settlement parameters with the remaining duration rounded up to weeks to the migration entrypoint on root
+                                            │   │   ├── it should forward the native tokens to the Hyperlane mailbox
+                                            │   │   ├── it should refund surplus native tokens to the caller
+                                            │   │   ├── it should emit the MessageDispatched event
+                                            │   │   └── it should emit the VeNFTMigrated event
+                                            │   └── when the migration parameters vary
+                                            │       ├── it should increase the paid basis by the conversion output
+                                            │       ├── it should record the caller as the depositor
+                                            │       ├── it should not unlock the v2 veNFT
+                                            │       ├── it should merge the v2 veNFT into the migration veNFT
+                                            │       ├── it should convert the basis output to TOKEN at the configured ratio, rounding down
+                                            │       ├── it should increment the dispatch nonce
+                                            │       ├── it should dispatch the incremented nonce and decay settlement parameters with the remaining duration rounded up to weeks to the migration entrypoint on root
+                                            │       ├── it should forward the native tokens to the Hyperlane mailbox
+                                            │       ├── it should refund surplus native tokens to the caller
+                                            │       ├── it should emit the MessageDispatched event
+                                            │       └── it should emit the VeNFTMigrated event
+                                            └── when the rounded duration reaches or exceeds the maximum v3 stake duration
+                                                ├── when the migration parameters are known_
+                                                │   ├── when migration occurs during the first three days of the epoch
+                                                │   │   ├── it should increase the paid basis by the conversion output
+                                                │   │   ├── it should record the caller as the depositor
+                                                │   │   ├── it should not unlock the v2 veNFT
+                                                │   │   ├── it should merge the v2 veNFT into the migration veNFT
+                                                │   │   ├── it should convert the basis output to TOKEN at the configured ratio, rounding down
+                                                │   │   ├── it should increment the dispatch nonce
+                                                │   │   ├── it should dispatch the incremented nonce and decay settlement parameters with the maximum duration to the migration entrypoint on root
+                                                │   │   ├── it should forward the native tokens to the Hyperlane mailbox
+                                                │   │   ├── it should refund surplus native tokens to the caller
+                                                │   │   ├── it should emit the MessageDispatched event
+                                                │   │   └── it should emit the VeNFTMigrated event
+                                                │   └── when migration occurs during the final four days of the epoch
+                                                │       ├── it should increase the paid basis by the conversion output
+                                                │       ├── it should record the caller as the depositor
+                                                │       ├── it should not unlock the v2 veNFT
+                                                │       ├── it should merge the v2 veNFT into the migration veNFT
+                                                │       ├── it should convert the basis output to TOKEN at the configured ratio, rounding down
+                                                │       ├── it should increment the dispatch nonce
+                                                │       ├── it should dispatch the incremented nonce and decay settlement parameters with the maximum duration to the migration entrypoint on root
+                                                │       ├── it should forward the native tokens to the Hyperlane mailbox
+                                                │       ├── it should refund surplus native tokens to the caller
+                                                │       ├── it should emit the MessageDispatched event
+                                                │       └── it should emit the VeNFTMigrated event
+                                                └── when the migration parameters vary_
+                                                    ├── it should increase the paid basis by the conversion output
+                                                    ├── it should record the caller as the depositor
+                                                    ├── it should not unlock the v2 veNFT
+                                                    ├── it should merge the v2 veNFT into the migration veNFT
+                                                    ├── it should convert the basis output to TOKEN at the configured ratio, rounding down
+                                                    ├── it should increment the dispatch nonce
+                                                    ├── it should dispatch the incremented nonce and decay settlement parameters with the maximum duration to the migration entrypoint on root
+                                                    ├── it should forward the native tokens to the Hyperlane mailbox
+                                                    ├── it should refund surplus native tokens to the caller
+                                                    ├── it should emit the MessageDispatched event
+                                                    └── it should emit the VeNFTMigrated event

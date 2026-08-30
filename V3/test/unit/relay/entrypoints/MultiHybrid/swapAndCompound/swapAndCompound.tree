@@ -1,0 +1,8 @@
+UnitMultiHybrid::SwapAndCompound
+├── when the relay is not the bound relay
+│   └── it should revert with WrongRelay
+├── when the input token is excluded
+│   └── it should revert with TokenExcluded
+└── when a keeper compounds a reward
+    ├── it should swap the reward into the relay TOKEN
+    └── it should compound the landed delta

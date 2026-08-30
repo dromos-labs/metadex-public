@@ -1,0 +1,5 @@
+UnitBaseEntrypoint::Constructor
+├── when the factory registry is the zero address
+│   └── it should revert with ZeroAddress
+└── when the factory registry is valid
+    └── it should set the factory registry immutable

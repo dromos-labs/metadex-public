@@ -1,0 +1,44 @@
+UnitGaugeManager::constructor
+├── when the factory registry is the zero address
+│   └── it should revert with ZeroAddress
+├── when the leaf voter is the zero address
+│   └── it should revert with ZeroAddress
+└── when no address is zero
+    ├── it should set the factory registry
+    └── it should set the leaf voter
+
+UnitGaugeManager::activateGauge
+├── when the caller holds the governance role on the leaf voter
+│   └── it should activate the gauge on the leaf voter regardless of the recorded module
+└── when the caller does not hold the governance role on the leaf voter
+    ├── when the caller is not a registered module
+    │   └── it should revert with ModuleNotRegistered
+    └── when the caller is a registered module
+        ├── when the caller is not the recorded module for the gauge
+        │   └── it should revert with WrongModule
+        └── when the caller is the recorded module for the gauge
+            └── it should activate the gauge on the leaf voter
+
+UnitGaugeManager::registerModule
+├── when the caller does not hold the module admin role on the leaf voter
+│   └── it should revert with NotAuthorized
+└── when the caller holds the module admin role on the leaf voter
+    ├── when the module is the zero address
+    │   └── it should revert with ZeroAddress
+    ├── when the module is already registered
+    │   └── it should revert with ModuleAlreadyRegistered
+    └── when the module is not registered
+        ├── it should add the module to the set
+        ├── it should emit ModuleRegistered
+        └── it should expose the module through the set views
+
+UnitGaugeManager::deregisterModule
+├── when the caller does not hold the module admin role on the leaf voter
+│   └── it should revert with NotAuthorized
+└── when the caller holds the module admin role on the leaf voter
+    ├── when the module is not registered
+    │   └── it should revert with ModuleNotRegistered
+    └── when the module is registered
+        ├── it should remove the module from the set
+        ├── it should emit ModuleDeregistered
+        └── it should hide the module from the set views

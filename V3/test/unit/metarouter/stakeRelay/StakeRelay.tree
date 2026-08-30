@@ -1,0 +1,47 @@
+UnitStakeRelay::createStake
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+└── given the recipient is valid
+    ├── when the funded amount exceeds the escrow stake width
+    │   └── it should revert with SafeCastOverflowedUintDowncast for _amount
+    ├── when the funded amount fits the escrow stake width
+    │   ├── it should fund _stakingToken and call createStake with _amount, _stakingWeeks and _isPermanent
+    │   ├── it should deliver the minted sAERO to _recipient
+    │   └── it should emit BatchExecuted with _sender
+    ├── when the payer is the user and the spend mode is pips
+    │   └── it should revert with InvalidSpendMode
+    └── when the payer is the user and the spend mode is an amount
+        ├── it should pull the spend value from the logical sender into the execution address
+        ├── it should stake the received delta and deliver the minted sAERO to _recipient
+        └── it should emit BatchExecuted with _sender
+
+UnitStakeRelay::depositRelay
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+├── when the recipient is the metarouter
+│   └── it should revert with InvalidRecipient
+└── given the recipient is valid
+    ├── when the relay is not registered with the factory
+    │   └── it should revert with UnauthorizedRelay
+    └── given the relay is registered with the factory
+        ├── when the relay reports a vpm the escrow does not recognize
+        │   └── it should revert with UnauthorizedRelayVpm
+        └── given the relay vpm is recognized by the escrow
+            ├── when the token id is the in flight sentinel without an in flight position
+            │   └── it should revert with NoInFlightNft
+            ├── when the router owns the position but it was not tracked this batch
+            │   └── it should revert with NftNotInCustody
+            ├── when the caller requests a relay deposit
+            │   ├── it should pull the sAERO from the caller with transferFrom
+            │   ├── it should grant the vpm operator approval and approve the relay for _tokenId
+            │   ├── it should request the deposit with _tokenId, _amount and the selected share recipient
+            │   ├── it should revoke the vpm operator approval and return the sAERO to the caller
+            │   └── it should emit BatchExecuted with _sender
+            ├── when the token id is the in flight sentinel
+            │   ├── it should resolve the in flight sAERO without pulling it from the caller
+            │   ├── it should request the deposit with the resolved token id and selected share recipient
+            │   └── it should consume the in flight sAERO
+            └── when the in flight position is deposited twice
+                ├── it should request both deposits with the selected share recipients
+                ├── it should reacquire the returned sAERO before the second deposit
+                └── it should leave the in flight slots cleared

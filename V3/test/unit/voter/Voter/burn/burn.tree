@@ -1,0 +1,35 @@
+UnitVoter::Burn
+├── when the caller is not the voting escrow
+│   └── it should revert with NotVotingEscrow
+├── when the burn amount is zero
+│   └── it should revert with ZeroAmount
+├── when the burn amount exceeds the committed balance
+│   └── it should revert with InsufficientCommitted
+├── when the burn amount exceeds the chain zero allocation
+│   └── it should revert with InsufficientChain0Allocation
+├── when the burn does not drain the chain zero allocation
+│   ├── it should advance the global index to T act
+│   ├── it should settle the chain zero ceiling to T act
+│   ├── it should resolve the chain zero point to T act
+│   ├── it should resolve totalPoint to T act
+│   ├── it should decrement permanentStakeBalance on the chain zero point by the burn amount
+│   ├── it should decrement permanentStakeBalance on totalPoint by the burn amount
+│   ├── it should decrement committed on the token zero state by the burn amount
+│   ├── it should decrement allocationChainAmounts for token zero on chain zero by the burn amount
+│   ├── it should keep chain zero in the token zero chain set
+│   ├── it should recompute the global emissions per VP against the new totalWeight
+│   └── it should emit the Burned event
+├── when the burn drains the chain zero allocation
+│   ├── it should advance the global index to T act
+│   ├── it should settle the chain zero ceiling to T act
+│   ├── it should resolve the chain zero point to T act
+│   ├── it should resolve totalPoint to T act
+│   ├── it should decrement permanentStakeBalance on the chain zero point by the burn amount
+│   ├── it should decrement permanentStakeBalance on totalPoint by the burn amount
+│   ├── it should decrement committed on the token zero state by the burn amount
+│   ├── it should zero allocationChainAmounts for token zero on chain zero
+│   ├── it should remove chain zero from the token zero chain set
+│   ├── it should recompute the global emissions per VP against the new totalWeight
+│   └── it should emit the Burned event
+└── when totalWeight resolves to zero
+    └── it should set the global emissions per VP to zero

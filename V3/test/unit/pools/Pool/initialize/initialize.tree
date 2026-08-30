@@ -1,0 +1,7 @@
+UnitPoolOracle::Initialize
+└── when initializing the buffer
+    ├── it should set the timestamp to the given timestamp
+    ├── it should set the reserve0 cumulative to zero
+    ├── it should set the reserve1 cumulative to zero
+    ├── it should set the cardinality to one
+    └── it should set the cardinalityNext to one

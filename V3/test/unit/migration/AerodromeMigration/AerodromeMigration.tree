@@ -1,0 +1,45 @@
+UnitAerodromeMigration::constructor
+├── when the owner is the zero address
+│   └── it should revert with OwnableInvalidOwner
+├── when the deployer is the zero address
+│   └── it should revert with ZeroAddress
+├── when the v2 token is the zero address
+│   └── it should revert with ZeroAddress
+├── when the v2 voting escrow is the zero address
+│   └── it should revert with ZeroAddress
+├── when the v2 voter is the zero address
+│   └── it should revert with ZeroAddress
+├── when the migration opening timestamp is not week aligned
+│   └── it should revert with InvalidOpen
+├── when the migration opening timestamp is not in the future
+│   └── it should revert with InvalidOpen
+├── when the v3 token is the zero address
+│   └── it should revert with ZeroAddress
+├── when the v3 voting escrow is the zero address
+│   └── it should revert with ZeroAddress
+└── when passing valid parameters
+    ├── it should set the owner
+    ├── it should set the shared migration configuration
+    ├── it should set the V2 Minter
+    ├── it should return Defeated as the epoch governor result
+    ├── it should restrict each configured v2 veNFT
+    ├── it should emit RestrictionsSet for each configured v2 veNFT
+    ├── it should transfer the migration veNFT seed amount from the deployer
+    ├── it should create the v2 migration veNFT
+    ├── it should permanently lock the v2 migration veNFT
+    └── it should set the Aerodrome settlement immutables
+
+UnitAerodromeMigration::onERC721Received
+├── when the caller is not the v3 voting escrow
+│   └── it should revert with InvalidERC721Transfer
+└── when the caller is the v3 voting escrow
+    ├── when the operator is not the migration contract
+    │   └── it should revert with InvalidERC721Transfer
+    └── when the operator is the migration contract
+        └── it should return the ERC721 receiver selector
+
+UnitAerodromeMigration::remaining
+├── when the remaining balance is zero
+│   └── it should return zero
+└── when the remaining balance is positive
+    └── it should return the remaining balance

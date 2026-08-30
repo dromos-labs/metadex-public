@@ -1,0 +1,24 @@
+UnitGaugeManager::CreateGauge
+├── when the caller is not a registered module
+│   └── it should revert with ModuleNotRegistered
+└── when the caller is a registered module
+    ├── when the gauge factory is not approved
+    │   └── it should revert with GaugeFactoryNotApproved
+    └── when the gauge factory is approved
+        ├── when the target has no recorded factory
+        │   └── it should revert with TargetNotRecorded
+        ├── when the gauge factory links to a different target factory
+        │   └── it should revert with TargetFactoryMismatch
+        ├── when the target is already linked to a gauge
+        │   └── it should revert with TargetAlreadyLinked
+        ├── when the target has no linked gauge
+        │   ├── it should deploy through the requested gauge factory
+        │   ├── it should record the caller as the gauge module
+        │   ├── it should report the gauge to the factory registry
+        │   ├── it should register the gauge on the leaf voter with the activation flag
+        │   ├── it should emit GaugeCreated with the module and creator fields
+        │   └── it should return the deployed gauge
+        ├── when the leaf voter registration reverts
+        │   └── it should revert
+        └── when the gauge factory reenters createGauge
+            └── it should revert with ReentrancyGuardReentrantCall

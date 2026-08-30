@@ -1,0 +1,122 @@
+UnitReceiptToken::constructor
+├── when leaf voter is zero address
+│   └── it should revert with ZeroAddress
+└── when parameters are valid
+    ├── it should set the LEAF_VOTER immutable to _leafVoter
+    ├── it should set the name to _name
+    ├── it should set the symbol to _symbol
+    └── it should set the name hash to a hash of _name bytes
+
+UnitReceiptToken::mint
+├── when caller is not leaf voter
+│   └── it should revert with NotLeafVoter
+├── when caller is leaf voter and recipient is zero address
+│   └── it should revert with ZeroAddress
+├── when caller is leaf voter and total supply overflows
+│   └── it should revert with TotalSupplyOverflow
+└── when caller is leaf voter and recipient is valid
+    ├── it should mint tokens to the recipient
+    ├── it should increase total supply by the amount
+    └── it should emit Transfer with address(0), _recipient, _amount
+
+UnitReceiptToken::burn
+├── when caller is not leaf voter
+│   └── it should revert with NotLeafVoter
+├── when caller is leaf voter and account has insufficient balance
+│   └── it should revert with InsufficientBalance
+└── when caller is leaf voter and account has enough balance
+    ├── it should burn tokens from the account
+    ├── it should decrease total supply by the amount
+    └── it should emit Transfer with _account, address(0), _amount
+
+UnitReceiptToken::transfer
+├── when recipient is zero address
+│   └── it should revert with ZeroAddress
+├── when caller has insufficient balance
+│   └── it should revert with InsufficientBalance
+├── when caller has enough balance
+│   ├── it should transfer tokens to the recipient
+│   ├── it should keep total supply unchanged
+│   └── it should emit Transfer with _caller, _recipient, _amount
+└── when recipient is caller
+    ├── it should keep the caller balance unchanged
+    ├── it should keep total supply unchanged
+    └── it should emit Transfer with _caller, _caller, _amount
+
+UnitReceiptToken::transferFrom
+├── when recipient is zero address
+│   └── it should revert with ZeroAddress
+├── when from address has insufficient balance
+│   └── it should revert with InsufficientBalance
+├── when caller has insufficient allowance
+│   └── it should revert with InsufficientAllowance
+├── when caller is PermitTwo and no approval has been given
+│   └── it should revert with InsufficientAllowance
+├── when caller has finite allowance
+│   ├── when finite allowance recipient is not from
+│   │   ├── it should transfer tokens to the recipient
+│   │   ├── it should decrease the caller allowance
+│   │   ├── it should keep total supply unchanged
+│   │   └── it should emit Transfer with _from, _recipient, _amount
+│   └── when finite allowance recipient is from
+│       ├── it should keep the from balance unchanged
+│       ├── it should decrease the caller allowance
+│       ├── it should keep total supply unchanged
+│       └── it should emit Transfer with _from, _from, _amount
+└── when caller has infinite allowance
+    ├── when infinite allowance recipient is not from
+    │   ├── it should transfer tokens to the recipient
+    │   ├── it should keep the caller allowance unchanged
+    │   ├── it should keep total supply unchanged
+    │   └── it should emit Transfer with _from, _recipient, _amount
+    └── when infinite allowance recipient is from
+        ├── it should keep the from balance unchanged
+        ├── it should keep the caller allowance unchanged
+        ├── it should keep total supply unchanged
+        └── it should emit Transfer with _from, _from, _amount
+
+UnitReceiptToken::approve
+├── when called
+│   ├── it should approve the spender
+│   └── it should emit Approval with _owner, _spender, _amount
+└── when spender is PermitTwo
+    ├── it should approve PermitTwo
+    └── it should emit Approval with _owner, PermitTwo, _amount
+
+UnitReceiptToken::allowance
+├── when spender is PermitTwo and no approval has been given
+│   └── it should return zero
+├── when spender is PermitTwo and approval has been given
+│   └── it should return its allowance
+├── when spender is any non PermitTwo address and no approval has been given
+│   └── it should return zero
+└── when spender is any non PermitTwo address and approval has been given
+    └── it should return its allowance
+
+UnitReceiptToken::permit
+├── when deadline has expired
+│   └── it should revert with PermitExpired
+├── when signature is invalid
+│   └── it should revert with InvalidPermit
+├── when signature is replayed
+│   └── it should revert with InvalidPermit
+├── when spender is PermitTwo and signature is valid
+│   ├── it should approve PermitTwo
+│   ├── it should increment the owner nonce
+│   └── it should emit Approval with _permitOwner, PermitTwo, _amount
+└── when spender is not PermitTwo and signature is valid
+    ├── it should approve the spender
+    ├── it should increment the owner nonce
+    └── it should emit Approval with _permitOwner, _spender, _amount
+
+UnitReceiptToken::DOMAIN_SEPARATOR
+└── when called
+    └── it should return the expected domain separator
+
+UnitReceiptToken::name
+└── when called
+    └── it should return the token name
+
+UnitReceiptToken::symbol
+└── when called
+    └── it should return the token symbol

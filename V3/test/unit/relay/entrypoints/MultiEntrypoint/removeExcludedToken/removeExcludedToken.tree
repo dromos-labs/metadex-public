@@ -1,0 +1,8 @@
+UnitMultiEntrypoint::RemoveExcludedToken
+├── when the caller is not the config admin
+│   └── it should revert with NotConfigAdmin
+├── when the token is not excluded
+│   └── it should revert with TokenNotConfigured
+└── when the token is excluded
+    ├── it should remove the token from the excluded set
+    └── it should emit an ExcludedTokenRemoved event

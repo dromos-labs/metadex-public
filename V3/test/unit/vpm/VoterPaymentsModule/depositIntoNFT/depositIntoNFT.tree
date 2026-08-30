@@ -1,0 +1,25 @@
+UnitVoterPaymentsModule::depositIntoNFT
+├── when sources is empty
+│   └── it should revert with NoSources
+├── when any source authorization check fails
+│   └── it should revert with NotApprovedByOwner
+└── when every source authorization passes
+    ├── when the operation is restricted and the caller is unregistered
+    │   └── it should revert with NotRegistered
+    └── when the operation is permissionless or the caller is registered
+        ├── when the destination is the mint sentinel
+        │   ├── when the net mint amount is zero
+        │   │   └── it should revert with ZeroMintAmount
+        │   └── when the net mint amount is nonzero
+        │       ├── it should pass recipient through to VE
+        │       └── it should emit DepositedIntoNFT with the resolved destination id
+        ├── when the destination is the accumulator
+        │   └── it should emit DepositedIntoNFT
+        └── when the destination is an existing tokenId
+            ├── when fee is zero
+            │   ├── it should drop the fee leg from the VE destinations
+            │   └── it should emit DepositedIntoNFT with fee zero
+            ├── when fee is nonzero
+            │   └── it should emit DepositedIntoNFT
+            └── when sources span a fuzzed length
+                └── it should accumulate totalIn across every source leg

@@ -1,0 +1,5 @@
+UnitVotingEscrow::BalanceOfNFTAt
+├── when the timestamp is before the first user point
+│   └── it should return zero
+└── when a user point exists at or before the timestamp
+    └── it should return the decayed balance at the timestamp

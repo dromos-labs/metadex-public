@@ -1,0 +1,23 @@
+UnitGovernanceCreationModule::constructor
+├── when the leaf voter is the zero address
+│   └── it should revert with ZeroAddress
+├── when the leaf voter reports a zero gauge manager
+│   └── it should revert with ZeroAddress
+└── when the leaf voter reports a nonzero gauge manager
+    ├── it should set the leaf voter
+    └── it should set the gauge manager reported by the leaf voter
+
+UnitGovernanceCreationModule::createGauge
+├── when the caller is not a governor
+│   └── it should revert with NotAuthorized
+└── when the caller is a governor
+    ├── it should forward the request to the gauge manager verbatim
+    ├── it should report the governor as the creator
+    ├── it should forward the chosen activation flag
+    └── it should return the created gauge
+
+UnitGovernanceCreationModule::activate
+├── when the caller is not a governor
+│   └── it should revert with NotAuthorized
+└── when the caller is a governor
+    └── it should activate the gauge through the gauge manager

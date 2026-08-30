@@ -1,0 +1,22 @@
+UnitVoter::CeilingConservation
+├── when settling every chain to now across a sequence of touches
+│   ├── it should advance the global index to the integral of emissions per VP over time
+│   ├── it should accrue each chain ceiling by its weight times the shared index delta
+│   └── it should conserve total emissions across every chain ceiling
+├── when a decaying chain is poked daily for a week
+│   └── it should credit the week the same as one weekly segment however often the chain is touched
+├── when the global settle crosses week boundaries
+│   ├── it should record the accumulator at every boundary crossed
+│   ├── it should record the time weighted accumulator at every boundary crossed
+│   ├── it should leave the next boundary unrecorded
+│   ├── it should advance the index to the whole elapsed integral
+│   └── it should advance the time weighted accumulator to the whole elapsed integral
+├── when an untouched chain settles after a total weight change
+│   ├── it should accrue the untouched chain at the resampled rate over the later interval
+│   └── it should not accrue the untouched chain at the stale pre change rate
+├── when the settle walk crosses many week boundaries
+│   └── it should keep the cost of each extra boundary bounded
+├── when a chain is registered after the time weighted accumulator has grown
+│   └── it should credit a decaying chain the full positive accrual on its first settle
+└── when the scalar changes inside a decaying chains unsettled segment
+    └── it should credit the same however often the chain settles

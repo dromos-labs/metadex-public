@@ -1,0 +1,3 @@
+UnitVotingEscrow::CLOCKMODE
+└── when called
+    └── it should return the timestamp mode string

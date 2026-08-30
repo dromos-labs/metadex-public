@@ -1,0 +1,54 @@
+name: CI
+
+on: [push, workflow_dispatch]
+
+concurrency:
+  group: ${{github.workflow}}-${{github.ref}}
+  cancel-in-progress: true
+
+env:
+  BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+  OPTIMISM_RPC_URL: ${{ secrets.OPTIMISM_RPC_URL }}
+
+jobs:
+  unit-tests:
+    name: Run Unit Tests
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: install-tools
+        uses: ./.github/workflows/install-tools
+
+      - name: Run tests
+        shell: bash
+        run: yarn test:unit
+
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: install-tools
+        uses: ./.github/workflows/install-tools
+
+      - name: Run tests
+        shell: bash
+        run: yarn test:integration
+
+  fork-tests:
+    name: Run Fork Tests
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: install-tools
+        uses: ./.github/workflows/install-tools
+
+      - name: Run tests
+        shell: bash
+        run: yarn test:fork

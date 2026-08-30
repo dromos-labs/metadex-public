@@ -1,0 +1,15 @@
+UnitDynamicSwapFeeHook::BulkUpdateFees
+├── when caller is not Fee Manager
+│   └── it should revert with "NFM"
+└── when caller is Fee Manager
+    ├── when pools array and fees array are not the same length
+    │   └── it should revert with "LMM"
+    └── when pools array and fees array are the same length
+        ├── when one of the fee is bigger than max fee
+        │   └── it should revert with "MBF"
+        └── when all the fees are smaller than max fee
+            ├── when the pool is invalid
+            │   └── it should revert with "PNP"
+            └── when the pool is valid
+                ├── it should update the fee for all pool
+                └── it should emit a {CustomFeeSet} event for all pools

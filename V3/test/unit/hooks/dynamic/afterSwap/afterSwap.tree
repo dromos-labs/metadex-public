@@ -1,0 +1,70 @@
+UnitDynamicSwapFeeHook::AfterSwap
+├── when caller isn't pool
+│   └── it reverts with CNP
+└── when caller is pool
+    ├── when clPoolTape is address zero
+    │   └── it returns
+    └── when clPoolTape isn't address zero
+        ├── when swap is zeroForOne
+        │   ├── when swap is exactInput
+        │   │   ├── it calls record
+        │   │   ├── it passes volume0 as diff between amountSpecified and amountSpecifiedRemaining
+        │   │   ├── it passes volume1 as amountCalculated
+        │   │   ├── it passes fee0 as total fee (fee from input amount)
+        │   │   ├── it passes fee1 as 0
+        │   │   ├── it passes tick as afterSwapParams.tick
+        │   │   ├── when mevFee is gt 0
+        │   │   │   ├── it passes mevFee0 as mev fee amount
+        │   │   │   └── it passes mevFee1 as 0
+        │   │   └── when toxic
+        │   │       ├── it passes mevVolume0 as volume0
+        │   │       └── it passes mevVolume1 as volume1
+        │   └── when swap is exactOutput
+        │       ├── it calls record
+        │       ├── it passes volume0 as amountCalculated
+        │       ├── it passes volume1 as diff between amountSpecified and amountSpecifiedRemaining
+        │       ├── it passes fee0 as total fee
+        │       ├── it passes fee1 as 0
+        │       ├── it passes tick as afterSwapParams.tick
+        │       ├── when mevFee is gt 0_
+        │       │   ├── it passes mevFee0 as mev fee amount
+        │       │   └── it passes mevFee1 as 0
+        │       ├── when dynamic fee is gt after swap fee
+        │       │   ├── it passes mevFee0 as 0
+        │       │   └── it passes mevFee1 as 0
+        │       └── when toxic_
+        │           ├── it passes mevVolume0 as volume0
+        │           └── it passes mevVolume1 as volume1
+        └── when swap is oneForZero
+            ├── when swap is exactInput_
+            │   ├── it calls record
+            │   ├── it passes volume0 as amountCalculated
+            │   ├── it passes volume1 as diff between amountSpecified and amountSpecifiedRemaining
+            │   ├── it passes fee0 as 0
+            │   ├── it passes fee1 as total fee
+            │   ├── it passes tick as afterSwapParams.tick
+            │   ├── when mevFee is gt 0__
+            │   │   ├── it passes mevFee0 as 0
+            │   │   └── it passes mevFee1 as mev fee amount
+            │   ├── when dynamic fee is gt after swap fee_
+            │   │   ├── it passes mevFee0 as 0
+            │   │   └── it passes mevFee1 as 0
+            │   └── when toxic__
+            │       ├── it passes mevVolume0 as volume0
+            │       └── it passes mevVolume1 as volume1
+            └── when swap is exactOutput_
+                ├── it calls record
+                ├── it passes volume0 as diff between amountSpecified and amountSpecifiedRemaining
+                ├── it passes volume1 as amountCalculated
+                ├── it passes fee0 as 0
+                ├── it passes fee1 as total fee
+                ├── it passes tick as afterSwapParams.tick
+                ├── when mevFee is gt 0___
+                │   ├── it passes mevFee0 as 0
+                │   └── it passes mevFee1 as mev fee amount
+                ├── when dynamic fee is gt after swap fee__
+                │   ├── it passes mevFee0 as 0
+                │   └── it passes mevFee1 as 0
+                └── when toxic___
+                    ├── it passes mevVolume0 as volume0
+                    └── it passes mevVolume1 as volume1

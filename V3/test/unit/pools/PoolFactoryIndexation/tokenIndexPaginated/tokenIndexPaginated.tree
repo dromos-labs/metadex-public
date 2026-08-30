@@ -1,0 +1,8 @@
+UnitPoolFactoryIndexation::TokenIndexPaginated
+├── when end is lt or eq start
+│   └── it reverts with EndLeqStart
+└── when end is gt start
+    ├── when end is gt array length
+    │   └── it reverts with Panic(0x32)
+    └── when end is leq array length
+        └── it returns elements from tokenIndex set from start (inclusive) to end (exclusive)

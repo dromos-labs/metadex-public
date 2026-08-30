@@ -1,0 +1,17 @@
+UnitVoter::VoteRates
+├── when the vote resamples emissionsPerVP for a leaf chain
+│   └── it should set emissionsPerVP to mulDiv minter rate precision total weight
+├── when the vote reanchors chain zero to a new shape
+│   ├── it should set emissionsPerVP to mulDiv minter rate precision the reanchored total weight
+│   └── it should anchor chain zero at the global index
+├── when totalWeight resolves to zero before the resample
+│   └── it should set emissionsPerVP to zero
+├── when the vote spans multiple leaf chains in the dispatch scope
+│   ├── it should settle both chains off the shared global index
+│   ├── it should leave both chains anchored at the current global index
+│   └── it should resample the single global emissionsPerVP against the total weight
+├── when chainPoint decays through the walk before the resample
+│   └── it should use the resolved total weight when computing emissionsPerVP
+└── when a chain in scope is settled at the global index delta
+    ├── it should accrue chainCeiling by weight times index delta
+    └── it should advance the chain cursor and the global settlement to T act

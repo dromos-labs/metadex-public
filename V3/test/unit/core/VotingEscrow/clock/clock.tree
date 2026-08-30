@@ -1,0 +1,3 @@
+UnitVotingEscrow::Clock
+└── when called after a warp
+    └── it should return the current block timestamp

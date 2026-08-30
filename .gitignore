@@ -1,17 +1,24 @@
-# Compiler files
-cache/
-out/
+# General
+yarn-error.log
+node_modules
+.DS_STORE
+.vscode
 
-# Ignores development broadcast logs
-!/broadcast
-/broadcast/*/31337/
-/broadcast/**/dry-run/
+# Foundry files
+cache
+out-via-ir
+lcov.info
+lcov-v3.info
 
-# Docs
-docs/
-
-# Dotenv file
+# Config files
 .env
 
-# Coverage
-lcov.info
+# Avoid ignoring gitkeep
+!/**/.gitkeep
+
+# Keep the latest deployment only
+broadcast/*/*/*
+
+# Out dir
+out
+crytic-export

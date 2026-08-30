@@ -1,0 +1,7 @@
+UnitV2Gauge
+└── when deployed with valid parameters
+    ├── it should set the staking token
+    ├── it should set the fees voting reward
+    ├── it should set the voter
+    ├── it should set the is pool flag
+    └── it should set the gauge factory

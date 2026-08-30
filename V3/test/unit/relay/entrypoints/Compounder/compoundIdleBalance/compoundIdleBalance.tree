@@ -1,0 +1,6 @@
+UnitCompounder::CompoundIdleBalance
+├── when the caller is not the keeper
+│   └── it should revert with NotKeeper
+└── when a keeper drains the idle balance
+    ├── it should read the relay TOKEN
+    └── it should compound the unaccounted balance

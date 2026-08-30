@@ -1,0 +1,24 @@
+UnitLeafVoter::ActivateGauge
+├── when the caller is not the gauge manager
+│   └── it should revert with NotGaugeManager
+└── when the caller is the gauge manager
+    ├── when the gauge is not registered
+    │   └── it should revert with GaugeNotRegistered
+    ├── when the gauge is the zero gauge
+    │   └── it should revert with GaugeNotRegistered
+    ├── when the gauge is already activated
+    │   └── it should revert with GaugeAlreadyActivated
+    └── when the gauge is registered and inactive
+        ├── when the chain cursor lags the current timestamp
+        │   ├── it should settle the chain index to the current timestamp
+        │   └── it should advance the gauge cursor to the settled chain cursor
+        ├── when the chain was pre settled past the current timestamp
+        │   └── it should advance the gauge cursor to the existing logical cursor
+        ├── when the inactive gauge carries weight
+        │   ├── it should credit the settled share to the gauge ceiling
+        │   └── it should set the activation flag
+        └── when the gauge carries no weight
+            ├── it should set the activation flag
+            ├── it should emit GaugeActivated with the activation cursor
+            ├── it should not checkpoint a reward
+            └── it should not create emission ceiling

@@ -1,0 +1,53 @@
+UnitDynamicSwapFeeHook::_GetFirstSwapFee
+├── when base fee is ZERO_FEE_INDICATOR
+│   └── it should return (0, ZERO_FEE_INDICATOR)
+└── when base fee is not zero fee indicator
+    ├── when observe call reverts
+    │   └── it should return (base fee, bas fee)
+    ├── when initial fee is enabled
+    │   ├── when initial fee override is 0
+    │   │   └── it should return (base fee, total fee)
+    │   ├── when initial fee override is ZERO_FEE_INDICATOR
+    │   │   └── it should return (0, total fee)
+    │   └── when initial fee override is non zero
+    │       └── it should return (initial fee, total fee)
+    └── when initial fee is not enabled
+        ├── when scaling factor is not set on the pool
+        │   ├── when observation cardinality is insufficient
+        │   │   ├── when discount is zero
+        │   │   │   └── it should return (baseFee, baseFee)
+        │   │   └── when discount is gt zero
+        │   │       └── it should return (discounted base fee, base fee)
+        │   └── when observation cardinality is sufficient
+        │       ├── when observations latest slot is uninitialized
+        │       │   ├── when latest observation timestamp is lt seconds ago
+        │       │   │   └── it should fall back to observations(0) and return base fee
+        │       │   └── when latest observation timestamp is geq seconds ago
+        │       │       └── it should fall back to observations(0) and return base fee with dynamic fee
+        │       ├── when total fee is lt fee cap
+        │       │   ├── when discount is zero_
+        │       │   │   └── it should return (total fee, total fee)
+        │       │   └── when discount is gt zero_
+        │       │       └── it should return (discounted total fee, total fee)
+        │       └── when total fee is gt fee cap
+        │           ├── when discount is zero__
+        │           │   └── it should return (fee cap, fee cap)
+        │           └── when discount is gt zero__
+        │               └── it should return (discounted fee cap, fee cap)
+        └── when scaling factor is set on the pool
+            └── when observation cardinality is sufficient_
+                ├── when observations latest slot is uninitialized_
+                │   ├── when latest observation timestamp is lt seconds ago_
+                │   │   └── it should fall back to observations(0) and return base fee
+                │   └── when latest observation timestamp is geq seconds ago_
+                │       └── it should fall back to observations(0) and return base fee with dynamic fee
+                ├── when total fee is lt fee cap_
+                │   ├── when discount is zero___
+                │   │   └── it should return (total fee, total fee)
+                │   └── when discount is gt zero___
+                │       └── it should return (discounted total fee, total fee)
+                └── when total fee is gt fee cap_
+                    ├── when discount is zero____
+                    │   └── it should return (fee cap, fee cap)
+                    └── when discount is gt zero____
+                        └── it should return (discounted fee cap, fee cap)

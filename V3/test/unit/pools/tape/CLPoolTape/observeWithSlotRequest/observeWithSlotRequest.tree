@@ -1,0 +1,23 @@
+UnitClPoolTape::ObserveWithSlotRequest
+├── when the pool is registered
+│   ├── when the array is empty
+│   │   └── it returns an empty array
+│   ├── when the array is not empty
+│   │   ├── it returns the observation at each secondsAgo
+│   │   ├── it always populates the staked cumulative the swap count the block timestamp and the close tick
+│   │   ├── it populates requested slots equal to the observe function without slots param
+│   │   └── it zeroes unrequested slots
+│   ├── when the request is empty
+│   │   └── it returns only the always loaded fields
+│   ├── when the request excludes slot two
+│   │   └── it does not read the pool oracle for targets past the last swap
+│   ├── when the request excludes at least one slot
+│   │   ├── it performs fewer storage reads than the observe function without slots param
+│   │   ├── when requesting a single slot without binary search
+│   │   │   └── it performs exactly the expected storage reads for the requested slot
+│   │   └── when requesting a single slot with binary search
+│   │       └── it performs exactly the expected storage reads for the requested slot
+│   └── when requesting incrementally more slots
+│       └── it performs exactly the expected storage reads for each cumulative request
+└── when the pool is unregistered
+    └── it returns zeroed observations

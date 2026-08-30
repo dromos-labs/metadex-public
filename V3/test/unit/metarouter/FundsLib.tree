@@ -1,0 +1,67 @@
+UnitFundsLib::push
+├── when the recipient is any address
+│   ├── it should transfer _amount to _recipient
+│   └── it should not track _token
+├── when the native mirror amount exceeds the batch balance
+│   └── it should revert with InsufficientBalance for the native mirror token
+├── when the native mirror amount equals the batch balance
+│   ├── it should transfer the amount
+│   └── it should not track the token
+├── when a lower decimals mirror amount exceeds the batch native floored to the mirror decimals
+│   └── it should revert with InsufficientBalance for the native mirror token
+└── when a lower decimals mirror amount fits the batch native floored to the mirror decimals
+    ├── it should transfer the amount
+    └── it should not track the token
+
+UnitFundsLib::pull
+└── when pulling from the logical sender
+    ├── it should pull _amount from the logical sender to the execution address
+    └── it should track _token
+
+UnitFundsLib::pay
+├── when the payer is the execution address
+│   ├── it should transfer _amount to _recipient
+│   └── it should not track _token
+├── when the payer is the logical sender
+│   ├── it should transfer _amount from the logical sender to _recipient
+│   └── it should not track _token
+├── when the payer is neither the execution address nor the logical sender
+│   └── it should revert with InvalidPayer
+└── when the payer is the zero address and the logical sender is unset
+    └── it should revert with InvalidPayer
+
+UnitFundsLib::fund
+├── given the payer is external
+│   ├── when the spend mode is not amount
+│   │   └── it should revert with InvalidSpendMode
+│   └── given the spend mode is amount
+│       ├── when the transfer delivers the full amount
+│       │   └── it should return _spend.value as _amount
+│       └── when the token charges a fee on transfer
+│           └── it should return the received balance delta as _amount
+└── when the payer is not external
+    ├── it should resolve _spend against the execution address balance as _amount
+    └── it should track _token
+
+UnitFundsLib::resolveSpend
+├── given the spend mode is amount
+│   ├── when the requested value exceeds the balance
+│   │   └── it should revert with InsufficientBalance for _asset
+│   ├── when the requested value is within the balance
+│   │   └── it should return _spend.value as _amount
+│   ├── when the requested mirror value exceeds the batch balance within the raw mirror balance
+│   │   └── it should revert with InsufficientBalance for the native mirror token
+│   └── when the requested mirror value equals the batch balance
+│       └── it should return the batch balance as _amount
+└── given the spend mode is pips
+    ├── when the pip value exceeds the denominator
+    │   └── it should revert with InvalidPips for _spend.value
+    └── given the pip value is within the denominator
+        ├── when the pip proportion is positive
+        │   └── it should return the pip proportion of _balance as _amount
+        ├── when the pip proportion rounds down to zero
+        │   └── it should return zero as _amount
+        ├── when the pip value equals the denominator
+        │   └── it should return _balance as _amount
+        └── when using a known rounded down example
+            └── it should return the hand computed floored proportion as _amount

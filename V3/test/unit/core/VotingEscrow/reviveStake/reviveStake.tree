@@ -1,0 +1,26 @@
+UnitVotingEscrow::ReviveStake
+├── when the caller is not the owner or approved operator
+│   └── it should revert with ERC721InsufficientApproval
+├── when the value is zero
+│   └── it should revert with ZeroAmount
+├── when the revived stake is permanent and the staking period is greater than zero
+│   └── it should revert with StakingPeriodNotAllowed
+├── when the token still holds a funded stake
+│   └── it should revert with StakeAlreadyFunded
+├── when the shell is permanent
+│   └── it should revert with PermanentStake
+├── when the shell end is still in the future
+│   └── it should revert with StakeNotExpired
+├── when reviving a withdrawn token with a decaying stake
+│   ├── it should set the staked balance with the computed end
+│   ├── it should write a user point with the decaying slope and bias
+│   ├── it should schedule a negative slope change at the computed end
+│   ├── it should call parkOnChain0 on the voter
+│   └── it should emit the Deposit event with the computed end as unstake time
+├── when reviving a withdrawn token with a permanent stake
+│   ├── it should set the staked balance as permanent
+│   ├── it should increase the permanent stake balance by the value
+│   └── it should emit the Deposit event with a zero unstake time
+└── when reviving a drained shell whose end has passed
+    ├── it should overwrite the expired end with the computed one
+    └── it should set the staked balance to the new value

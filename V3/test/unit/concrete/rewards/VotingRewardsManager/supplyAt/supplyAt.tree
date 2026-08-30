@@ -1,0 +1,15 @@
+UnitConcreteVotingRewardsManager::SupplyAt
+├── when there are no global checkpoints
+│   └── it should return zero
+└── when there are global checkpoints
+    ├── when there are no checkpoints before or at the timestamp
+    │   └── it should return zero
+    └── when there are checkpoints before or at the timestamp
+        ├── when the timestamp matches the checkpoint timestamp
+        │   └── it should return the sum of the global bias and permanent lock balance
+        └── when the timestamp does not match the checkpoint timestamp
+            ├── when there are no slope changes
+            │   └── it should return the sum of the decayed global bias and permanent lock balance
+            └── when there are slope changes
+                ├── it should apply slope changes at epoch boundaries
+                └── it should return the sum of the decayed global bias and permanent lock balance

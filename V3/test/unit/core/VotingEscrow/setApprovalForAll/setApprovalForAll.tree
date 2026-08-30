@@ -1,0 +1,6 @@
+UnitVotingEscrow::SetApprovalForAll
+├── when the operator is the zero address
+│   └── it should revert with ERC721InvalidOperator
+└── when the operator is another address
+    ├── it should mark the operator as approved
+    └── it should emit the ApprovalForAll event

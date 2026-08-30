@@ -1,0 +1,5 @@
+UnitVoter::RevokeRole
+├── when revoking the last holder of a self administering role
+│   └── it should revert with LastRoleHolder
+└── when revoking a non last holder of a self administering role
+    └── it should remove the role from the holder

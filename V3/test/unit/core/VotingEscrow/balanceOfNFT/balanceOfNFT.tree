@@ -1,0 +1,3 @@
+UnitVotingEscrow::BalanceOfNFT
+└── when a user point exists at or before the current timestamp
+    └── it should return the decayed balance at the current timestamp

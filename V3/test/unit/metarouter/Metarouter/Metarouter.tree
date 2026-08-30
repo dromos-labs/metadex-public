@@ -1,0 +1,106 @@
+UnitMetarouter::constructor
+├── when the wrapped native token is the zero address
+│   └── it should deploy with a zero WETH
+├── when the voter is the zero address
+│   ├── it should deploy without reading the voter
+│   ├── it should set IS_ROOT to false
+│   └── it should leave EMISSION_TOKEN, STAKING_ESCROW, STAKING_TOKEN and RELAY_FACTORY as zero
+├── when the position manager is the zero address
+│   └── it should revert with ZeroAddress
+├── when the interchain account router is the zero address
+│   └── it should deploy with ICA_ROUTER as zero
+├── when the factory registry is the zero address
+│   └── it should revert with ZeroAddress
+├── when the native mirror token is the zero address
+│   └── it should leave the native mirror scale as zero
+├── when the wrapped native token is the native mirror token
+│   └── it should revert with WethIsNativeErc20
+├── when the native mirror token reports more decimals than native
+│   └── it should revert with InvalidNativeErc20Decimals
+├── when the native mirror token reports the native decimals
+│   └── it should set the native mirror scale to one
+├── when the native mirror token reports fewer decimals than native
+│   └── it should derive the native mirror scale from the decimals difference
+├── when the native mirror token reports the stablecoin six decimals
+│   └── it should set the native mirror scale to the known trillion factor
+├── when the local chain is not the root chain
+│   ├── it should derive the emission token from the leaf voter receipt token
+│   └── it should set IS_ROOT to false and STAKING_ESCROW, STAKING_TOKEN and RELAY_FACTORY to zero
+├── when the local chain id is below the root chain id
+│   └── it should set IS_ROOT to false
+└── given the local chain is the root chain
+    ├── when the root voter is the zero address
+    │   └── it should revert with ZeroAddress
+    └── given the root voter is a valid address
+        ├── when the relay factory is the zero address
+        │   └── it should revert with ZeroAddress
+        └── when the relay factory is a valid address
+            ├── it should derive the emission token from the root voter minter
+            ├── it should set IS_ROOT to true
+            ├── it should derive STAKING_ESCROW from the root voter and STAKING_TOKEN from the escrow TOKEN
+            └── it should set RELAY_FACTORY to the relay factory
+
+UnitMetarouter::executeSubPlan
+├── given the sub plan fails
+│   ├── when the sub plan is unflagged
+│   │   └── it should revert the batch
+│   ├── when the sub plan is flagged
+│   │   └── it should unwind the nested changes and continue
+│   └── when the sub plan is flagged after the outer plan funds the token
+│       └── it should sweep the complete funded balance to the fallback recipient
+└── when the sub plan succeeds
+    └── it should apply the nested command state changes
+
+UnitMetarouter::msgSender
+├── when a batch is active
+│   └── it should return the outer caller
+└── when a batch is not active
+    └── it should return the zero address
+
+UnitMetarouter::balanceCheck
+├── given the asset is a token
+│   ├── given the balance is below the minimum
+│   │   ├── when the command is unflagged
+│   │   │   └── it should revert the whole batch with InsufficientBalance for _token
+│   │   └── when the command is flagged
+│   │       ├── it should revert only the inner call
+│   │       └── it should continue the batch
+│   ├── when the balance meets the minimum
+│   │   └── it should pass
+│   └── when the checked token is the native mirror token held by the execution address
+│       └── it should revert even if the total balance meets the minimum through pre batch funds
+└── given the asset is native
+    ├── when the owner is the execution address and the available balance is below the minimum
+    │   └── it should revert even if the total balance meets the minimum through pre batch funds
+    ├── when the owner is the execution address and the available balance meets the minimum
+    │   └── it should pass
+    ├── when the owner is another account and the live native balance is below the minimum
+    │   └── it should revert with InsufficientBalance
+    └── when the owner is another account and the live native balance meets the minimum
+        └── it should check the account's live native balance
+
+UnitMetarouter::receive
+├── when the sender is unexpected and no batch is active
+│   └── it should revert with InvalidEthSender
+├── when the sender is the wrapped native token
+│   └── it should accept the native eth
+└── when a batch is active
+    └── it should accept the native eth
+
+UnitMetarouter::onErc721Received
+├── when no batch is active
+│   └── it should revert with BatchNotActive
+└── given a batch is active
+    ├── when the sender is not the position manager
+    │   └── it should revert with InvalidNftSender
+    ├── when no expected nft is set
+    │   └── it should revert with UnexpectedNftSender
+    └── given an expected nft is set
+        ├── when the from is not the expected sender
+        │   └── it should revert with UnexpectedNftSender
+        ├── when the token id is not the expected one
+        │   └── it should revert with UnexpectedNftSender
+        └── when the from and token id are the expected ones
+            ├── it should track the collection and token id
+            ├── it should leave the expected nft for the setting command to clear
+            └── it should return the selector

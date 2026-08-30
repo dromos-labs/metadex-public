@@ -1,0 +1,49 @@
+UnitRelayWindDown
+├── when closing without an uncovered head
+│   ├── it should revert with NoQueuedWithdrawal, EvacuationWindowNotElapsed or HeadIsCovered
+│   └── it should hold the admin to the same gate
+├── when the head exit is uncovered
+│   ├── it should close the relay permanently and reject new weight
+│   └── it should reject a second close
+├── when the keeper closes at will
+│   └── it should close skipping the starvation gate
+├── when a deposit lands in the same block as the close
+│   ├── it should admit the same block deposit and mint its principal at the seed ratio
+│   ├── it should mint no yield on a closed relay
+│   └── it should drain the pending counter into the backing
+├── when a deposit is requested before the close and drained after it
+│   ├── it should admit the request registered before the close
+│   ├── it should leave the fee tail denominator at the seed supply
+│   ├── it should hand the late depositor nothing
+│   └── it should pay the whole tail to the genuine holder
+├── when evacuating an open relay
+│   ├── it should revert with RelayNotClosed
+│   └── it should hold the keeper to the same rule
+├── when evacuating a closed relay
+│   ├── it should revert when the chain holds nothing to evacuate
+│   └── it should dispatch the chain's full weight and stay open for a re-dispatch
+├── when a holder that sold its whole yield side exits a closed relay
+│   ├── it should refuse the exit while the relay is open
+│   ├── it should accept the exit once the relay is closed
+│   └── it should burn the principal and leave the sold yield outstanding
+├── when a holder that kept its yield side exits a closed relay
+│   ├── it should burn only the principal
+│   └── it should leave the holders yield side untouched
+├── when transferring the yield side with a queued exit on a closed relay
+│   ├── it should let the whole yield balance move while the exit waits
+│   └── it should keep the escrow intact for the drain
+├── when a reward arrives after the closure
+│   ├── it should distribute over the surviving yield supply
+│   └── it should pay the exited holder in full
+├── when emergency deallocating
+│   └── it should gate the open relay to the keeper, forward the whole value and open up once closed
+├── when allocating with no dispatches
+│   └── it should revert with EmptyAllocation
+├── when a donation is recognized after the keeper voted
+│   ├── it should refuse a vote that spends the weight the queue is about to be owed
+│   ├── it should let the vote spend everything above the donation priced reserve
+│   ├── it should refuse the permissionless close once the donation is recognized
+│   └── it should settle the exit at the recognized price
+└── when the keeper recognizes the donation before voting
+    ├── it should price the queue against the same weight either way
+    └── it should refuse the vote that reaches past it

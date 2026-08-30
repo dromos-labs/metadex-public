@@ -1,0 +1,20 @@
+UnitStablePool::Mint
+├── given the pool current totalSupply is zero
+│   ├── when the deposited amounts are not equal
+│   │   └── it should revert with DepositsNotEqual
+│   └── when the deposited amounts are equal
+│       ├── when the K of deposited amounts is below or equal to MINIMUM_K
+│       │   └── it should revert with BelowMinimumK
+│       └── when the K of deposited amounts is above MINIMUM_K
+│           ├── when the liquidity to mint is below MINIMUM_LIQUIDITY
+│           │   └── it should revert with InsufficientLiquidityMinted
+│           └── when the liquidity to mint is above MINIMUM_LIQUIDITY
+│               ├── it should mint the minimum liquidity to address one
+│               ├── it should mint the remaining liquidity to the recipient
+│               └── it should emit the Mint event
+└── given the pool current totalSupply is positive
+    ├── when the liquidity to mint is zero
+    │   └── it should revert with InsufficientLiquidityMinted
+    └── when the liquidity to mint is positive
+        ├── it should mint the proportional liquidity to the recipient
+        └── it should emit the Mint event

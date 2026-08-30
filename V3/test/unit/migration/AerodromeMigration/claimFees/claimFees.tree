@@ -1,0 +1,6 @@
+UnitAerodromeMigration::ClaimFees
+├── when a reward token is the migration output token
+│   ├── it should revert with InvalidRewardToken
+│   └── it should leave the migration and recipient balances unchanged
+└── given the claimed token balance is positive
+    └── it should transfer the claimed token balance

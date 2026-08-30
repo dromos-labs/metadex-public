@@ -1,0 +1,6 @@
+UnitDenseQueue::NextHead
+├── when the cursor is past the tail
+│   ├── it should return zero
+│   └── it should return zero for a cursor wider than the id type
+└── when the cursor is at or before the tail
+    └── it should return the cursor

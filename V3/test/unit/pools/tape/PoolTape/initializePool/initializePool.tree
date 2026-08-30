@@ -1,0 +1,11 @@
+UnitPoolTape::InitializePool
+├── when the accumulator has not been initialized
+│   ├── it pre populates the accumulator slots
+│   ├── it does not set lastSwapTimestamp
+│   ├── when the pool buffer has not been initialized
+│   │   └── it initializes the pool buffer
+│   └── when the pool buffer has been initialized
+│       └── it does not update the pool buffer
+└── when the accumulator has been initialized
+    ├── it does not update the accumulator
+    └── it does not update the pool buffer

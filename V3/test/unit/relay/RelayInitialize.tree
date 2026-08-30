@@ -1,0 +1,55 @@
+UnitRelayInitialize
+├── when initializing twice
+│   └── it should revert with AlreadyInitialized
+├── when an operator input is zero
+│   └── it should revert with ZeroAddress
+├── when the compounder is zero
+│   └── it should skip the grant instead of reverting
+├── when both entrypoints are zero
+│   ├── it should revert on a maxi relay which can never attach one
+│   ├── it should revert on a protocol relay starting as level one
+│   └── it should initialize a protocol relay starting as level two which attaches later
+├── when the config is degenerate
+│   └── it should reject zero windows zero floors and a zero entrypoint timelock
+├── when a seed invariant is broken
+│   └── it should reject a foreign, empty or lock-mismatched seed
+├── when the module is not authorized
+│   └── it should revert with ModuleNotAuthorized
+├── when a maxi starts as level two
+│   └── it should revert with NotPromotable
+├── when a constructor dependency is zero
+│   └── it should revert with ZeroAddress
+├── when a satellite implementation holds no code
+│   ├── it should revert with ImplementationNotAContract for the principal implementation
+│   ├── it should revert with ImplementationNotAContract for the yield implementation
+│   └── it should hold the zero address to the same rule, since it carries no code either
+├── when a satellite clone comes out unwired
+│   ├── it should revert with SatelliteNotInitialized when the clone never bound the relay
+│   └── it should revert with SatelliteNotInitialized when the clone dropped the transferability
+├── when granting the standing compound allowance
+│   └── it should approve the escrow for the maximum amount and the module for the stake
+├── when naming the reward token at initialization
+│   ├── it should register the named token
+│   ├── it should close the single slot registry on it, leaving the keeper nothing to add
+│   └── it should leave the registry empty when the creator names no token
+├── when extending a custom period lock
+│   └── it should refresh only when the end falls short of the horizon
+├── when the lock already covers the horizon
+│   └── it should never reach the escrow
+├── when extending a permanent lock
+│   └── it should never reach the escrow
+├── when allocating with a custom period lock
+│   ├── it should refresh the staking period before the dispatch
+│   └── it should emit the allocation
+├── when compounding after a custom period lock fell short
+│   └── it should refresh the staking period before growing the stake
+├── when compounding while the lock still holds the horizon
+│   └── it should skip the refresh
+├── when the lock weeks reach past the escrow maximum
+│   └── it should revert with LockWeeksTooLong
+├── when the lock weeks sit at the escrow maximum
+│   └── it should accept the config
+├── when initializing the satellite implementations
+│   └── it should revert with AlreadyInitialized on both implementations
+└── when copying the config into the clone
+    └── it should copy every field verbatim

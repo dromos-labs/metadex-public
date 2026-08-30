@@ -1,0 +1,90 @@
+UnitV2Gauge::Withdraw
+├── when the amount is zero
+│   └── it should revert with ZeroAmount
+└── when the amount is not zero
+    ├── when the amount exceeds the caller balance
+    │   └── it should revert
+    └── when the amount is within the caller balance
+        ├── when the caller has deferred emissions and no accrued emissions
+        │   ├── when deferred emission minting reverts
+        │   │   ├── it should request a leaf voter settlement
+        │   │   ├── it should attempt to mint the deferred emissions
+        │   │   ├── it should preserve the caller deferred emissions
+        │   │   ├── it should not emit the EmissionsDeferred event
+        │   │   ├── it should decrease the caller balance
+        │   │   ├── it should decrease total supply
+        │   │   ├── it should transfer staking tokens to the caller
+        │   │   └── it should emit the Withdraw event
+        │   └── when deferred emission minting succeeds
+        │       ├── it should request a leaf voter settlement
+        │       ├── it should clear the caller deferred emissions
+        │       ├── it should emit the DeferredEmissionsClaimed event
+        │       ├── it should mint the deferred emissions to the caller
+        │       ├── it should decrease the caller balance
+        │       ├── it should decrease total supply
+        │       ├── it should transfer staking tokens to the caller
+        │       └── it should emit the Withdraw event
+        ├── when the caller has no accrued emissions
+        │   ├── it should request a leaf voter settlement
+        │   ├── it should update the caller's rewardPerTokenPaid
+        │   ├── it should keep the caller rewards cleared
+        │   ├── it should not mint emissions
+        │   ├── it should decrease the caller balance to zero
+        │   ├── it should decrease total supply
+        │   ├── it should clear the caller deposit block
+        │   ├── it should transfer staking tokens to the caller
+        │   └── it should emit the Withdraw event
+        └── when the caller has accrued emissions
+            ├── when emission minting reverts
+            │   ├── it should request a leaf voter settlement
+            │   ├── it should update the caller's rewardPerTokenPaid
+            │   ├── it should clear the caller rewards
+            │   ├── it should attempt to mint live and deferred LP emissions
+            │   ├── it should store the live LP emissions with the existing deferred LP balance
+            │   ├── it should store the referral emissions with the existing referral balance
+            │   ├── it should emit the ReferralEmissionsDeferred event
+            │   ├── it should emit the EmissionsDeferred event
+            │   ├── it should decrease the caller balance
+            │   ├── it should decrease total supply
+            │   ├── it should keep the caller deposit block
+            │   ├── it should transfer staking tokens to the caller
+            │   └── it should emit the Withdraw event
+            ├── when the amount is less than the caller balance
+            │   ├── it should request a leaf voter settlement
+            │   ├── it should update the caller's rewardPerTokenPaid
+            │   ├── it should clear the caller rewards
+            │   ├── it should emit the EmissionsClaimed event
+            │   ├── it should mint emissions to the caller
+            │   ├── it should decrease the caller balance
+            │   ├── it should decrease total supply
+            │   ├── it should keep the caller deposit block
+            │   ├── it should transfer staking tokens to the caller
+            │   └── it should emit the Withdraw event
+            └── when the amount equals the caller balance
+                ├── when the reward parameters are known
+                │   ├── it should request a leaf voter settlement
+                │   ├── it should update the caller's rewardPerTokenPaid
+                │   ├── it should clear the caller rewards
+                │   ├── it should emit the EmissionsClaimed event
+                │   ├── it should mint emissions to the caller
+                │   ├── it should decrease the caller balance to zero
+                │   ├── it should decrease total supply
+                │   ├── it should clear the caller deposit block
+                │   ├── it should transfer staking tokens to the caller
+                │   └── it should emit the Withdraw event
+                ├── when the reward parameters vary
+                │   ├── it should request a leaf voter settlement
+                │   ├── it should update the caller's rewardPerTokenPaid
+                │   ├── it should clear the caller rewards
+                │   ├── it should emit the EmissionsClaimed event
+                │   ├── it should mint emissions to the caller
+                │   ├── it should decrease the caller balance to zero
+                │   ├── it should decrease total supply
+                │   ├── it should clear the caller deposit block
+                │   ├── it should transfer staking tokens to the caller
+                │   └── it should emit the Withdraw event
+                └── when the settlement pulls a nonzero delta
+                    ├── it should fold the pulled delta into reward per token stored
+                    ├── it should advance the cumulative reward share cursor
+                    ├── it should mint the folded emissions to the caller
+                    └── it should transfer staking tokens to the caller

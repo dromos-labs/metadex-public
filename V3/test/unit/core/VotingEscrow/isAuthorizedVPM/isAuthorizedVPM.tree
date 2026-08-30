@@ -1,0 +1,5 @@
+UnitVotingEscrow::IsAuthorizedVPM
+├── when the account holds the vpm role
+│   └── it should return true
+└── when the account does not hold the vpm role
+    └── it should return false

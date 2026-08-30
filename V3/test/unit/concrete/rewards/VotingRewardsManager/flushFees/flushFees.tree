@@ -1,0 +1,59 @@
+UnitConcreteVotingRewardsManager::FlushFees
+├── when the caller is not the gauge factory
+│   └── it should revert with NotGaugeFactory
+└── when the caller is the gauge factory
+    ├── when the gauge fee collection reverts
+    │   └── it should revert with FeeCollectionFailed
+    └── when the gauge fee collection succeeds
+        ├── when the fee accumulator was already updated in the current timestamp
+        │   ├── when the collected fees are smaller than or equal to the last pending fees
+        │   │   ├── it should skip the fee accumulator update
+        │   │   ├── it should skip the fee buffering
+        │   │   ├── it should clear the last pending fees
+        │   │   └── it should emit the FeesCollected event for each qualifying token
+        │   └── when the collected fees are greater than the last pending fees
+        │       ├── it should skip the fee accumulator update
+        │       ├── it should buffer the newly accrued fees
+        │       ├── it should clear the last pending fees
+        │       └── it should emit the FeesCollected event for each qualifying token
+        └── when the fee accumulator was not updated in the current timestamp
+            ├── when the gauge collected no fees
+            │   ├── when the buffer is empty
+            │   │   ├── it should set lastFeeUpdate to the current timestamp
+            │   │   ├── it should skip the fee accumulator update
+            │   │   ├── it should skip the global reward checkpoint
+            │   │   └── it should preserve the last pending fees
+            │   └── when the buffer is not empty
+            │       ├── when the gauge is not active
+            │       │   ├── it should set lastFeeUpdate to the current timestamp
+            │       │   ├── it should preserve the buffered fees
+            │       │   ├── it should skip the fee accumulator update
+            │       │   ├── it should skip the global reward checkpoint
+            │       │   └── it should preserve the last pending fees
+            │       └── when the gauge is active
+            │           ├── it should set lastFeeUpdate to the current timestamp
+            │           ├── it should credit the buffered fees to the fee accumulator
+            │           ├── it should retain only the rounding remainder
+            │           ├── it should create a new global reward point
+            │           └── it should emit the NotifyFeesAmount event for each qualifying token
+            └── when the gauge collected fees
+                ├── when the collected fees do not meet the credit threshold
+                │   ├── it should buffer the collected fees
+                │   ├── it should skip the global reward checkpoint
+                │   ├── it should clear the last pending fees
+                │   └── it should emit the FeesCollected event for each qualifying token
+                └── when the collected fees meet the credit threshold
+                    ├── when the accumulator increase represents at least the smallest token unit
+                    │   ├── it should credit the collected fees to the fee accumulator
+                    │   ├── it should create a new global reward point
+                    │   ├── it should snapshot the fee accumulator at the new global checkpoint index
+                    │   ├── it should clear the last pending fees
+                    │   └── it should emit the FeesCollected event for each qualifying token
+                    └── when the accumulator increase represents less than the smallest token unit
+                        ├── it should increase each fee accumulator by one
+                        ├── it should leave no fees buffered
+                        ├── it should create a new global reward point
+                        ├── it should snapshot the fee accumulator at the new global checkpoint index
+                        ├── it should clear the last pending fees
+                        ├── it should emit the NotifyFeesAmount event with an amount of one
+                        └── it should emit the FeesCollected event for each qualifying token

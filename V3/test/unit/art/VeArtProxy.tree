@@ -1,0 +1,15 @@
+UnitVeArtProxy::svg
+├── when rendering the canonical fixture
+│   └── it should match the sAERO reference svg exactly
+├── when the stake and allocation amounts vary
+│   └── it should render the live VotingEscrow stake and stored Voter allocation
+├── when the stake is permanent
+│   └── it should render a permanent unstake label
+├── when the stake has been withdrawn
+│   └── it should render a withdrawn no stake label
+└── when the stake has an unstake timestamp
+    └── it should render the formatted unstake date
+
+UnitVeArtProxy::tokenURI
+└── when the token metadata is generated
+    └── it should embed the generated base64 svg

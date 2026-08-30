@@ -1,0 +1,13 @@
+UnitQueueLib::RequireUncoveredHead
+├── when the withdraw queue is empty
+│   └── it should revert with NoQueuedWithdrawal
+└── given the withdraw queue holds a head exit
+    ├── when the evacuation window has not elapsed since registration
+    │   └── it should revert with EvacuationWindowNotElapsed
+    └── given the evacuation window has elapsed
+        ├── when the free chain zero weight covers the head exit
+        │   └── it should revert with HeadIsCovered
+        ├── when the head exit is uncovered
+        │   └── it should price the head through the principal token supply and pass
+        └── when the head exit is uncovered well past the window
+            └── it should pass once the window has elapsed with margin

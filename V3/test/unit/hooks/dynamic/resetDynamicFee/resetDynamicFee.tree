@@ -1,0 +1,11 @@
+UnitDynamicSwapFeeHook::ResetDynamicFee
+├── when caller is not Fee Manager
+│   └── it should revert with "NFM"
+└── when caller is Fee Manager
+    ├── when the pool doesn't exist
+    │   └── it should revert with "PNP"
+    └── when the pool exists
+        ├── it should set the fee cap and the scaling factor to 0
+        ├── it should disable the initial fee
+        ├── it should set the initial fee to 0
+        └── it should emit a {DynamicFeeReset} event

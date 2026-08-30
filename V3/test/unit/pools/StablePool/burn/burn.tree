@@ -1,0 +1,11 @@
+UnitStablePool::Burn
+├── when the amounts to burn are zero
+│   └── it should revert with InsufficientLiquidityBurned
+└── when the amounts to burn are positive
+    ├── when the remaining k is zero
+    │   └── it should revert with KIsZero
+    └── when the remaining k is positive
+        ├── it should transfer token zero to the recipient
+        ├── it should transfer token one to the recipient
+        ├── it should burn the liquidity from the pool
+        └── it should emit the Burn event

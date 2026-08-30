@@ -1,0 +1,7 @@
+UnitBaseEntrypoint::RequireIdleBalance
+├── when the whole balance is owed to claimants
+│   └── it should revert with NoIdleBalance
+├── when the relay holds more than it owes
+│   └── it should return the unaccounted part
+└── when the accounted amount exceeds the balance
+    └── it should revert

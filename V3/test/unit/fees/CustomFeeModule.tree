@@ -1,0 +1,24 @@
+UnitCustomFeeModule::constructor
+└── given a freshly deployed module
+    └── it should set factory to the provided factory address
+
+UnitCustomFeeModule::setCustomFee
+├── when the caller is not the fee manager
+│   └── it should revert with NotFeeManager
+└── when the caller is the fee manager
+    ├── when the fee exceeds the max fee and is not the zero indicator
+    │   └── it should revert with FeeTooHigh
+    └── when the fee is within the cap or the zero indicator
+        ├── when the pool is not a registered pool
+        │   └── it should revert with InvalidPool
+        └── when the pool is a registered pool
+            ├── it should set the custom fee
+            └── it should emit SetCustomFee
+
+UnitCustomFeeModule::getFee
+├── when a zero fee has been explicitly set
+│   └── it should return zero
+├── when a positive fee has been set
+│   └── it should return the custom fee
+└── when no fee has been set
+    └── it should revert with NoCustomFee

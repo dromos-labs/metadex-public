@@ -1,0 +1,19 @@
+UnitPriorityFeeMevTaxModule::GetMevTax
+├── when the gas price is lte the base fee
+│   └── it should return zero tax and false toxic
+├── when the priority fee is lte the threshold
+│   └── it should return zero tax and false toxic
+└── when the priority fee is gt the threshold
+    ├── when the computed tax does not exceed the cap
+    │   ├── it should return the mev tax
+    │   └── it should return true toxic
+    ├── when the computed tax exceeds the cap
+    │   └── it should return the cap and true toxic
+    ├── when testing a concrete example
+    │   └── it should return the expected tax and true toxic
+    ├── when testing a rounded up example
+    │   └── it should return the rounded up tax and true toxic
+    ├── when testing a threshold above the minimum threshold
+    │   └── it should return the expected tax and true toxic
+    └── when testing a capped example
+        └── it should return the cap and true toxic

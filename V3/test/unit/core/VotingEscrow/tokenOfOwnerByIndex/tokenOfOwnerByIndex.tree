@@ -1,0 +1,24 @@
+UnitVotingEscrow::TokenOfOwnerByIndex
+├── when the owner holds no tokens
+│   └── it should revert with ERC721OutOfBoundsIndex
+├── when the index equals the owner balance
+│   └── it should revert with ERC721OutOfBoundsIndex
+├── when the owner holds a single minted token
+│   └── it should return that token id at index zero
+├── when the owner holds several minted tokens
+│   └── it should return each minted token id at its index
+├── when a non last token is transferred away
+│   ├── it should shrink the sender balance by one
+│   ├── it should swap the last sender token into the freed slot
+│   ├── it should keep every remaining sender token discoverable
+│   └── it should expose the token under the recipient
+├── when the last token is transferred away
+│   ├── it should shrink the sender balance by one
+│   ├── it should keep the earlier sender tokens discoverable
+│   └── it should expose the token under the recipient
+├── when a token is transferred to its current owner
+│   ├── it should keep the owner balance unchanged
+│   └── it should keep the token discoverable at its index
+└── when an expired stake is withdrawn
+    ├── it should keep the owner balance unchanged
+    └── it should keep the token discoverable at its index

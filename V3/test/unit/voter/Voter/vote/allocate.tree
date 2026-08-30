@@ -1,0 +1,52 @@
+UnitVoter::Allocate
+├── when the caller is not approved or owner of the tokenId
+│   └── it should revert with NotAuthorized
+├── when msg value does not equal the sum of declared values
+│   └── it should revert with UnexpectedValue
+├── when the tokenId stake has expired before T act
+│   └── it should revert with StakeExpired
+├── when the stake was withdrawn
+│   └── it should revert with StakeExpired
+├── when the gauge dispatches are not strictly ascending
+│   ├── when a later gauge dispatch chain id is below the previous one
+│   │   └── it should revert with GaugeDispatchesNotStrictlyAscending
+│   └── when the first gauge dispatch chain is chain zero
+│       └── it should revert with GaugeDispatchesNotStrictlyAscending
+├── when a gauge dispatch chain is not registered
+│   └── it should revert with ChainNotActiveOrSunset
+├── when a gauge dispatch chain is paused or suspended
+│   └── it should revert with ChainNotActiveOrSunset
+├── when a non root gauge dispatch chain has a zero gas limit
+│   └── it should revert with MissingDestinationGasLimit
+├── when a gauge list total exceeds the freshly written chain budget
+│   └── it should revert with ChainAllocationMismatch
+├── when a gauge list carries the deallocation sentinel
+│   ├── it should forward the entry's full declared value to the orchestrator
+│   ├── it should flag the dispatch to charge the deallocation return
+│   └── it should emit the GaugesAllocated event carrying the sentinel list
+├── when only one of several gauge entries carries the deallocation sentinel
+│   ├── it should leave the plain entry's dispatch unflagged
+│   └── it should flag only the sentinel entry's dispatch to charge the deallocation return
+├── when every phase passes for a single chain
+│   ├── it should store the per chain allocated budget in phase one
+│   ├── it should dispatch the AllocateChain batch with the chain fee
+│   ├── it should validate the gauge list against the freshly written budget
+│   ├── it should dispatch the AllocateGauge batch with the gauge fee
+│   ├── it should emit the ChainsAllocated event once for the chain dispatch array
+│   └── it should emit the GaugesAllocated event once per gauge dispatch carrying its chainId and gauges
+├── when a gauge dispatch targets the root colocated chain with a zero gas limit
+│   └── it should dispatch the AllocateGauge batch without reverting
+├── when a refund recipient grows the stake mid call
+│   ├── it should ship the pre call staked amount in both batches
+│   ├── it should ship the pre call stake end in both batches
+│   └── it should ship one emissions per VP in both batches
+├── when the call carries several gauge legs
+│   ├── it should dispatch exactly two batches
+│   ├── it should send the chain batch before the gauge batch
+│   └── it should pack every gauge leg into one batch
+├── when the chain dispatch list is empty
+│   ├── it should not dispatch a chain batch
+│   └── it should still apply the local accounting
+└── when the gauge dispatch list is empty
+    ├── it should not dispatch a gauge batch
+    └── it should still apply the local accounting

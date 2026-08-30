@@ -1,0 +1,39 @@
+UnitVelodromeMigration::Constructor
+├── when the owner is the zero address
+│   └── it should revert with OwnableInvalidOwner
+├── when the deployer is the zero address
+│   └── it should revert with ZeroAddress
+├── when the v2 token is the zero address
+│   └── it should revert with ZeroAddress
+├── when the v2 voting escrow is the zero address
+│   └── it should revert with ZeroAddress
+├── when the v2 voter is the zero address
+│   └── it should revert with ZeroAddress
+├── when the migration opening timestamp is not week aligned
+│   └── it should revert with InvalidOpen
+├── when the migration opening timestamp is not in the future
+│   └── it should revert with InvalidOpen
+├── when the Hyperlane mailbox is the zero address
+│   └── it should revert with ZeroAddress
+├── when the root domain is zero
+│   └── it should revert with InvalidDomain
+├── when the root domain is equal to the mailbox local domain
+│   └── it should revert with InvalidDomain
+├── when the legacy root voting rewards factory is the zero address
+│   └── it should revert with ZeroAddress
+├── when the voter emergency council is the zero address
+│   └── it should revert with ZeroAddress
+└── when passing valid parameters
+    ├── it should set the owner
+    ├── it should set the shared migration configuration
+    ├── it should set the V2 Minter
+    ├── it should return Defeated as the epoch governor result
+    ├── it should restrict each configured v2 veNFT
+    ├── it should emit RestrictionsSet for each configured v2 veNFT
+    ├── it should transfer the migration veNFT seed amount from the deployer
+    ├── it should create the v2 migration veNFT
+    ├── it should permanently lock the v2 migration veNFT
+    ├── it should set the Velodrome settlement immutables
+    ├── it should query the V2 voter emergency council
+    ├── it should cache the V2 emergency council
+    └── it should cache the V2 root voting rewards factory

@@ -1,0 +1,43 @@
+UnitClaims::claimGaugeRewards
+├── given a lite deployment with no leaf voter
+│   └── it should revert with CommandDisabled
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+├── when the gauge is not registered
+│   └── it should revert with GaugeNotRegistered
+└── given the gauge is registered
+    ├── when the recipient is the metarouter
+    │   ├── it should claim all positions through the unbounded two argument overload for an empty token id list
+    │   ├── it should hold the emission token
+    │   └── it should return the emission token to _msgSender()
+    ├── when the recipient is a user pointed address
+    │   ├── it should claim all positions through the unbounded two argument overload for an empty token id list
+    │   └── it should not sweep the emission token
+    ├── when the token id list is not empty and the gauge type is cl
+    │   └── it should claim only the requested token ids
+    ├── when the token id list is not empty and the gauge type is not cl
+    │   └── it should revert with InvalidGaugeType
+    ├── when the v2 gauge penalty is active and the penalty is not allowed
+    │   └── it should revert with PenaltyNotAccepted
+    ├── when the v2 gauge penalty is active and the penalty is allowed
+    │   └── it should claim despite the active penalty
+    └── when the v2 gauge penalty window has elapsed
+        └── it should claim after the penalty window
+
+UnitClaims::claimV2PoolFees
+├── when the recipient is the zero address
+│   └── it should revert with InvalidRecipient
+├── when the pool is not registered
+│   └── it should revert with PoolNotRegistered
+└── given the pool is registered
+    ├── when the recipient is the metarouter
+    │   ├── it should track both pool tokens
+    │   ├── it should call _pool claimFees with _msgSender() and _recipient
+    │   └── it should return both pool tokens to _msgSender()
+    ├── when the pool has no fees to claim
+    │   ├── it should track both pool tokens
+    │   ├── it should call _pool claimFees with _msgSender() and _recipient
+    │   └── it should not sweep either pool token
+    └── when the recipient is a user pointed address
+        ├── it should call _pool claimFees with _msgSender() and _recipient
+        └── it should not track or sweep the pool tokens

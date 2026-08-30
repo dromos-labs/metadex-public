@@ -1,0 +1,63 @@
+UnitRelayGovernance
+├── when a deposit is admitted
+│   └── it should checkpoint the principal and self-delegate the depositor
+├── when holders express nominal votes
+│   └── it should size each cast to the snapshot slice and book the consumption
+├── when a vote is expressed
+│   └── it should emit the preference from the relay address
+├── when the ui prices a slice
+│   └── it should answer the total and remaining budget without reverting
+├── when the library views are called directly
+│   └── it should price the same slice at the library address
+├── when the yield token is sold
+│   └── it should move no governance weight to the buyer
+├── when buying the principal token
+│   └── it should revert on every holder transfer path
+├── when a holder withdraws
+│   └── it should zero the checkpointed weight with the burned pair
+├── given a freshly initialized relay
+│   └── it should accept an express vote with nothing to attach
+├── given the consumption ledger is read
+│   └── it should keep the spent weight in relay storage
+├── when a caller holds no snapshot principal
+│   └── it should revert with NoVotingPower
+├── when expressing a fractional split
+│   └── it should forward the split untouched and consume its sum
+├── when the fractional payload is malformed
+│   └── it should revert with InvalidSupport
+├── when the slice passes the component width
+│   └── it should cap the cast at uint128 max and book the same amount
+├── when a deposit is still pending at the snapshot
+│   └── it should divide the queued weight among the holders already in
+├── when a fractional split spends the whole slice
+│   └── it should accept a split that sums to exactly the remaining budget
+├── when the snapshot predates the relay
+│   └── it should price a zero slice instead of reverting
+├── when a holder delegated elsewhere receives more principal
+│   └── it should keep the chosen delegate across the new mint
+├── when the governor is rotated
+│   ├── it should gate the rotation to the admin
+│   ├── it should reject a zero governor
+│   ├── it should reject a zero adapter
+│   └── it should store the pair and emit the event
+├── when a rotated governor reuses a proposal id
+│   ├── it should let the holder spend a fresh slice on the colliding proposal
+│   ├── it should book the fresh spend under the new governor
+│   └── it should leave the old governor ledger untouched
+├── when the adapter encodes a mint call
+│   ├── it should refuse to send calldata whose selector is not the fractional cast
+│   ├── it should mint no unbacked principal
+│   └── it should leave the pair and the backing counter as they were
+├── when the adapter encodes an arbitrary external call
+│   ├── it should never reach the escrow with the transfer
+│   └── it should refuse to send calldata whose selector is not the fractional cast
+├── when the rotated pair encodes the fractional cast
+│   ├── it should forward the fractional cast to the rotated governor
+│   └── it should book the spent slice
+├── when the proposal id fills the selector word
+│   ├── it should forward the cast whatever the argument bytes share the selector word
+│   └── it should book the spend
+├── when the adapter returns calldata too short for a selector
+│   └── it should refuse a payload that carries no selector at all
+└── when the governor reverts the cast
+    └── it should rebubble the governor revert verbatim

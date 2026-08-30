@@ -1,0 +1,18 @@
+UnitV2Gauge::ClaimReferralEmissions
+├── when the caller is not the referral or an approved operator
+│   └── it should revert with NotAuthorized
+├── when the recipient is the zero address
+│   └── it should revert with ZeroAddress
+├── when the referral has no deferred emissions
+│   └── it should not mint emissions
+├── when emission minting reverts
+│   ├── it should revert
+│   └── it should preserve the deferred referral emissions
+├── when the caller is the referral
+│   ├── it should emit the ReferralEmissionsClaimed event
+│   ├── it should clear the deferred referral emissions
+│   └── it should mint the full balance to the recipient
+└── when the caller is an approved operator
+    ├── it should emit the ReferralEmissionsClaimed event
+    ├── it should clear the deferred referral emissions
+    └── it should mint the full balance to the recipient

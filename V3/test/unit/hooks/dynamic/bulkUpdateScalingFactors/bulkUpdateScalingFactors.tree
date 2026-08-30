@@ -1,0 +1,18 @@
+UnitDynamicSwapFeeHook::BulkUpdateScalingFactors
+├── when caller is not Fee Manager
+│   └── it should revert with "NFM"
+└── when caller is Fee Manager
+    ├── when pools array and scaling factors array are not the same length
+    │   └── it should revert with "LMM"
+    └── when pools array and scaling factors array are the same length
+        ├── when one of the pools is invalid
+        │   └── it should revert revert with "PNP"
+        └── when all pools are valid
+            ├── when one of the pools fee cap is not set
+            │   └── it should revert with "ISF"
+            └── when all the pools have a set fee cap
+                ├── when one of scaling factor is bigger than max scaling factor
+                │   └── it should revert with "ISF"
+                └── when all the scaling factors are below max scaling factor
+                    ├── it should update the scaling factor for all the pools
+                    └── it should emit a {ScalingFactorSet} event for all the pools

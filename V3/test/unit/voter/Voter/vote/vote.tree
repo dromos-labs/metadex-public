@@ -1,0 +1,83 @@
+UnitVoter::AllocateChains
+├── when the caller is not approved or owner of the tokenId
+│   └── it should revert with NotAuthorized
+├── when the chain dispatch list is empty and value is attached
+│   └── it should revert with UnexpectedValue
+├── when the tokenId stake has expired before T act
+│   └── it should revert with StakeExpired
+├── when the stake was withdrawn but stale bookings remain
+│   └── it should revert with StakeExpired
+├── when the delta exceeds the chain zero parked amount
+│   └── it should revert with InsufficientChain0Allocation
+├── when the delta equals the chain zero parked amount
+│   ├── it should fully drain chain zero to zero
+│   ├── it should remove chain zero from the set
+│   ├── it should store the drained amount on the listed chain
+│   ├── it should leave committed unchanged
+│   └── it should leave totalPoint unchanged
+├── when a chain in the dispatch scope is not registered
+│   └── it should revert with ChainNotActive
+├── when the allocations array is invalid
+│   ├── when allocation chain ids are not strictly ascending
+│   │   └── it should revert with AllocationsNotStrictlyAscending
+│   ├── when a chain is not active
+│   │   └── it should revert with ChainNotActive
+│   ├── when a chain is sunset
+│   │   └── it should revert with ChainNotActive
+│   └── when a leaf chain entry has zero gas limit
+│       └── it should revert with MissingDestinationGasLimit
+├── when the tokenId allocates a chain from parked chain zero vp
+│   ├── it should set lastAllocated to the block timestamp
+│   ├── it should leave committed unchanged
+│   ├── it should set lastStakeEnd to the live stake end
+│   ├── it should store the per chain allocated amount
+│   ├── it should drain chain zero and remove it from the set
+│   ├── it should advance the global settlement to T act and anchor the listed chain cursor at the index
+│   ├── it should move the delta contribution onto the listed chain point and keep totalPoint neutral
+│   ├── it should resample the global emissionsPerVP against the post add total weight
+│   ├── it should call MessageOrchestrator dispatch with one AllocateChain entry carrying the delta
+│   └── it should emit the ChainsAllocated event carrying the dispatch array
+├── when the tokenId adds to a second chain across calls
+│   ├── it should leave the first chain amount unchanged
+│   ├── it should leave the first chain point unchanged
+│   ├── it should not dispatch a message to the first chain
+│   ├── it should store the second chain amount
+│   ├── it should drain chain zero and remove it from the set
+│   ├── it should leave committed unchanged
+│   └── it should dispatch only the second chain carrying its delta
+├── when the tokenId has a permanent stake
+│   ├── it should leave committed unchanged and lastStakeEnd at zero
+│   ├── it should drain chain zero and remove it from the set
+│   ├── it should add the delta to permanentStakeBalance on the chain point
+│   ├── it should leave bias and slope unchanged on the chain point
+│   ├── it should not schedule a slope reduction
+│   └── it should add the delta to totalPoint permanentStakeBalance
+├── when the stake shape has changed and the caller adds to one chain
+│   ├── it should set lastStakeEnd to the live stake end
+│   ├── it should leave committed unchanged
+│   ├── it should re-anchor every allocated chain to the new stake end
+│   ├── it should re-anchor chain zero to the new stake end
+│   ├── it should move the prior slope schedule entries to the live stakeEnd
+│   ├── it should draw the delta from chain zero without a message
+│   └── it should dispatch only the listed chain carrying its delta
+├── when the stake shape changed to permanent and the caller adds to one chain
+│   ├── it should re-anchor every allocated chain onto the permanent balance with no double count
+│   ├── it should clear the prior decaying slope schedule and add no permanent schedule
+│   └── it should store the permanent shape
+├── when a delta zero refresh is supplied with chain zero parked
+│   ├── it should leave chain zero parked untouched
+│   └── it should leave committed unchanged
+├── when a delta zero refresh entry is supplied and the shape changed
+│   ├── it should re-anchor the chain to the live stake end
+│   └── it should dispatch the chain with a zero allocation delta and the new snapshot
+├── when a delta zero refresh entry is supplied but the shape did not change
+│   ├── it should dispatch the chain with a zero allocation delta and the current snapshot
+│   ├── it should leave the chain point and total point unchanged
+│   └── it should leave committed unchanged
+└── when a delta zero refresh entry is supplied for a chain with no position
+    ├── it should dispatch the poked chain with a zero allocation delta and the current snapshot
+    ├── it should book nothing for the token on the poked chain
+    ├── it should not add the poked chain to the tokens allocation set
+    ├── it should leave the poked chain point empty
+    ├── it should leave the held chain point and the total point unchanged
+    └── it should leave committed unchanged

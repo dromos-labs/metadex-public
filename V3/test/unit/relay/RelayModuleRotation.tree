@@ -1,0 +1,13 @@
+UnitRelayModuleRotation
+├── when the caller is not the keeper
+│   └── it should revert with Unauthorized
+├── when the named module is the zero address
+│   └── it should revert with ZeroAddress
+├── when the escrow does not authorize the named module
+│   └── it should revert with ModuleNotAuthorized
+├── when the named module is the one already in use
+│   └── it should leave the approval untouched
+└── when the keeper moves to an authorized module
+    ├── it should hand the new module the sAERO approval
+    ├── it should emit VoterPaymentsModuleSet
+    └── it should route later deposits through the new module

@@ -1,0 +1,6 @@
+UnitClPoolTape::SetElasticFeeModule
+├── when the caller is not the owner
+│   └── it reverts with OwnableUnauthorizedAccount
+└── when the caller is the owner
+    ├── it stores the elastic fee module
+    └── it emits ElasticFeeModuleSet

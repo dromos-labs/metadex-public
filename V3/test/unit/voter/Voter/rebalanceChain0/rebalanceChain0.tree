@@ -1,0 +1,75 @@
+UnitVoter::RebalanceChain0
+├── when the caller is not the voting escrow
+│   └── it should revert with NotVotingEscrow
+├── when both source and destination arrays are empty
+│   ├── it should leave the chain zero point unchanged
+│   └── it should leave totalPoint unchanged
+├── when a source amount exceeds its chain zero allocation
+│   └── it should revert with InsufficientChain0Allocation
+├── when a destination has voted and its stored stake end differs from the live stake end
+│   └── it should revert with DstShapeStale
+├── when the batch moves allocation between differing stake ends
+│   ├── it should advance the global index to T act
+│   ├── it should settle the chain zero ceiling to T act
+│   ├── it should resolve the chain zero point to T act
+│   ├── it should resolve totalPoint to T act
+│   ├── it should remove the source contribution from the chain zero point at the source stake end
+│   ├── it should remove the source contribution from totalPoint at the source stake end
+│   ├── it should add the destination contribution to the chain zero point at the destination stake end
+│   ├── it should add the destination contribution to totalPoint at the destination stake end
+│   ├── it should recompute the global emissions per VP against the new totalWeight
+│   ├── it should decrement committed on the source by the amount
+│   ├── it should decrement allocationChainAmounts for the source on chain zero by the amount
+│   ├── it should increment committed on the destination by the amount
+│   ├── it should increment allocationChainAmounts for the destination on chain zero by the amount
+│   └── it should emit the Chain zero Rebalanced event
+├── when the batch has multiple sources and destinations
+│   ├── it should settle the chain zero ceiling once
+│   ├── it should decrement committed and chain zero allocation on every source
+│   ├── it should increment committed and chain zero allocation on every destination
+│   └── it should recompute the global emissions per VP once against the final totalWeight
+├── when a source drains its chain zero allocation
+│   └── it should remove chain zero from the source chain set
+├── when a destination has not voted before
+│   ├── it should seed the destination lastStakeEnd to the live stake end
+│   ├── it should keep the destination lastAllocated unchanged
+│   └── it should add chain zero to the destination chain set
+├── when a destination has a permanent stake
+│   ├── it should remove the source bias and slope from the chain zero point
+│   ├── it should add the amount to the chain zero permanent stake balance
+│   └── it should add the amount to the totalPoint permanent stake balance
+├── when a source leg has a zero amount
+│   └── it should leave that source ledger untouched
+├── when a destination leg has a zero amount
+│   └── it should leave that destination ledger untouched
+├── when a source equals a destination
+│   ├── it should net the equal portion to zero on the shared ledger
+│   └── it should apply only the remaining destination legs as real moves
+├── when a full drain self reshape changes the stake shape
+│   ├── it should re seed the stored shape at the live decaying end
+│   ├── it should leave the chain zero booking whole
+│   ├── it should keep chain zero in the tokens allocation set
+│   └── it should move the contribution from permanent to decaying on chain zero and total
+├── when a destination stake has expired
+│   ├── it should not revert
+│   ├── it should credit the destination chain zero allocation
+│   └── it should leave the chain zero point unchanged for the expired destination leg
+├── when a source stake has expired
+│   ├── it should not revert
+│   ├── it should drain the source chain zero allocation
+│   └── it should leave the chain zero point unchanged for the expired source leg
+├── when the batch has multiple sources and destinations at differing stake ends
+│   ├── it should settle and resolve the chain zero point once
+│   ├── it should remove every source contribution at its own stake end
+│   ├── it should add every destination contribution at its own stake end
+│   └── it should move each token ledger by its own amount
+├── when the accumulator is a destination
+│   ├── it should credit the accumulator chain zero allocation
+│   └── it should add the amount to the permanent stake balance
+├── when a fully drained source is recredited at a new stake end
+│   ├── it should relocate the token contribution to the new stake end
+│   └── it should leave the token shape and ledger consistent
+└── when destination legs accumulate before a source leg drains the total
+    ├── it should book the chain zero point at the contribution of the accumulated total
+    ├── it should clear the chain zero point and its slope schedule after the drain
+    └── it should clear totalPoint and its slope schedule after the drain

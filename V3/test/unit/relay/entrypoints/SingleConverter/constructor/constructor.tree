@@ -1,0 +1,5 @@
+UnitSingleConverter::Constructor
+├── when the target token is the zero address
+│   └── it should revert with ZeroAddress
+└── when the target token is valid
+    └── it should set the target token immutable

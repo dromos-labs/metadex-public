@@ -1,0 +1,10 @@
+UnitVotingEscrow::TokenByIndex
+├── when the enumeration is empty
+│   └── it should revert with ERC721OutOfBoundsIndex
+└── given the enumeration holds tokens
+    ├── when the index is within the enumeration
+    │   └── it should return the token id at that index
+    ├── when using a known unordered example
+    │   └── it should return the token id at that index
+    └── when the index equals the total supply
+        └── it should revert with ERC721OutOfBoundsIndex

@@ -1,0 +1,10 @@
+UnitMultiConverter::SwapAndConvert
+├── when the relay is not the bound relay
+│   └── it should revert with WrongRelay
+├── when the input token is excluded
+│   └── it should revert with TokenExcluded
+├── when the target token is not configured
+│   └── it should revert with NotTargetToken
+└── when a keeper converts a reward
+    ├── it should swap the reward into the target token
+    └── it should notify the landed delta

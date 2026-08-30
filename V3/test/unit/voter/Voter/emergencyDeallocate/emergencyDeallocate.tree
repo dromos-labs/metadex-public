@@ -1,0 +1,34 @@
+UnitVoter::EmergencyDeallocate
+├── when the caller is not authorized for the token
+│   └── it should revert with NotAuthorized
+├── when the chain is not registered
+│   └── it should revert with ChainNotSuspended
+├── when the chain is not suspended
+│   └── it should revert with ChainNotSuspended
+├── when the chain is sunset
+│   └── it should revert with ChainNotSuspended
+├── when the chain is suspended but emergency deallocation is not allowed
+│   └── it should revert with EmergencyDeallocationNotAllowed
+├── when the destination gas limit is zero for a non local chain
+│   └── it should revert with MissingDestinationGasLimit
+├── when the token has nothing booked on the suspended chain
+│   └── it should revert with NothingToDeallocate
+├── when the token has voting power booked on the suspended chain
+│   ├── it should move the full booked amount from the suspended chain to chain zero
+│   ├── it should remove the suspended chain from the tokens allocation set
+│   ├── it should conserve the total weight across the full-drain move
+│   ├── it should advance the global settlement cursor to the current timestamp
+│   ├── it should anchor both chain cursors at the advanced global index
+│   ├── it should route the suspended chain accrual into its cumulative suspended surplus keeping its ceiling frozen
+│   ├── it should accrue the chain zero ceiling from the global index delta at its pre drain weight
+│   ├── it should resample the global emissions per voting power scalar against the post drain total weight
+│   ├── it should dispatch one EmergencyDeallocate message forwarding the value
+│   └── it should emit EmergencyDeallocated with the amount
+├── when the suspended chain is the local chain
+│   ├── it should not revert despite the zero gas limit
+│   ├── it should dispatch one EmergencyDeallocate message with a zero gas limit forwarding the value
+│   ├── it should move the full booked amount from the local chain to chain zero
+│   └── it should emit EmergencyDeallocated with the amount
+└── when drained twice on the same chain
+    ├── it should dispatch exactly one EmergencyDeallocate message across both calls
+    └── it should revert NothingToDeallocate on the second drain

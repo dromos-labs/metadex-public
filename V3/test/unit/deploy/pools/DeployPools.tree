@@ -1,0 +1,36 @@
+UnitDeployPools
+├── when parameters are not valid
+│   ├── when the chain id does not match the current chain
+│   │   └── it should revert with ChainIdMismatch
+│   ├── when the pool admin is the zero address
+│   │   └── it should revert with InvalidInput
+│   ├── when the pauser is the zero address
+│   │   └── it should revert with InvalidInput
+│   ├── when the fee manager is the zero address
+│   │   └── it should revert with InvalidInput
+│   ├── when the pool tape manager is the zero address
+│   │   └── it should revert with InvalidInput
+│   ├── when the discount registry manager is the zero address
+│   │   └── it should revert with InvalidInput
+│   ├── when the pool tape owner is the zero address
+│   │   └── it should revert with InvalidInput
+│   ├── when the discount registry owner is the zero address
+│   │   └── it should revert with InvalidInput
+│   ├── when the target factory admin is the zero address
+│   │   └── it should revert with InvalidInput
+│   ├── when the default cadence interval is zero
+│   │   └── it should revert with InvalidInput
+│   ├── when the pool tape gas limit is zero
+│   │   └── it should revert with InvalidInput
+│   └── when the fee module gas limit is zero
+│       └── it should revert with InvalidInput
+└── when all parameters are valid
+    ├── it should link both pool factories to the deployed factory registry
+    ├── it should approve both pool factories as target factories
+    ├── it should hand the target factory admin over to the configured target factory admin
+    ├── it should leave the leaf voter unset
+    ├── it should set the volatile factory configuration eq to the deployment parameters
+    ├── it should set the stable factory configuration eq to the deployment parameters
+    ├── it should set the tape and registry owners and the default cadence interval
+    ├── it should set each fee module and flat fee quoter factory eq to its pool factory
+    └── it should deploy every contract at its deterministic CREATE3 address

@@ -1,0 +1,8 @@
+UnitMultiEntrypoint::RemoveTargetToken
+├── when the caller is not the config admin
+│   └── it should revert with NotConfigAdmin
+├── when the token is not a target
+│   └── it should revert with TokenNotConfigured
+└── when the token is a target
+    ├── it should remove the token from the target set
+    └── it should emit a TargetTokenRemoved event

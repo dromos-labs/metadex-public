@@ -1,0 +1,57 @@
+UnitVotingRewardsManager::EarnedIncentives
+├── given the program has not started
+│   └── it should return zero
+├── given the veNFT never voted
+│   └── it should return zero
+├── given another veNFT created global checkpoints
+│   └── it should return zero for a veNFT with no checkpoint
+├── given the checkpoint limit is zero
+│   └── it should return zero
+├── given only closed intervals exist
+│   └── it should return the closed interval rewards
+├── given the open interval is not yet closed
+│   └── it should include the estimated open interval
+├── given an open interval before the program starts
+│   └── it should return zero
+├── given the program starts inside the open interval
+│   └── it should estimate only after the program starts
+├── given the program ended before the latest global checkpoint
+│   └── it should return only the program rewards
+├── given the open interval crosses a week boundary
+│   └── it should estimate the full unsettled interval
+├── given the open interval exceeds the checkpoint iteration limit
+│   └── it should return the full pending estimate
+├── given the latest global checkpoint is mid week
+│   └── it should match a later claim across the next week boundary
+├── given a decaying open interval starts from a mid week global checkpoint
+│   ├── it should estimate rewards using the weight share at the end of the interval
+│   └── it should be lower than a claim at the same timestamp
+├── given a bounded read over multiple user checkpoints
+│   └── it should return only the bounded user checkpoints
+├── given a bounded read stops before the latest user checkpoint
+│   └── it should exclude the open interval
+├── given a bounded read reaches the latest user checkpoint
+│   └── it should include the estimated open interval
+├── given the program ends inside the open interval
+│   └── it should estimate only through the program end
+├── given a non permanent decaying lock
+│   └── it should return the decayed voting power share of closed intervals
+├── given a decaying lock alongside a permanent lock
+│   └── it should earn less than the permanent lock as its voting power decays
+├── given a decaying lock alongside a permanent lock in the open interval
+│   ├── it should estimate the decaying share
+│   └── it should match a later claim approximately
+├── given a decaying lock expires inside the open interval
+│   ├── it should return only closed rewards
+│   └── it should be lower than a claim at the same timestamp
+├── given another decaying lock expires inside the open interval
+│   ├── it should estimate rewards using the weight share at the end of the interval
+│   └── it should be higher than a claim at the same timestamp
+├── given a decaying lock expired before the open interval
+│   └── it should ignore the open interval after expiry
+├── given the latest user checkpoint is reset
+│   └── it should ignore the open interval
+├── given rewards were already partially claimed
+│   └── it should return only the remaining closed rewards
+└── given rewards were already partially claimed with a stale open interval
+    └── it should return remaining rewards including the open interval

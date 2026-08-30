@@ -1,0 +1,49 @@
+UnitVotingRewardsManager::CreateIncentiveProgram
+├── when duration is less than the minimum duration
+│   └── it should revert with InsufficientDuration
+├── when amount is less than duration
+│   └── it should revert with InsufficientAmount
+├── when start is in the past
+│   └── it should revert with InvalidStart
+├── when the token is not listed
+│   └── it should revert with NotListed
+├── when the parameters are valid
+│   ├── given global history is empty
+│   │   ├── when the program starts immediately
+│   │   │   ├── it should initialize global history
+│   │   │   ├── it should timestamp the initial checkpoint at creation
+│   │   │   └── it should record zero supply in the initial checkpoint
+│   │   └── when the program starts in the future
+│   │       ├── it should initialize global history
+│   │       ├── it should timestamp the initial checkpoint at creation
+│   │       └── it should preserve the future program start
+│   ├── given global history already exists
+│   │   ├── when history cannot reach the current timestamp within the iteration limit
+│   │   │   ├── it should revert with StaleCheckpointHistory
+│   │   │   └── it should allow program creation after history is advanced
+│   │   ├── when the current timestamp is the maximum reachable timestamp
+│   │   │   ├── it should create the incentive program
+│   │   │   └── it should not write a global checkpoint
+│   │   └── when the current timestamp is before the maximum reachable timestamp
+│   │       └── it should not write a global checkpoint
+│   ├── given an incentive program already exists and time has advanced
+│   │   └── it should not write a global checkpoint
+│   └── when creating the incentive program
+│       ├── it should pull the calculated program amount from the caller
+│       ├── it should store the program at the new id
+│       ├── it should initialize the remaining program balance
+│       ├── it should increment the incentive count
+│       ├── it should index the program by token
+│       ├── it should index the program by creator
+│       ├── it should register the token in the rewards list
+│       └── it should emit an IncentiveCreated event
+├── when streaming a known amount over a known duration
+│   ├── it should store the independently computed rate
+│   ├── it should store the independently computed end
+│   └── it should initialize the remaining program balance
+└── when rate rounding reduces the program amount
+    ├── it should pull the rounded program amount from the caller
+    ├── it should leave the rounding remainder with the creator
+    ├── it should store the rounded program amount
+    ├── it should initialize the remaining program balance
+    └── it should emit the IncentiveCreated event

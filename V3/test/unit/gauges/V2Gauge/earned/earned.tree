@@ -1,0 +1,43 @@
+UnitV2Gauge::Earned
+├── when the gauge has no staked supply
+│   ├── it should not query the voter projection
+│   └── it should return zero
+├── when the account has no accrued emissions
+│   └── it should return zero
+├── when the account has only deferred LP emissions
+│   ├── it should return the deferred LP emissions
+│   └── it should exclude referral emissions credited to the account
+├── when the account has accrued and deferred LP emissions
+│   ├── it should apply penalty and referral deductions only to live emissions
+│   ├── it should include deferred LP emissions
+│   └── it should exclude referral emissions credited to the account
+└── when the account has accrued emissions
+    ├── when there is no penalty and no referral
+    │   ├── when the reward per token is known
+    │   │   ├── it should return full emissions
+    │   │   └── it should align claimed emissions with earned
+    │   └── when the reward per token varies
+    │       ├── it should return full emissions
+    │       └── it should align claimed emissions with earned
+    ├── when there is a penalty rate
+    │   ├── when called within min stake blocks
+    │   │   └── it should return emissions after penalty
+    │   └── when called after min stake blocks
+    │       └── it should return full emissions
+    ├── when there is a referral share
+    │   └── it should return emissions after referral
+    └── when there is a penalty rate and a referral share
+        ├── when the gauge has no new reward per token to estimate
+        │   ├── it should apply the penalty before the referral
+        │   ├── it should return emissions after penalty and referral
+        │   ├── it should align claimed emissions with earned
+        │   └── it should return zero earned emissions after claim
+        ├── when the gauge has new reward per token to estimate
+        │   ├── it should include the cached rate estimate
+        │   ├── it should apply the penalty before the referral
+        │   ├── it should return emissions after penalty and referral
+        │   ├── it should align claimed emissions with earned
+        │   └── it should return zero earned emissions after claim
+        └── when the projected cumulative varies
+            ├── it should fold the projected delta into the estimate
+            └── it should align claimed emissions with earned

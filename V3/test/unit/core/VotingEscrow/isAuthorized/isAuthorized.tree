@@ -1,0 +1,11 @@
+UnitVotingEscrow::IsAuthorized
+├── when the spender is the owner
+│   └── it should return true
+├── when the spender is an approved operator
+│   └── it should return true
+├── when the spender is the per token approved address
+│   └── it should return true
+├── when the spender is unrelated
+│   └── it should return false
+└── when the token has not been minted
+    └── it should return false

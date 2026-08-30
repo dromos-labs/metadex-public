@@ -1,0 +1,48 @@
+UnitPool::Swap
+├── when the factory is paused
+│   └── it should revert with IsPaused
+└── when the factory is not paused
+    ├── when both output amounts eq zero
+    │   └── it should revert with InsufficientOutputAmount
+    └── when an output amount is gt zero
+        ├── when an output amount is gte its reserve
+        │   └── it should revert with InsufficientLiquidity
+        └── when the output amounts are lt the reserves
+            ├── when the recipient is a pool token
+            │   └── it should revert with InvalidTo
+            └── when the recipient is not a pool token
+                ├── when the data payload is not empty
+                │   └── it should call the hook on the recipient with the output amounts
+                └── when the data payload is empty
+                    ├── when the input amounts eq zero
+                    │   └── it should revert with InsufficientInputAmount
+                    └── when an input amount is gt zero
+                        ├── when the invariant decreases after the swap
+                        │   └── it should revert with K
+                        └── when the invariant is preserved
+                            ├── when swap is zeroForOne
+                            │   ├── it should transfer the token1 output to the recipient
+                            │   ├── it should transfer the token0 fee to the pool fees contract
+                            │   ├── it records the swap data to the pool tape via the factory
+                            │   ├── it accrues the fee ratio on the token0 fee index
+                            │   ├── it emits the Fees event
+                            │   ├── it emits the Swap event
+                            │   ├── it updates the reserves to the post swap balances
+                            │   ├── when the factory reports the zeroForOne swap as toxic
+                            │   │   └── it records the mev volumes on the pool tape
+                            │   └── when the zeroForOne swap fee eq zero
+                            │       ├── it should not transfer fees to the pool fees contract
+                            │       └── it should not increase the token0 fee index
+                            └── when swap is oneForZero
+                                ├── it should transfer the token0 output to the recipient
+                                ├── it should transfer the token1 fee to the pool fees contract
+                                ├── it records the swap data to the pool tape via the factory
+                                ├── it accrues the fee ratio on the token1 fee index
+                                ├── it emits the Fees event
+                                ├── it emits the Swap event
+                                ├── it updates the reserves to the post swap balances
+                                ├── when the factory reports the oneForZero swap as toxic
+                                │   └── it records the mev volumes on the pool tape
+                                └── when the oneForZero swap fee eq zero
+                                    ├── it should not transfer fees to the pool fees contract
+                                    └── it should not increase the token1 fee index

@@ -1,0 +1,24 @@
+UnitVolatilityRingLibrary::pack
+└── it packs the range dist and m into the full 64 bits
+
+UnitVolatilityRingLibrary::unpack
+└── it returns the packed range dist and m
+
+UnitVolatilityRingLibrary::push
+├── it writes the packed value at the head position over any previous value
+├── it leaves the other values in the word untouched
+├── it advances the head modulo the window
+├── when pushing at the last slot of a full ring
+│   ├── it leaves the count unchanged
+│   └── it wraps the head to zero
+├── when the count lt the window
+│   └── it increments the count
+└── when the count eq the window
+    └── it leaves the count unchanged
+
+UnitVolatilityRingLibrary::values
+├── when the ring has not wrapped
+│   ├── it sizes the three arrays to the count
+│   └── it returns the stored values ordered oldest to newest
+└── when the ring has wrapped
+    └── it returns the values ordered oldest to newest across the wrap

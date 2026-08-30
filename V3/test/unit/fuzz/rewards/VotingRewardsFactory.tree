@@ -1,0 +1,20 @@
+UnitVotingRewardsFactory::constructor
+├── when the voter is the zero address
+│   └── it should revert with {ZeroAddress}
+├── when the wrapped native is the zero address
+│   └── it should revert with {ZeroAddress}
+├── when the voter reports a zero factory registry
+│   └── it should revert with {ZeroAddress}
+└── when the contract is deployed
+    ├── it should set the voter
+    ├── it should set the factory registry reported by the voter
+    └── it should set the wrappedNative
+
+UnitVotingRewardsFactory::createRewards
+├── when the caller is not an approved gauge factory
+│   └── it should revert with {NotAuthorized}
+└── when the caller is an approved gauge factory
+    ├── it should deploy a new VotingRewardsManager
+    ├── it should set the immutables on the deployed VotingRewardsManager
+    ├── it should emit VotingRewardsCreated
+    └── it should return the deployed VotingRewardsManager address

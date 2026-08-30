@@ -1,0 +1,9 @@
+UnitVotingEscrow::IsAuthorizedVPMForToken
+├── when the vpm holds the vpm role and the owner approved it
+│   └── it should return true
+├── when the vpm holds the vpm role but the owner has not approved it
+│   └── it should return false
+├── when the vpm does not hold the vpm role
+│   └── it should return false
+└── when the token id has not been minted
+    └── it should return false without reverting

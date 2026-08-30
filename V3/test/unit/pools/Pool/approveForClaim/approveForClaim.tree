@@ -1,0 +1,6 @@
+UnitPool::ApproveForClaim
+├── when operator is zero address
+│   └── it should revert with ZeroAddress
+└── when operator is not zero address
+    ├── it should set the caller approval for the operator
+    └── it should emit a ClaimApproval event

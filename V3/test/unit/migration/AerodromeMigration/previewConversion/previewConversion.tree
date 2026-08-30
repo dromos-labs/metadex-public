@@ -1,0 +1,20 @@
+UnitAerodromeMigration::PreviewConversion
+├── when the v2 lock is permanent
+│   ├── it should return the amount to be migrated from the v2 veNFT
+│   ├── it should return the v2 token amount as the converted v3 token amount
+│   ├── it should indicate the v2 lock is permanent
+│   ├── it should indicate the conversion does not settle as liquid tokens
+│   └── it should return the conversion parameters used by depositVeNFT
+└── when the v2 lock is not permanent
+    ├── when the v2 lock has expired
+    │   ├── it should return the amount to be migrated from the v2 veNFT
+    │   ├── it should return the v2 token amount as the converted v3 token amount
+    │   ├── it should indicate the v2 lock is not permanent
+    │   ├── it should indicate the conversion settles as liquid tokens
+    │   └── it should return the conversion parameters used by depositVeNFT
+    └── when the v2 lock is active
+        ├── it should return the amount to be migrated from the v2 veNFT
+        ├── it should return the v2 token amount as the converted v3 token amount
+        ├── it should indicate the v2 lock is not permanent
+        ├── it should indicate the conversion does not settle as liquid tokens
+        └── it should return the conversion parameters used by depositVeNFT

@@ -1,19 +1,28 @@
 name: slither
 
-on:
-    push:
-      branches: 
-        - main
-        - develop
-    pull_request:
-    workflow_dispatch:
+on: [push, workflow_dispatch]
 
 jobs:
   analyze:
-    runs-on: ubuntu-latest
+    name: Slither
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
-      - uses: actions/checkout@v4
-      - uses: crytic/slither-action@v0.4.1
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: install-tools
+        uses: ./.github/workflows/install-tools
+
+      - name: Build V3 sources
+        run: forge build --build-info V3/src --skip '*/test/**' '*/script/**' --force
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.4.2
+        id: slither
         with:
-          fail-on: medium
-          slither-args: --exclude-dependencies
+          target: "V3/src"
+          slither-version: "0.11.5"
+          slither-config: slither.config.json
+          ignore-compile: true
+          fail-on: config
+

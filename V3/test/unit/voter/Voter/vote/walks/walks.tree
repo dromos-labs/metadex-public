@@ -1,0 +1,23 @@
+UnitVoter::VoteWalks
+├── when the walk window stays within a single week
+│   └── it should decay chain point bias by slope times the partial week delta
+├── when the walk crosses a single week boundary with a scheduled slope reduction
+│   ├── it should decay bias up to the boundary at the pre boundary slope
+│   ├── it should reduce slope by the scheduled reduction at the boundary
+│   └── it should decay the trailing partial week with the post boundary slope
+├── when the walk crosses multiple week boundaries
+│   └── it should apply each scheduled reduction in chronological order
+├── when bias would underflow during the walk
+│   └── it should clamp bias at zero
+├── when slope would underflow at a boundary
+│   └── it should clamp slope at zero
+├── when the chain point timestamp is already at block timestamp
+│   └── it should leave the chain point bias slope and timestamp unchanged
+├── when the point has a non zero permanent balance and the walk runs
+│   └── it should leave permanent stake balance unchanged by the walk
+├── when totalPoint and chain point have separate slope reductions at the same boundary
+│   ├── it should apply the chain slope reduction using chainSlopeChanges
+│   └── it should apply the totalPoint slope reduction using totalSlopeChanges
+└── when block timestamp lands exactly on a week boundary
+    ├── it should apply the boundary slope reduction
+    └── it should skip the trailing partial decay

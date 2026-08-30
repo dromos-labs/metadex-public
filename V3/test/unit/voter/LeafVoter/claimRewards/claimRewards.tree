@@ -1,0 +1,29 @@
+UnitLeafVoter::ClaimRewards
+├── when the chain status is not Active
+│   └── it should claim rewards
+├── when the caller is neither the operator nor leaf message orchestrator
+│   └── it should revert with NotAuthorized
+├── when the recipient is the zero address
+│   └── it should revert with ZeroAddress
+├── when a fee claim target is zero
+│   ├── it should emit FeeClaimFailed for the zero voting rewards manager
+│   └── it should continue claiming the remaining entries
+├── when an incentive claim target is zero
+│   ├── it should emit IncentiveClaimFailed for the zero voting rewards manager
+│   └── it should continue claiming the remaining entries
+├── when a fee claim target is not registered in the FactoryRegistry
+│   ├── it should emit FeeClaimFailed for the unregistered voting rewards manager
+│   └── it should continue claiming the remaining entries
+├── when an incentive claim target is not registered in the FactoryRegistry
+│   ├── it should emit IncentiveClaimFailed for the unregistered voting rewards manager
+│   └── it should continue claiming the remaining entries
+├── when a registered fee claim target reverts
+│   └── it should bubble the exact revert
+├── when a registered incentive claim target reverts
+│   └── it should bubble the exact revert
+├── when all inputs are valid
+│   ├── it should emit FeeClaimSucceeded for the fee claim
+│   ├── it should emit IncentiveClaimSucceeded for the incentive claim
+│   └── it should claim fees and incentives in one call
+└── when an inbound claim is delivered after the chain becomes inactive
+│   └── it should process the already-dispatched claim

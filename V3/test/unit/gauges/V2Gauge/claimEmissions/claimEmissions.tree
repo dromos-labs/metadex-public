@@ -1,0 +1,159 @@
+UnitV2Gauge::ClaimEmissions
+├── when the recipient is the zero address
+│   └── it should revert with ZeroAddress
+└── when the recipient is not the zero address
+    ├── when the caller is not the account or an approved operator
+    │   └── it should revert with NotAuthorized
+    └── when the caller is authorized
+        ├── when the caller is the account
+        │   ├── when the account has deferred emissions and no accrued emissions
+        │   │   ├── it should request a leaf voter settlement
+        │   │   ├── it should update the account's rewardPerTokenPaid
+        │   │   ├── it should clear the account deferred emissions
+        │   │   ├── it should emit the DeferredEmissionsClaimed event
+        │   │   └── it should mint the deferred account emissions to the recipient
+        │   ├── when the account has no accrued emissions
+        │   │   ├── when unused emissions are zero
+        │   │   │   ├── it should request a leaf voter settlement
+        │   │   │   ├── it should advance reward per token stored
+        │   │   │   ├── it should advance the cumulative reward share cursor
+        │   │   │   ├── it should update the account's rewardPerTokenPaid
+        │   │   │   ├── it should not forfeit emissions
+        │   │   │   └── it should not mint emissions
+        │   │   └── when unused emissions are greater than zero
+        │   │       ├── it should request a leaf voter settlement
+        │   │       ├── it should leave reward per token stored unchanged
+        │   │       ├── it should advance the cumulative reward share cursor
+        │   │       ├── it should update the account's rewardPerTokenPaid
+        │   │       ├── it should forfeit unused emissions
+        │   │       └── it should not mint emissions
+        │   └── when the account has accrued emissions
+        │       ├── when there is no penalty and no referral
+        │       │   ├── when the reward parameters are known
+        │       │   │   ├── it should request a leaf voter settlement
+        │       │   │   ├── it should advance reward per token stored
+        │       │   │   ├── it should advance the cumulative reward share cursor
+        │       │   │   ├── it should update the account's rewardPerTokenPaid
+        │       │   │   ├── it should clear the account rewards
+        │       │   │   ├── it should not forfeit emissions
+        │       │   │   ├── it should emit the EmissionsClaimed event
+        │       │   │   └── it should mint full emissions to the recipient
+        │       │   └── when the reward parameters vary
+        │       │       ├── it should request a leaf voter settlement
+        │       │       ├── it should advance reward per token stored
+        │       │       ├── it should advance the cumulative reward share cursor
+        │       │       ├── it should update the account's rewardPerTokenPaid
+        │       │       ├── it should clear the account rewards
+        │       │       ├── it should not forfeit emissions
+        │       │       ├── it should emit the EmissionsClaimed event
+        │       │       └── it should mint full emissions to the recipient
+        │       ├── when there is a penalty rate
+        │       │   ├── when called within min stake blocks
+        │       │   │   ├── when there are no remaining emissions after penalty
+        │       │   │   │   ├── it should request a leaf voter settlement
+        │       │   │   │   ├── it should advance reward per token stored
+        │       │   │   │   ├── it should advance the cumulative reward share cursor
+        │       │   │   │   ├── it should update the account rewardPerTokenPaid
+        │       │   │   │   ├── it should clear the account rewards
+        │       │   │   │   ├── it should emit the EarlyWithdrawPenalty event
+        │       │   │   │   ├── it should forfeit all emissions
+        │       │   │   │   └── it should not mint emissions
+        │       │   │   └── when there are remaining emissions after penalty
+        │       │   │       ├── when unused emissions are zero_
+        │       │   │       │   ├── it should request a leaf voter settlement
+        │       │   │       │   ├── it should advance reward per token stored
+        │       │   │       │   ├── it should advance the cumulative reward share cursor
+        │       │   │       │   ├── it should update the account rewardPerTokenPaid
+        │       │   │       │   ├── it should clear the account rewards
+        │       │   │       │   ├── it should emit the EarlyWithdrawPenalty event
+        │       │   │       │   ├── it should emit the EmissionsClaimed event
+        │       │   │       │   ├── it should forfeit the penalty emissions
+        │       │   │       │   └── it should mint the remaining emissions to the recipient
+        │       │   │       └── when unused emissions are greater than zero_
+        │       │   │           ├── it should request a leaf voter settlement
+        │       │   │           ├── it should leave reward per token stored unchanged
+        │       │   │           ├── it should advance the cumulative reward share cursor
+        │       │   │           ├── it should update the account rewardPerTokenPaid
+        │       │   │           ├── it should clear the account rewards
+        │       │   │           ├── it should emit the EarlyWithdrawPenalty event
+        │       │   │           ├── it should emit the EmissionsClaimed event
+        │       │   │           ├── it should forfeit unused and penalty emissions
+        │       │   │           └── it should mint the remaining emissions to the recipient
+        │       │   └── when called after min stake blocks
+        │       │       ├── it should request a leaf voter settlement
+        │       │       ├── it should advance reward per token stored
+        │       │       ├── it should advance the cumulative reward share cursor
+        │       │       ├── it should update the account rewardPerTokenPaid
+        │       │       ├── it should clear the account rewards
+        │       │       ├── it should not forfeit emissions
+        │       │       ├── it should emit the EmissionsClaimed event
+        │       │       └── it should mint full emissions to the recipient
+        │       ├── when there is a referral share
+        │       │   ├── when there are no remaining emissions after referral
+        │       │   │   ├── it should request a leaf voter settlement
+        │       │   │   ├── it should advance reward per token stored
+        │       │   │   ├── it should advance the cumulative reward share cursor
+        │       │   │   ├── it should update the account's rewardPerTokenPaid
+        │       │   │   ├── it should clear the account rewards
+        │       │   │   ├── it should not forfeit emissions
+        │       │   │   ├── it should emit the ReferralEmissionsDeferred event
+        │       │   │   ├── it should store all emissions for the referral
+        │       │   │   └── it should not mint emissions
+        │       │   └── when there are remaining emissions after referral
+        │       │       ├── it should request a leaf voter settlement
+        │       │       ├── it should advance reward per token stored
+        │       │       ├── it should advance the cumulative reward share cursor
+        │       │       ├── it should update the account's rewardPerTokenPaid
+        │       │       ├── it should clear the account rewards
+        │       │       ├── it should not forfeit emissions
+        │       │       ├── it should emit the ReferralEmissionsDeferred event
+        │       │       ├── it should emit the EmissionsClaimed event
+        │       │       ├── it should store the referral emissions
+        │       │       └── it should mint the remaining emissions to the recipient
+        │       └── when there is a penalty rate and a referral share
+        │           ├── when the penalty rate and referral share are known
+        │           │   ├── it should request a leaf voter settlement
+        │           │   ├── it should advance reward per token stored
+        │           │   ├── it should advance the cumulative reward share cursor
+        │           │   ├── it should update the account's rewardPerTokenPaid
+        │           │   ├── it should apply the penalty before the referral
+        │           │   ├── it should clear the account rewards
+        │           │   ├── it should emit the EarlyWithdrawPenalty event
+        │           │   ├── it should emit the ReferralEmissionsDeferred event
+        │           │   ├── it should emit the EmissionsClaimed event
+        │           │   ├── it should forfeit the penalty emissions
+        │           │   ├── it should store the referral emissions
+        │           │   └── it should mint the remaining emissions to the recipient
+        │           └── when the penalty rate and referral share vary
+        │               ├── it should request a leaf voter settlement
+        │               ├── it should advance reward per token stored
+        │               ├── it should advance the cumulative reward share cursor
+        │               ├── it should update the account's rewardPerTokenPaid
+        │               ├── it should apply the penalty before the referral
+        │               ├── it should clear the account rewards
+        │               ├── it should emit the EarlyWithdrawPenalty event
+        │               ├── it should emit the ReferralEmissionsDeferred event
+        │               ├── it should emit the EmissionsClaimed event
+        │               ├── it should forfeit the penalty emissions
+        │               ├── it should store the referral emissions
+        │               └── it should mint the remaining emissions to the recipient
+        ├── when the caller is the account and the gauge settles across multiple pulls
+        │   ├── it should fold only the first cumulative delta on the first settlement
+        │   ├── it should advance the cursor to the first cumulative on the first settlement
+        │   └── it should fold only the new cumulative increment on the second settlement
+        └── when the caller is an approved operator
+            ├── it should keep claim approval active
+            ├── it should request a leaf voter settlement
+            ├── it should advance reward per token stored
+            ├── it should advance the cumulative reward share cursor
+            ├── it should update the account's rewardPerTokenPaid
+            ├── it should apply the penalty before the referral
+            ├── it should clear the account rewards
+            ├── it should emit the EarlyWithdrawPenalty event
+            ├── it should emit the ReferralEmissionsDeferred event
+            ├── it should emit the EmissionsClaimed event
+            ├── it should clear the account deferred emissions
+            ├── it should emit the DeferredEmissionsClaimed event
+            ├── it should accumulate the referral emissions
+            ├── it should forfeit the penalty emissions
+            └── it should mint live and deferred LP emissions to the recipient

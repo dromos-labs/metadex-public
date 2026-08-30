@@ -1,0 +1,16 @@
+UnitVotingEscrow::BurnFees
+├── when the caller lacks the burn fees role
+│   └── it should revert with AccessControlUnauthorizedAccount
+├── when the amount is zero
+│   └── it should revert with ZeroAmount
+├── when the amount exceeds the accumulator staked amount
+│   └── it should revert with AmountExceedsAccumulator
+└── when a burn fees role holder burns from the accumulator
+    ├── it should reduce the accumulator staked amount by the amount
+    ├── it should decrement supply by the amount
+    ├── it should decrement the permanent stake balance by the amount
+    ├── it should call the token burn with the amount
+    ├── it should burn the matching voting power on the voter
+    ├── it should emit the Supply event
+    ├── it should emit the Burn event
+    └── it should propagate the debit into the latest global point

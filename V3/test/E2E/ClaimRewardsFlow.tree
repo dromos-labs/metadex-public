@@ -1,0 +1,13 @@
+E2EClaimRewardsFlow::ClaimRewards
+├── when mixed fee and incentive claims succeed
+│   ├── it should forward every claim through the root local messaging stack
+│   └── it should consume the outbound and inbound nonces
+├── when fee and incentive claims revert
+│   ├── it should bubble the exact fee revert from the leaf voter
+│   ├── it should roll back the nonces when the fee claim reverts
+│   ├── it should bubble the exact incentive revert after the fee manager recovers
+│   ├── it should roll back the nonces when the incentive claim reverts
+│   └── it should deliver the same nonce after both managers recover
+└── when the encoded claim rewards recipient is the zero address
+    ├── it should revert with ZeroAddress at the leaf voter
+    └── it should roll back the outbound and inbound nonces

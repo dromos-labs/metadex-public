@@ -1,0 +1,7 @@
+UnitMultiHybrid::ConvertIdleBalance
+├── when the relay is not the bound relay
+│   └── it should revert with WrongRelay
+├── when the target token is not configured
+│   └── it should revert with NotTargetToken
+└── when a keeper distributes the idle balance
+    └── it should notify the unaccounted target token balance

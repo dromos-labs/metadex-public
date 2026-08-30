@@ -1,0 +1,98 @@
+UnitMetarouterState::trackERC20
+├── when the token has already been tracked
+│   └── it should not append the token again
+└── when the token has not been tracked
+    ├── it should flag _token under the tracked namespace
+    └── it should append _token to the tracked erc20 array
+
+UnitMetarouterState::trackNft
+├── when the nft has already been tracked
+│   ├── it should not append the collection again
+│   └── it should not append the token id again
+└── when the nft has not been tracked
+    ├── it should flag the nft under its derived flag slot
+    ├── it should append _collection to the collection array
+    └── it should append _tokenId to the token id array
+
+UnitMetarouterState::untrackNft
+└── when a tracked nft is untracked
+    ├── it should clear the nft flag
+    └── it should leave the collection array length unchanged
+
+UnitMetarouterState::clearNftArrays
+└── when the custody arrays hold entries
+    ├── it should reset the collection array length
+    └── it should reset the token id array length
+
+UnitMetarouterState::setInFlightNft
+├── when an nft is already in flight
+│   └── it should revert with InFlightNftPresent
+└── when no nft is in flight
+    ├── it should store _collection in the in flight collection slot
+    └── it should store _tokenId in the in flight token id slot
+
+UnitMetarouterState::consumeInFlightNft
+├── when the in flight nft matches
+│   ├── it should clear the in flight collection slot
+│   └── it should clear the in flight token id slot
+├── when the collection differs from the in flight nft
+│   └── it should leave the in flight slots unchanged
+└── when the token id differs from the in flight nft
+    └── it should leave the in flight slots unchanged
+
+UnitMetarouterState::inFlightNft
+├── when no nft is in flight
+│   ├── it should return address zero as _collection
+│   └── it should return zero as _tokenId
+└── when an nft is in flight
+    ├── it should return the in flight collection as _collection
+    └── it should return the in flight token id as _tokenId
+
+UnitMetarouterState::resolvePositionId
+├── when the token id is nonzero
+│   └── it should return _tokenId as _resolved
+├── when the collection does not match the in flight collection
+│   └── it should revert with NoInFlightNft
+└── when the token id is the in flight sentinel
+    └── it should return the in flight token id as _resolved
+
+UnitMetarouterState::isNftInCustody
+├── when the nft flag is set
+│   └── it should return true as _inCustody
+└── when the nft flag is not set
+    └── it should return false as _inCustody
+
+UnitMetarouterState::trackedNftLength
+├── when the collection array is empty
+│   └── it should return zero as _length
+└── when the collection array holds entries
+    └── it should return the number of entries as _length
+
+UnitMetarouterState::trackedNftAt
+└── when the index is within the custody arrays
+    ├── it should return the collection at the index as _collection
+    └── it should return the token id at the index as _tokenId
+
+UnitMetarouterState::msgSender
+├── when the locker slot is empty
+│   └── it should return address zero as _sender
+└── when the locker slot holds the outer caller
+    └── it should return the outer caller as _sender
+
+UnitMetarouterState::availableNativeBalance
+├── when the balance is below the pre batch snapshot
+│   └── it should revert with PreBatchNativeBalanceSpent
+├── when the balance equals the pre batch snapshot
+│   └── it should return zero as _balance
+└── when the balance exceeds the pre batch snapshot
+    └── it should return the balance above the snapshot as _balance
+
+UnitMetarouterState::availableErc20Balance
+├── when the token is not the native mirror token
+│   └── it should return the full token balance as _balance
+├── when the token is the native mirror token
+│   └── it should return the batch native floored to the mirror decimals
+├── when a fractional pre batch remainder meets a whole raw unit batch value
+│   └── it should return the full batch amount
+└── when the batch native is below one raw mirror unit
+    └── it should return zero as _balance
