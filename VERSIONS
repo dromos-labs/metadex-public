@@ -6,8 +6,9 @@ Convention: each entry identifies a version by the commit hash of its
 source state; the entry is added in the immediately following commit,
 whose only change is this file.
 
-version:
-commit tag:
-first-distribution:
-converts-to-gpl:
+version: 1.0.0
+commit tag: 9034016643dff273b1dc15dc15a11e65c1e1cc00
+first-distribution: 2026-09-15
+converts-to-gpl: 2031-09-15
 deployments:
+    arc - deployment-addresses/arc.json
