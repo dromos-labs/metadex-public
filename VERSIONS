@@ -12,3 +12,10 @@ first-distribution: 2026-09-15
 converts-to-gpl: 2031-09-15
 deployments:
     arc - deployment-addresses/arc.json
+
+version: 1.0.1
+commit tag: b731a9756e7735c78a13e1885cb90239e41226b8
+first-distribution: 2026-10-02
+converts-to-gpl: 2031-10-02
+deployments:
+    none
