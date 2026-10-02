@@ -33,7 +33,7 @@ contract VelodromeMigration is Migration, IVelodromeMigration {
   uint256 public constant DISPATCH_GAS_LIMIT = 900_000;
 
   /// @dev VELO-to-TOKEN conversion ratio in pips
-  uint256 internal constant _RATIO_PIPS = 55_000;
+  uint256 internal constant _RATIO_PIPS = 44_000;
 
   /// @dev Gas limit for querying a reward contract chain identifier
   uint256 internal constant _CHAIN_ID_CALL_GAS_LIMIT = 50_000;
