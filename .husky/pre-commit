@@ -1,0 +1,2 @@
+# Compile contracts and scripts (skipping tests), then lint the Solidity lines changed by this commit.
+yarn build:skip-tests -q && yarn lint:v3:changed

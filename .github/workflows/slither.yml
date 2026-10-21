@@ -1,0 +1,28 @@
+name: slither
+
+on: [push, workflow_dispatch]
+
+jobs:
+  analyze:
+    name: Slither
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: install-tools
+        uses: ./.github/workflows/install-tools
+
+      - name: Build V3 sources
+        run: forge build --build-info V3/src --force
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.4.2
+        id: slither
+        with:
+          target: "V3/src"
+          slither-version: "0.11.5"
+          slither-config: slither.config.json
+          ignore-compile: true
+          fail-on: config
+

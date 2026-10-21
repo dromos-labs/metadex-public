@@ -1,0 +1,52 @@
+name: contract-size
+
+on: [push, workflow_dispatch]
+
+concurrency:
+  group: ${{github.workflow}}-${{github.ref}}
+  cancel-in-progress: true
+
+env:
+  FOUNDRY_SRC: V3/src
+
+jobs:
+  contract-size:
+    name: Check Contract Sizes
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: install-tools
+        uses: ./.github/workflows/install-tools
+
+      # Fails when any contract exceeds the EIP-170 runtime size limit (24,576 bytes)
+      # or the EIP-3860 initcode size limit (49,152 bytes). Note: EIP-3860 counts the
+      # constructor arguments in the initcode, while forge's measurement excludes
+      # them, so the initcode check here is slightly permissive; the exact limit is
+      # only enforced at deployment.
+      # Exclusions are keyed by "path/to/File.sol:Contract" in .github/contract-size-exclusions.json.
+      - name: Check contract sizes
+        shell: bash
+        run: |
+          if forge build V3/src --sizes; then exit 0; fi
+          forge build V3/src --sizes --json > sizes.json 2>/dev/null || true
+          offenders=$(jq -r --slurpfile excluded .github/contract-size-exclusions.json \
+            --slurpfile cache cache/solidity-files-cache.json '
+            ($cache[0].files | to_entries | map(.key as $src | (.value.artifacts | keys[]) | {name: ., src: $src})) as $map |
+            to_entries[]
+            | (.key | capture("^(?<name>\\S+)(?: \\((?<path>.*)\\))?$")) as $contract
+            | (if $contract.path then ["\($contract.path):\($contract.name)"]
+               else [$map[] | select(.name == $contract.name) | "\(.src):\(.name)"] end) as $ids
+            | select(($ids | length) == 0 or any($ids[]; . as $id | $excluded[0] | has($id) | not))
+            | .key as $name | .value
+            | (select(.runtime_margin < 0) | "  \($name): runtime size \(.runtime_size) bytes, \(-.runtime_margin) bytes over the EIP-170 limit"),
+              (select(.init_margin < 0) | "  \($name): initcode size \(.init_size) bytes, \(-.init_margin) bytes over the EIP-3860 limit")
+          ' sizes.json)
+          if [ -z "$offenders" ]; then
+            echo "Only the excluded contracts (.github/contract-size-exclusions.json) are above the limit; passing."
+            exit 0
+          fi
+          echo "Contracts above the size limit:"
+          echo "$offenders"
+          exit 1
