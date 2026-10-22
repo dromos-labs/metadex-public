@@ -6,8 +6,65 @@ Convention: each entry identifies a version by the commit hash of its
 source state; the entry is added in the immediately following commit,
 whose only change is this file.
 
-version:
-commit tag:
-first-distribution: 2026-08-DD (public source publication)
-converts-to-gpl: 2031-08-DD
-deployments: (none — provisional)
+version: 1.0.0
+commit tag: 9034016643dff273b1dc15dc15a11e65c1e1cc00
+first-distribution: 2026-09-15
+converts-to-gpl: 2031-09-15
+deployments:
+    arc - deployment-addresses/arclitelaunch-arc.json
+
+version: 1.0.1
+commit tag: b731a9756e7735c78a13e1885cb90239e41226b8
+first-distribution: 2026-10-02
+converts-to-gpl: 2031-10-02
+deployments:
+    none
+
+version: 1.1.0
+commit tag: 79c8d5b62b7558c7fd58261523e517c588c0378d
+first-distribution: 2026-10-21
+converts-to-gpl: 2031-10-21
+deployments:
+    arbitrum - deployment-addresses/gaugestack-arbitrum.json
+    arbitrum - deployment-addresses/leaf-arbitrum.json
+    arbitrum - deployment-addresses/metarouter-arbitrum.json
+    arbitrum - deployment-addresses/pools-arbitrum.json
+    arbitrum - deployment-addresses/relayleafmoduledeployer-arbitrum.json
+    arc - deployment-addresses/gaugestack-arc.json
+    arc - deployment-addresses/leaf-arc.json
+    arc - deployment-addresses/metarouter-arc.json
+    arc - deployment-addresses/poolmodules-arc.json
+    arc - deployment-addresses/pools-arc.json
+    arc - deployment-addresses/relayleafmoduledeployer-arc.json
+    base - deployment-addresses/gaugestack-base.json
+    base - deployment-addresses/leaf-base.json
+    base - deployment-addresses/metarouter-base.json
+    base - deployment-addresses/migration-base.json
+    base - deployment-addresses/pools-base.json
+    base - deployment-addresses/registerleafchains-base.json
+    base - deployment-addresses/registerrootchain-base.json
+    base - deployment-addresses/relayfactoryregistry-base.json
+    base - deployment-addresses/relaystack-base.json
+    base - deployment-addresses/root-base.json
+    base - deployment-addresses/rootadapters-base.json
+    ethereum - deployment-addresses/gaugestack-ethereum.json
+    ethereum - deployment-addresses/leaf-ethereum.json
+    ethereum - deployment-addresses/metarouter-ethereum.json
+    ethereum - deployment-addresses/pools-ethereum.json
+    ethereum - deployment-addresses/relayleafmoduledeployer-ethereum.json
+    ink - deployment-addresses/gaugestack-ink.json
+    ink - deployment-addresses/leaf-ink.json
+    ink - deployment-addresses/metarouter-ink.json
+    ink - deployment-addresses/pools-ink.json
+    ink - deployment-addresses/relayleafmoduledeployer-ink.json
+    optimism - deployment-addresses/gaugestack-optimism.json
+    optimism - deployment-addresses/leaf-optimism.json
+    optimism - deployment-addresses/metarouter-optimism.json
+    optimism - deployment-addresses/migration-optimism.json
+    optimism - deployment-addresses/pools-optimism.json
+    optimism - deployment-addresses/relayleafmoduledeployer-optimism.json
+    robinhood - deployment-addresses/gaugestack-robinhood.json
+    robinhood - deployment-addresses/leaf-robinhood.json
+    robinhood - deployment-addresses/metarouter-robinhood.json
+    robinhood - deployment-addresses/pools-robinhood.json
+    robinhood - deployment-addresses/relayleafmoduledeployer-robinhood.json
