@@ -85,14 +85,15 @@ library StakeRelayLib {
    *      relay (cleared when the sAERO returns); the operator grant goes to the VPM, which the escrow vouches for
    *      through `isAuthorizedVPM` and which is revoked after the deposit.
    *
-   *      Transferring the sAERO to the router clears the user's approval for that token. To deposit from the same
-   *      sAERO more than once in a batch, approve the router with `setApprovalForAll`. Otherwise, approve the token
-   *      again before each separate deposit transaction.
+   *      Transferring the sAERO to the router clears the user's approval for that token. Approve the token again
+   *      before each separate deposit transaction, or approve the router with `setApprovalForAll`. A deposit moves
+   *      the whole stake, so a batch deposits each sAERO once.
    *
-   *      Caller preconditions, surfaced as relay-side reverts: the sAERO needs at least `_amount` of idle chain0
-   *      weight (set by a prior vote outside the router), and a permissioned relay must have allow-listed the router
-   *      and selected recipient. The custody round-trip also clears the sAERO's delegation and blocks same-block
-   *      re-delegation (escrow transfers checkpoint the delegator), so delegators must re-delegate after.
+   *      Caller preconditions, surfaced as relay-side reverts: `amount` must be `type(uint256).max`, and the sAERO's
+   *      whole stake must be idle on chain0 (set by a prior vote outside the router). A permissioned relay must also
+   *      have allow-listed the router and selected recipient. The custody round-trip also clears the sAERO's
+   *      delegation and blocks same-block re-delegation (escrow transfers checkpoint the delegator), so delegators
+   *      must re-delegate after.
    * @param _input ABI-encoded `(uint256 tokenId, uint256 amount, address relay, address recipient)`, where token id zero
    *        uses the in-flight sAERO.
    * @param _escrow VotingEscrow the sAERO belongs to; non-zero, the router gates the command on `IS_ROOT`.

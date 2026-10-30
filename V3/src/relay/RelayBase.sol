@@ -106,10 +106,16 @@ abstract contract RelayBase is OwnableRoles, ReentrancyGuardTransient, RelayRole
   IRelayToken public yieldToken;
 
   /// @inheritdoc IRelay
-  mapping(uint256 id => PendingDeposit deposit) public pendingDeposits;
+  mapping(uint256 id => Deposit deposit) public deposits;
 
   /// @inheritdoc IRelay
   DenseQueue.Queue public depositList;
+
+  /// @inheritdoc IRelay
+  mapping(address recipient => uint256[] ids) public depositIdsOf;
+
+  /// @dev One-based position of each listed deposit id in its recipient's list; zero when unlisted.
+  mapping(uint256 id => uint256 position) internal _depositPositions;
 
   /// @inheritdoc IRelay
   uint256 public totalBacking;
@@ -240,7 +246,7 @@ abstract contract RelayBase is OwnableRoles, ReentrancyGuardTransient, RelayRole
     // setUp returns the seed stake, the only time totalBacking is written from an outside reading;
     // from here on it only moves through the Relay's own paths.
     (uint256 _seed, address _principalToken, address _yieldToken) =
-      RelayInitLib.setUp(_params, _relayConfig, _rewardTokenSet, _rakes);
+      RelayInitLib.setUp(_params, _relayConfig, _rewardTokenSet, _rakes, deposits);
     totalBacking = _seed;
 
     // Bind the satellites before anything mints: `onRelayTokenTransfer` authenticates its caller
@@ -321,14 +327,13 @@ abstract contract RelayBase is OwnableRoles, ReentrancyGuardTransient, RelayRole
   // slither-disable-start reentrancy-no-eth
   /// @inheritdoc IRelay
   function processPending(uint256 _maxEntries) external nonReentrant onlyRoles(KEEPER) {
-    totalBacking = QueueLib.processDeposits(depositList, pendingDeposits, _depositContext(_maxEntries, 0)).totalBacking;
+    totalBacking = QueueLib.processDeposits(depositList, deposits, _depositContext(_maxEntries, 0)).totalBacking;
   }
 
   /// @inheritdoc IRelay
   function processOverduePending(uint256[] calldata _ids) external nonReentrant {
-    QueueLib.DepositResult memory _result = QueueLib.processOverdueDeposits(
-      depositList, pendingDeposits, _ids, _depositContext(0, _relayConfig.keeperWindow)
-    );
+    QueueLib.DepositResult memory _result =
+      QueueLib.processOverdueDeposits(depositList, deposits, _ids, _depositContext(0, _relayConfig.keeperWindow));
     totalBacking = _result.totalBacking;
   }
 
@@ -339,23 +344,24 @@ abstract contract RelayBase is OwnableRoles, ReentrancyGuardTransient, RelayRole
   /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  --@--@--(_)--@--@--  */
 
   /// @inheritdoc IRelay
-  function registerOnWithdrawQueue(uint256 _shares, uint256 _destination) external nonReentrant {
+  function registerOnWithdrawQueue(uint256 _depositId, uint256 _destination) external nonReentrant {
     // The delegatecall preserves `msg.sender` as the registering holder.
-    QueueLib.registerExit(
+    pendingWithdrawalShares += QueueLib.registerExit(
       withdrawQueue,
       _withdrawals,
       escrowedShares,
+      deposits,
+      depositIdsOf,
+      _depositPositions,
       QueueLib.RegisterExitContext({
         principalToken: principalToken,
         yieldToken: yieldToken,
-        shares: _shares,
+        depositId: _depositId,
         destination: _destination,
         relayTokenId: _relayConfig.tokenId,
-        minWithdrawal: _relayConfig.minWithdrawal,
         closed: closed
       })
     );
-    pendingWithdrawalShares += _shares;
   }
 
   /// @inheritdoc IRelay
@@ -442,8 +448,8 @@ abstract contract RelayBase is OwnableRoles, ReentrancyGuardTransient, RelayRole
   }
 
   /// @inheritdoc IRelay
-  /// @dev Owner-gated, unlike the KEEPER-gated VPM rotation: no on-chain registry bounds the valid
-  ///      Governors, so the choice sits with the seat that owns the votes.
+  /// @dev Owner-gated like VPM rotation. No on-chain registry bounds valid Governors,
+  ///      so the choice sits with the seat that owns the votes.
   function setGovernor(IGovernor _governor, IRelayVoteAdapter _voteAdapter) external onlyOwner {
     governor = _governor;
     voteAdapter = _voteAdapter;
@@ -456,9 +462,9 @@ abstract contract RelayBase is OwnableRoles, ReentrancyGuardTransient, RelayRole
 
   /// @inheritdoc IRelay
   /// @dev The escrow's approval holds one address, so pointing it at the new module takes the
-  ///      spending right off the old one in the same call. The keeper picks which authorized
+  ///      spending right off the old one in the same call. The owner picks which authorized
   ///      module this Relay uses, never whether a module is authorized at all.
-  function setVoterPaymentsModule(IVoterPaymentsModule _vpm) external nonReentrant onlyRoles(KEEPER) {
+  function setVoterPaymentsModule(IVoterPaymentsModule _vpm) external nonReentrant onlyOwner {
     if (vpm == _vpm) return;
     vpm = _vpm;
     RelayConfigLib.rotateModule(VOTING_ESCROW, address(_vpm), _relayConfig.tokenId);
@@ -749,19 +755,27 @@ abstract contract RelayBase is OwnableRoles, ReentrancyGuardTransient, RelayRole
     AllocationLib.extendLock(VOTING_ESCROW, _relayConfig.tokenId, _relayConfig.lockWeeks);
   }
 
-  /// @notice Forces a holder's free position into the withdraw queue, to be returned to a fresh
+  /// @notice Forces one deposit's whole position into the withdraw queue, to be returned to a fresh
   ///         sAERO at the next drain.
-  /// @param _holder Holder being ejected.
-  /// @return _free Free shares forced into the queue (zero when the holder held none).
-  function _ejectHolder(address _holder) internal returns (uint256 _free) {
-    _free =
-      QueueLib.ejectHolder(withdrawQueue, _withdrawals, escrowedShares, principalToken, yieldToken, _holder, closed);
-    pendingWithdrawalShares += _free;
+  /// @param _depositId Deposit being ejected.
+  function _ejectDeposit(uint256 _depositId) internal {
+    pendingWithdrawalShares += QueueLib.ejectDeposit(
+      withdrawQueue,
+      _withdrawals,
+      escrowedShares,
+      deposits,
+      depositIdsOf,
+      _depositPositions,
+      principalToken,
+      yieldToken,
+      _depositId,
+      closed
+    );
   }
 
   /// @notice Guards and registers an async deposit for `_recipient`.
-  /// @param _tokenId Source sAERO whose weight enters the Relay.
-  /// @param _amount Staking weight pulled from the source sAERO.
+  /// @param _tokenId Source sAERO whose whole stake enters the Relay.
+  /// @param _amount Must be `type(uint256).max`, the whole-stake sentinel.
   /// @param _recipient Address the shares mint to at admission.
   function _requestDeposit(uint256 _tokenId, uint256 _amount, address _recipient) internal {
     // Tier seam: on Protocol tiers the share recipient must be allow-listed.
@@ -771,7 +785,9 @@ abstract contract RelayBase is OwnableRoles, ReentrancyGuardTransient, RelayRole
     // parks on chain0 and stays out of totalBacking until the drain admits it.
     QueueLib.registerDeposit(
       depositList,
-      pendingDeposits,
+      deposits,
+      depositIdsOf,
+      _depositPositions,
       VOTING_ESCROW,
       vpm,
       QueueLib.RegisterDepositContext({

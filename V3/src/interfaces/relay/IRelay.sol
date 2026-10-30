@@ -37,8 +37,6 @@ interface IRelay {
   /// @param tokenId The Relay's own sAERO that aggregates all pooled weight.
   /// @param minDeposit Minimum requestable deposit (dust guard).
   /// @param keeperWindow Time the keeper has to process a deposit before it becomes processable permissionlessly.
-  /// @param minWithdrawal Minimum shares per withdraw registration (dust guard). A partial exit must also
-  ///        leave at least this many free shares behind. The whole free position may always leave in one go.
   /// @param entrypointTimelock Exit-window delay (seconds) of every timelocked change: an L2 entrypoint
   ///        attachment, a leaf recipient, an operator, an ICA module keeper or leaf config and a rake raise; non-zero.
   /// @param lockWeeks Lock horizon in weeks re-extended on each allocation; zero means a permanent stake.
@@ -47,13 +45,12 @@ interface IRelay {
   /// @param name Relay display name, also the stem of the satellite-token names at creation;
   ///        mutable via `setName`.
   /// @param symbol Stem of the satellite-token symbols; no setter.
-  /// @dev `minDeposit` is held to `MIN_STAKE_AMOUNT`, the same bar the seed stake clears.
-  ///      `minWithdrawal` only has to be non-zero.
+  /// @dev `minDeposit` is held to `MIN_STAKE_AMOUNT`, the same bar the seed stake clears. There is no withdrawal
+  ///      floor: an exit always takes one deposit whole.
   struct RelayConfig {
     uint256 tokenId;
     uint256 minDeposit;
     uint256 keeperWindow;
-    uint256 minWithdrawal;
     uint256 entrypointTimelock;
     uint48 lockWeeks;
     uint48 evacuationWindow;
@@ -107,18 +104,22 @@ interface IRelay {
     RelayConfig config;
   }
 
-  /// @notice One entry of the deposit queue: a queued async deposit that waits for processing.
-  ///         Processing deletes the entry, which refunds its storage and marks the id consumed.
-  /// @param recipient Address the shares mint to, named at request.
-  /// @param requestedAt Request timestamp; after `keeperWindow` anyone can process the entry. Zero
-  ///        marks a consumed entry, because a live one always stamps its request's block timestamp.
-  /// @param tokenId Depositing sAERO the weight came from; only the `DepositProcessed` event reads it.
-  /// @param amount Staking weight moved into the Relay sAERO and held on chain0.
+  /// @notice One deposit's pending request or processed share record, keyed by its queue id.
+  /// @param recipient Address the shares mint to, named at request; zero once the record is consumed.
+  /// @param requestedAt Request timestamp while pending. Zero once processed or consumed.
+  /// @param tokenId Depositing sAERO the weight came from; zero for the bootstrap record at id zero.
+  /// @param amount Net staking weight while pending, minted shares once processed. Its unit depends on
+  ///        `requestedAt`; see below.
   /// @dev The queue stores no link to the next entry. Ids run in sequence from one and are never
   ///      reused, so every id up to `tail` was issued and the next id is always this id plus one.
-  ///      Deleting a consumed entry keeps that derivation intact — the id holds its place in the
-  ///      walk order — but a path that reused an id would break it and must store an explicit link.
-  struct PendingDeposit {
+  ///      Processing keeps the entry with a zero timestamp until its whole share record exits.
+  ///      A path that reused an id would break the queue walk and must store an explicit link.
+  ///      `amount` changes unit when the entry is processed. While `requestedAt` is non-zero it is net
+  ///      staking weight, after any VPM fee. Once `requestedAt` is zero it is the record's share count,
+  ///      which differs from the weight by the share price, so a reader must not treat it as weight. The
+  ///      record keeps no weight: `DepositRequested` and `DepositProcessed` carry the net weight, and an
+  ///      exit prices the shares against `totalBacking` and the principal supply at drain time.
+  struct Deposit {
     address recipient;
     uint48 requestedAt;
     uint128 tokenId;
@@ -202,10 +203,9 @@ interface IRelay {
   /// @param allowed True when permitted, false when revoked.
   event AllowListSet(address indexed account, bool allowed);
 
-  /// @notice Emitted when the owner hard-kicks an account: de-listed, and its free position forced
-  ///         into the withdraw queue.
-  /// @param account Account that was kicked.
-  /// @param shares Free shares forced into the withdraw queue (zero when it held none).
+  /// @notice Emitted when the owner ejects one processed deposit into the withdraw queue.
+  /// @param account Holder of the ejected deposit.
+  /// @param shares Shares of the ejected deposit.
   event Kicked(address indexed account, uint256 shares);
 
   /// @notice Emitted on the one-way promotion of a Protocol L1 Relay to Protocol L2.
@@ -255,6 +255,21 @@ interface IRelay {
   /// @param amount Staking weight admitted into the live backing.
   /// @param sharesMinted Shares minted at the current ratio.
   event DepositProcessed(uint256 indexed tokenId, address indexed recipient, uint256 amount, uint256 sharesMinted);
+
+  /// @notice Emitted by the Relay when a processed deposit creates a whole-position share receipt.
+  ///         Id zero is the bootstrap receipt created at initialization.
+  /// @param relay Relay that owns the receipt, also the event emitter.
+  /// @param depositId Id of the deposit or bootstrap seed.
+  /// @param holder Address holding the corresponding shares.
+  /// @param shares Shares represented by the receipt.
+  event DepositRecorded(address indexed relay, uint256 indexed depositId, address indexed holder, uint256 shares);
+
+  /// @notice Emitted by the Relay when an exit or kick consumes a share receipt.
+  /// @param relay Relay that owned the receipt, also the event emitter.
+  /// @param depositId Id of the consumed deposit or bootstrap seed.
+  /// @param holder Address whose shares enter the withdrawal queue.
+  /// @param shares Shares represented by the consumed receipt.
+  event DepositConsumed(address indexed relay, uint256 indexed depositId, address indexed holder, uint256 shares);
 
   /// @notice Emitted when a holder reserves an exit on the withdraw queue.
   /// @param holder Owner of the escrowed shares.
@@ -415,7 +430,7 @@ interface IRelay {
   /*                                                  CUSTOM ERRORS                                     __|__         */
   /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  --@--@--(_)--@--@--  */
 
-  /// @notice Thrown when the caller is not authorized over the source sAERO through the VPM.
+  /// @notice Thrown when the caller is not authorized over the source sAERO.
   error NotAuthorized();
 
   /// @notice Thrown when the named VoterPaymentsModule is not one the escrow authorizes.
@@ -437,8 +452,14 @@ interface IRelay {
   /// @notice Thrown when a requested deposit would mint zero shares at the current share ratio.
   error ZeroShares();
 
-  /// @notice Thrown when a registered withdrawal is zero, is below the configured minimum, or would leave a
-  ///         free remainder below it. The holder's whole free position is always accepted.
+  /// @notice Thrown when a deposit names an amount instead of `type(uint256).max`, the whole-stake sentinel.
+  error NotFullStake();
+
+  /// @notice Thrown when the selected VPM leaves weight on the source after a deposit.
+  /// @param tokenId Source sAERO.
+  error SourceNotDrained(uint256 tokenId);
+
+  /// @notice Reserved for compatibility; withdrawals now consume whole deposit receipts.
   error BelowMinimumWithdrawal();
 
   /// @notice Thrown when processing the deposit queue with nothing pending.
@@ -459,10 +480,15 @@ interface IRelay {
   /// @notice Thrown when a zero address is supplied where a non-zero one is required.
   error ZeroAddress();
 
-  /// @notice Thrown at construction when `minDeposit` is below `MIN_STAKE_AMOUNT`, or when
-  ///         `minWithdrawal` is zero. A zero floor admits a zero-amount entry, and a zero-share exit
-  ///         permanently stalls the withdraw FIFO; a dust deposit floor bounds no rounding loss.
+  /// @notice Thrown at construction when `minDeposit` is below `MIN_STAKE_AMOUNT`: a dust deposit floor bounds no
+  ///         rounding loss.
   error QueueFloorTooSmall();
+
+  /// @notice Thrown when an exit names a deposit whose shares belong to someone else.
+  error NotDepositHolder();
+
+  /// @notice Thrown when an exit names a deposit with no processed, unconsumed share record.
+  error DepositRecordNotFound();
 
   /// @notice Thrown when registering a withdrawal for more shares than the caller has free
   ///         (un-escrowed). An open Relay checks both satellites; a closed one checks the
@@ -668,14 +694,14 @@ interface IRelay {
   /// @notice Requests an async deposit from the caller's sAERO, crediting the eventual shares to
   ///         the sAERO's current owner. No shares mint here: the entry waits on the deposit queue
   ///         until the keeper processes it, or anyone after it ages past `keeperWindow`.
-  /// @param _tokenId Source sAERO whose weight enters the Relay.
-  /// @param _amount Staking weight pulled from the source sAERO; the Relay records the net weight
-  ///        after the VPM protocol fee.
+  /// @param _tokenId Source sAERO whose whole live stake enters the Relay. The Relay records the net weight
+  ///        after any VPM fee.
+  /// @param _amount Must be `type(uint256).max`: the whole live stake enters. Any other value reverts.
   function requestDeposit(uint256 _tokenId, uint256 _amount) external;
 
   /// @notice Requests an async deposit from the caller's sAERO, naming the share recipient.
-  /// @param _tokenId Source sAERO whose weight enters the Relay.
-  /// @param _amount Staking weight pulled from the source sAERO (gross of the VPM protocol fee).
+  /// @param _tokenId Source sAERO whose whole live stake enters the Relay.
+  /// @param _amount Must be `type(uint256).max`: the whole live stake enters. Any other value reverts.
   /// @param _recipient Address the shares mint to at admission.
   function requestDeposit(uint256 _tokenId, uint256 _amount, address _recipient) external;
 
@@ -694,9 +720,10 @@ interface IRelay {
   ///      still inside the keeper window.
   function processOverduePending(uint256[] calldata _ids) external;
 
-  /// @notice Registers an exit: escrows `_shares` into the FIFO withdraw queue, to be settled later
-  ///         against the idle chain0 weight. Permissionless; cannot be cancelled.
-  /// @param _shares Shares to escrow and burn at drain.
+  /// @notice Registers the exit of one of the caller's deposits: escrows all of its shares into the FIFO
+  ///         withdraw queue, to be settled later against the idle chain0 weight. Cannot be cancelled.
+  /// @param _depositId Deposit to exit, as `DepositRequested` named it; zero is the bootstrap seed.
+  ///        Its Relay-held share record leaves whole, so no exit is partial.
   /// @param _destination Existing sAERO the weight is sent to, or MINT_SENTINEL for a freshly minted
   ///        one. Read at settlement rather than now: the weight lands on that sAERO, whoever owns it
   ///        then. `processWithdrawals` says when a fresh sAERO replaces it. `InvalidDestination` lists
@@ -705,7 +732,7 @@ interface IRelay {
   ///      place. On a closed Relay the free-share cover is asked of the principal alone, so a
   ///      holder that sold its yield side can still leave; the drain mirrors this and burns only
   ///      the principal past closure, leaving the yield token its claim on the reward tail.
-  function registerOnWithdrawQueue(uint256 _shares, uint256 _destination) external;
+  function registerOnWithdrawQueue(uint256 _depositId, uint256 _destination) external;
 
   /// @notice Drains up to `_maxEntries` queued exits against the free chain0 weight, read live from
   ///         the Voter. Permissionless: the caller picks no route.
@@ -1049,17 +1076,31 @@ interface IRelay {
   /// @return _yieldToken The yield token clone.
   function yieldToken() external view returns (IRelayToken _yieldToken);
 
-  /// @notice Deposit-queue entries by id: async deposits that wait for processing. A consumed
-  ///         entry is deleted, so it reads back as all zeroes; the history lives in the events.
+  /// @notice Deposit entries by id: a pending request becomes a share record on processing, then is deleted on exit.
+  ///         Id zero records the bootstrap PT. A deleted entry reads back as all zeroes.
+  /// @dev Check `_requestedAt` before reading `_amount`, which has two units. A non-zero `_requestedAt` is a
+  ///      pending request and `_amount` is net staking weight. A zero `_requestedAt` with a non-zero
+  ///      `_recipient` is a processed record and `_amount` is shares. An all-zero entry was never issued, was
+  ///      consumed by an exit or kick, or minted zero shares. See `Deposit`.
   /// @param _id Deposit-queue id to read.
   /// @return _recipient Address the shares mint to, named at request.
-  /// @return _requestedAt Timestamp the deposit was requested; zero once the entry is consumed.
-  /// @return _tokenId Source sAERO of the pending deposit.
-  /// @return _amount Staking weight queued by the deposit.
-  function pendingDeposits(uint256 _id)
+  /// @return _requestedAt Request timestamp while pending; zero once processed or consumed.
+  /// @return _tokenId Source sAERO of the deposit, zero for the bootstrap record.
+  /// @return _amount Net staking weight while pending, or the record's shares once processed.
+  function deposits(uint256 _id)
     external
     view
     returns (address _recipient, uint48 _requestedAt, uint128 _tokenId, uint128 _amount);
+
+  /// @notice One live deposit id whose shares go to `_recipient`: a pending request or an open receipt.
+  /// @dev An exit or a kick removes the id. The last id moves into its place, so the order can change.
+  ///      Read `deposits(id)` to tell a pending deposit from an open one. A deposit that mints zero shares
+  ///      stays listed with an empty record. The bootstrap record (id zero) is not listed. A position past
+  ///      the end reverts without data.
+  /// @param _recipient Share recipient named at request.
+  /// @param _index Position in the recipient's list.
+  /// @return _id Deposit id at that position.
+  function depositIdsOf(address _recipient, uint256 _index) external view returns (uint256 _id);
 
   /// @notice Bookkeeping of the deposit queue (see `DenseQueue.Queue`).
   /// @return _head Earliest id the walk must still visit (possibly a consumed entry), or zero.

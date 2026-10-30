@@ -48,6 +48,7 @@ library RelayInitLib {
   /// @param _relayConfig The Relay's config storage the validated `_params.config` is written to.
   /// @param _rewardTokenSet Reward-token registry, seeded with `_params.rewardToken` when non-zero.
   /// @param _rakes The rake state the genesis rates are written to.
+  /// @param _deposits Deposit records; id zero holds the bootstrap shares.
   /// @return _seed The seed stake backing the bootstrap shares (the sAERO's staked amount).
   /// @return _principalToken The freshly cloned principal token (PT); soulbound.
   /// @return _yieldToken The freshly cloned yield token (YT); transferable only when
@@ -62,7 +63,8 @@ library RelayInitLib {
     IRelay.InitParams memory _params,
     IRelay.RelayConfig storage _relayConfig,
     EnumerableSet.AddressSet storage _rewardTokenSet,
-    IRelay.RakeState storage _rakes
+    IRelay.RakeState storage _rakes,
+    mapping(uint256 id => IRelay.Deposit deposit) storage _deposits
   ) external returns (uint256 _seed, address _principalToken, address _yieldToken) {
     SetUpContext memory _ctx = _contextOf(address(_params.vpm));
     if (
@@ -79,13 +81,9 @@ library RelayInitLib {
     // an unauthorized module, so an unvetted one would revert every deposit and every drain.
     if (!_ctx.votingEscrow.isAuthorizedVPM(_ctx.vpm)) revert IRelay.ModuleNotAuthorized();
     IRelay.RelayConfig memory _config = _params.config;
-    // A zero floor lets a zero-share exit into a FIFO whose entries cannot be cancelled: the drain
-    // reverts on it forever (the module refuses to move nothing) and `close` reads it as covered,
-    // so one transaction from anyone would end every exit. The deposit floor clears a higher bar: it
-    // is the denominator of the rounding loss a deposit can take, so a dust value bounds nothing. The
-    // withdrawal floor is denominated in shares, whose price only rises, and the supply floor is the
-    // seed rather than this value, so above zero it stays the deployer's call.
-    if (_config.minDeposit < MIN_STAKE_AMOUNT || _config.minWithdrawal == 0) revert IRelay.QueueFloorTooSmall();
+    // The deposit floor is the denominator of the rounding loss a deposit can take, so a dust value bounds
+    // nothing. There is no withdrawal floor: an exit takes one deposit's whole record, never zero shares.
+    if (_config.minDeposit < MIN_STAKE_AMOUNT) revert IRelay.QueueFloorTooSmall();
     // With a zero window anyone could close a working Relay as soon as an exit queues.
     if (_config.evacuationWindow == 0) revert IRelay.InvalidEvacuationWindow();
     // A zero keeper window would make the overdue drain permissionless from the first block.
@@ -99,7 +97,6 @@ library RelayInitLib {
     _relayConfig.tokenId = _config.tokenId;
     _relayConfig.minDeposit = _config.minDeposit;
     _relayConfig.keeperWindow = _config.keeperWindow;
-    _relayConfig.minWithdrawal = _config.minWithdrawal;
     _relayConfig.entrypointTimelock = _config.entrypointTimelock;
     _relayConfig.lockWeeks = _config.lockWeeks;
     _relayConfig.evacuationWindow = _config.evacuationWindow;
@@ -129,7 +126,9 @@ library RelayInitLib {
     _ctx.votingEscrow.approve(_ctx.vpm, _config.tokenId);
 
     _seed = uint256(_seedBalance.amount);
-
+    _deposits[0] =
+      IRelay.Deposit({recipient: _params.bootstrapOwner, requestedAt: 0, tokenId: 0, amount: uint128(_seed)});
+    emit IRelay.DepositRecorded(address(this), 0, _params.bootstrapOwner, _seed);
     _principalToken = Clones.clone(_ctx.principalTokenImplementation);
     IRelayToken(_principalToken)
       .initialize(string.concat(_config.name, ' PT'), string.concat(_config.symbol, '-PT'), false);

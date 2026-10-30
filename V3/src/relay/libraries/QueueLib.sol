@@ -99,8 +99,7 @@ library QueueLib {
   ///         legacy (non-IR) compiler pipeline.
   /// @param tokenId Source sAERO whose weight enters the Relay.
   /// @param recipient Address the eventual shares mint to, named by the requester.
-  /// @param amount Staking weight pulled from the source sAERO, before the VPM protocol fee is
-  ///        subtracted.
+  /// @param amount Must be `type(uint256).max`, the whole-stake sentinel.
   /// @param relayTokenId The Relay's sAERO the weight lands in.
   /// @param minDeposit Relay-level dust floor the net amount is checked against.
   /// @param totalSupply Current share supply, used by the zero-share guard.
@@ -127,19 +126,17 @@ library QueueLib {
   /// @param principalToken The PT satellite clone, whose free balance must cover the escrow.
   /// @param yieldToken The YT satellite clone, whose free balance must cover the escrow while the
   ///        Relay is open. A closed Relay drops this side of the cover; see `registerExit`.
-  /// @param shares Shares to escrow and burn at drain.
+  /// @param depositId Deposit whose whole position exits.
   /// @param destination sAERO the weight is sent to at settlement, or the mint sentinel for a fresh
   ///        one. Only the Relay sAERO is rejected; see `registerExit`.
   /// @param relayTokenId The Relay's own sAERO, banned as a destination.
-  /// @param minWithdrawal Relay-level dust floor the exit is checked against.
   /// @param closed Whether the Relay is permanently closed, which opens the principal-only exit.
   struct RegisterExitContext {
     IRelayToken principalToken;
     IRelayToken yieldToken;
-    uint256 shares;
+    uint256 depositId;
     uint256 destination;
     uint256 relayTokenId;
-    uint256 minWithdrawal;
     bool closed;
   }
 
@@ -150,11 +147,13 @@ library QueueLib {
   ///         `rebalanceUnderlying` mint convention (and RelayBase's public MINT_SENTINEL).
   uint256 internal constant _MINT_SENTINEL = type(uint256).max;
 
-  /// @notice Register an async deposit: guard the request, move the requested weight into the
+  /// @notice Register an async deposit: guard the request, move the source's entire stake into the
   ///         Relay sAERO through the VPM, guard the net amount and append it to the deposit queue.
   ///         The caller runs the tier check (allow list).
   /// @param _list Deposit-queue bookkeeping (the Relay's storage).
   /// @param _deposits Deposit-queue entries by id.
+  /// @param _depositIdsOf Deposit ids by share recipient, appended with the new id.
+  /// @param _depositPositions One-based position of each listed id, set for the new id.
   /// @param _votingEscrow VotingEscrow, read for the caller's authorization and the net-amount
   ///        delta around the VPM move.
   /// @param _vpm VoterPaymentsModule the weight moves in through (called as the Relay).
@@ -164,7 +163,9 @@ library QueueLib {
   ///      rule is not checked here; VE enforces it inside `rebalanceUnderlying`.
   function registerDeposit(
     DenseQueue.Queue storage _list,
-    mapping(uint256 id => IRelay.PendingDeposit deposit) storage _deposits,
+    mapping(uint256 id => IRelay.Deposit deposit) storage _deposits,
+    mapping(address recipient => uint256[] ids) storage _depositIdsOf,
+    mapping(uint256 id => uint256 position) storage _depositPositions,
     IVotingEscrow _votingEscrow,
     IVoterPaymentsModule _vpm,
     RegisterDepositContext memory _ctx
@@ -184,14 +185,21 @@ library QueueLib {
       revert IRelayToken.InvalidRecipient();
     }
 
+    // Only the sentinel passes, so a caller that names an amount cannot move more than it meant.
+    if (_ctx.amount != type(uint256).max) revert IRelay.NotFullStake();
+
     uint256 _stakedBefore = uint256(_votingEscrow.staked(_ctx.relayTokenId).amount);
 
+    // The deposit takes the source's whole live stake, read here rather than named by the caller, so a
+    // stake that changes between signing and execution still enters whole.
     // recipient address(0): no mint, the destination is the existing relayTokenId.
     IVotingEscrow.SourceDelta[] memory _sources = new IVotingEscrow.SourceDelta[](1);
-    _sources[0] = IVotingEscrow.SourceDelta({tokenId: _ctx.tokenId, amount: _ctx.amount.toUint128()});
+    _sources[0] = IVotingEscrow.SourceDelta({tokenId: _ctx.tokenId, amount: _votingEscrow.staked(_ctx.tokenId).amount});
     // The returned mint id is always zero here; the net amount is measured from the staked balance.
     // slither-disable-next-line unused-return
     _vpm.depositIntoNFT(_sources, _ctx.relayTokenId, address(0));
+
+    if (_votingEscrow.staked(_ctx.tokenId).amount != 0) revert IRelay.SourceNotDrained(_ctx.tokenId);
 
     // Net weight actually received: the request minus the VPM protocol fee.
     uint256 _netAmount = uint256(_votingEscrow.staked(_ctx.relayTokenId).amount) - _stakedBefore;
@@ -202,22 +210,30 @@ library QueueLib {
     // The bookkeeping issues the id; the queue stores no link, so the entry after `_id` is always
     // `_id + 1` and `tail` marks the end.
     uint40 _id = _list.append();
-    _deposits[_id] = IRelay.PendingDeposit({
+    _deposits[_id] = IRelay.Deposit({
       recipient: _ctx.recipient,
       requestedAt: uint48(block.timestamp),
       tokenId: _ctx.tokenId.toUint128(),
       amount: _netAmount.toUint128()
     });
 
+    uint256[] storage _recipientIds = _depositIdsOf[_ctx.recipient];
+    _recipientIds.push(_id);
+    _depositPositions[_id] = _recipientIds.length;
     emit IRelay.DepositRequested(_ctx.tokenId, _ctx.recipient, _netAmount, _id);
   }
 
-  /// @notice Registers the caller's exit: guards the request, then escrows the shares into the FIFO
-  ///         withdraw queue. The caller credits the shares to its pending-withdrawal counter.
+  /// @notice Registers the caller's exit of one deposit: consumes the deposit's record, then escrows all of
+  ///         its shares into the FIFO withdraw queue. The caller credits the shares to its pending-withdrawal
+  ///         counter.
   /// @param _queue Bookkeeping of the withdraw FIFO.
   /// @param _withdrawals Registered exits by id.
   /// @param _escrowedShares Per-holder escrowed (queued, undrained) shares.
+  /// @param _deposits Pending requests and processed share records, keyed by deposit id.
+  /// @param _depositIdsOf Deposit ids by share recipient. The exited id leaves the caller's list.
+  /// @param _depositPositions One-based position of each listed id, cleared for the exited id.
   /// @param _ctx The exit request plus the Relay-side readings the guards check.
+  /// @return _shares Shares of the deposit, escrowed whole.
   /// @dev Delegatecalled, so `msg.sender` is the registering holder. One escrow counter locks the
   ///      PT/YT pair in equal units.
   /// @dev A closed Relay asks the free-share cover of the principal alone. While open, demanding
@@ -231,15 +247,17 @@ library QueueLib {
   ///      is taken as given, the accumulator at tokenId 0 included. It is permanent and burn-only, so an exit
   ///      naming it hands the weight to the protocol. The sAERO stays transferable while the entry waits,
   ///      and one whose lock falls short of the Relay's own falls back to a fresh sAERO at settlement.
-  /// @dev The floor applies to both sides of a partial exit: the shares leaving and the free shares staying
-  ///      must each reach `minWithdrawal`. The whole free position may always leave when the yield token
-  ///      covers it, so a covered position priced under the floor is never locked in.
+  /// @dev An exit always takes one deposit's whole record. A holder with several deposits exits each one on its
+  ///      own, to the same sAERO or to different ones.
   function registerExit(
     DenseQueue.Queue storage _queue,
     mapping(uint256 id => IRelay.WithdrawEntry entry) storage _withdrawals,
     mapping(address holder => uint256 shares) storage _escrowedShares,
+    mapping(uint256 id => IRelay.Deposit deposit) storage _deposits,
+    mapping(address recipient => uint256[] ids) storage _depositIdsOf,
+    mapping(uint256 id => uint256 position) storage _depositPositions,
     RegisterExitContext memory _ctx
-  ) external {
+  ) external returns (uint256 _shares) {
     if (_ctx.destination == _ctx.relayTokenId) revert IRelay.InvalidDestination();
 
     // The entry holds the destination in 72 bits, so a wider one is refused rather than truncated
@@ -247,64 +265,65 @@ library QueueLib {
     bool _mintFresh = _ctx.destination == _MINT_SENTINEL;
     if (!_mintFresh && _ctx.destination > type(uint72).max) revert IRelay.InvalidDestination();
 
-    uint256 _escrowed = _escrowedShares[msg.sender];
-    uint256 _principal = _ctx.principalToken.balanceOf(msg.sender);
-    uint256 _needed = _escrowed + _ctx.shares;
-    if (_principal < _needed) revert IRelay.InsufficientFreeShares();
-    if (!_ctx.closed && _ctx.yieldToken.balanceOf(msg.sender) < _needed) revert IRelay.InsufficientFreeShares();
+    // A processed entry is the only way out. A revert below restores the deleted record.
+    IRelay.Deposit memory _record = _deposits[_ctx.depositId];
+    if (_record.recipient == address(0) || _record.requestedAt != 0) revert IRelay.DepositRecordNotFound();
+    if (_record.recipient != msg.sender) revert IRelay.NotDepositHolder();
+    _shares = _record.amount;
+    delete _deposits[_ctx.depositId];
+    _unlistDeposit(_depositIdsOf, _depositPositions, msg.sender, _ctx.depositId);
+    emit IRelay.DepositConsumed(address(this), _ctx.depositId, msg.sender, _shares);
 
-    // The subtraction cannot underflow: the cover check above already bounds `shares` by `_free`.
-    uint256 _free = _principal - _escrowed;
-    if (_ctx.shares == 0) revert IRelay.BelowMinimumWithdrawal();
-    if (_ctx.shares != _free && (_ctx.shares < _ctx.minWithdrawal || _free - _ctx.shares < _ctx.minWithdrawal)) {
-      revert IRelay.BelowMinimumWithdrawal();
-    }
-
-    appendExit(_queue, _withdrawals, _escrowedShares, msg.sender, _ctx.shares, _ctx.destination, _mintFresh);
+    _requireCover(_escrowedShares, _ctx.principalToken, _ctx.yieldToken, msg.sender, _shares, _ctx.closed);
+    appendExit(_queue, _withdrawals, _escrowedShares, msg.sender, _shares, _ctx.destination, _mintFresh);
   }
 
-  /// @notice Ejects `_holder`: forces their entire free (un-escrowed) pair into the FIFO withdraw
-  ///         queue for a fresh-sAERO exit.
+  /// @notice Ejects one deposit: consumes its record and forces its whole position into the FIFO withdraw
+  ///         queue for a fresh-sAERO exit. A holder with several deposits takes one call per deposit.
   /// @param _queue Bookkeeping of the withdraw FIFO.
   /// @param _withdrawals Registered exits by id.
   /// @param _escrowedShares Per-holder escrowed (queued, undrained) shares.
   /// @param _principalToken The Relay's principal token (PT).
   /// @param _yieldToken The Relay's yield token (YT).
-  /// @param _holder Holder being ejected.
-  /// @param _closed Whether the Relay is closed, which drops the yield side out of the free-position math.
-  /// @return _free Free shares forced into the queue (zero when the holder held none).
+  /// @param _deposits Pending requests and processed share records, keyed by deposit id.
+  /// @param _depositIdsOf Deposit ids by share recipient. The ejected id leaves the holder's list.
+  /// @param _depositPositions One-based position of each listed id, cleared for the ejected id.
+  /// @param _depositId Deposit being ejected.
+  /// @param _closed Whether the Relay is closed, which drops the yield side out of the cover check.
+  /// @return _shares Shares forced into the queue.
   /// @dev Touches no reward state: the yield side keeps accruing to the holder, and `claim` pays it
-  ///      out after the eviction. Shares the holder already escrowed keep their existing entry.
-  /// @dev The free position is the principal alone once the Relay is closed, mirroring the exit
-  ///      guard: a closed admission mints the principal with no yield side, so a minimum over both
-  ///      balances would read zero and eject nothing, or underflow the escrow subtraction outright.
-  ///      While open the minimum still applies, and it holds because the ejecting tiers keep the YT
-  ///      soulbound so balances stay paired. That pairing is a hard constraint: a tier combining a
-  ///      transferable YT with eject must revisit the open branch.
-  function ejectHolder(
+  ///      out after the eviction. The ejecting tier keeps the YT soulbound, so a holder's YT covers each of its
+  ///      deposit records. The bootstrap record has no YT of its own: ejecting it while the Relay is open needs
+  ///      YT from the owner's other records.
+  function ejectDeposit(
     DenseQueue.Queue storage _queue,
     mapping(uint256 id => IRelay.WithdrawEntry entry) storage _withdrawals,
     mapping(address holder => uint256 shares) storage _escrowedShares,
+    mapping(uint256 id => IRelay.Deposit deposit) storage _deposits,
+    mapping(address recipient => uint256[] ids) storage _depositIdsOf,
+    mapping(uint256 id => uint256 position) storage _depositPositions,
     IRelayToken _principalToken,
     IRelayToken _yieldToken,
-    address _holder,
+    uint256 _depositId,
     bool _closed
-  ) external returns (uint256 _free) {
-    uint256 _covered = _principalToken.balanceOf(_holder);
-    if (!_closed) {
-      uint256 _ytBalance = _yieldToken.balanceOf(_holder);
-      if (_ytBalance < _covered) _covered = _ytBalance;
-    }
-    _free = _covered - _escrowedShares[_holder];
-    if (_free == 0) return _free;
+  ) external returns (uint256 _shares) {
+    IRelay.Deposit memory _record = _deposits[_depositId];
+    if (_record.recipient == address(0) || _record.requestedAt != 0) revert IRelay.DepositRecordNotFound();
+    address _holder = _record.recipient;
+    _shares = _record.amount;
+    delete _deposits[_depositId];
+    _unlistDeposit(_depositIdsOf, _depositPositions, _holder, _depositId);
+    emit IRelay.DepositConsumed(address(this), _depositId, _holder, _shares);
+    _requireCover(_escrowedShares, _principalToken, _yieldToken, _holder, _shares, _closed);
     // The queue has no capacity, so a backlog of exits can never block an eviction. The eviction
     // always routes to a freshly minted sAERO, so it names no destination.
-    appendExit(_queue, _withdrawals, _escrowedShares, _holder, _free, 0, true);
+    appendExit(_queue, _withdrawals, _escrowedShares, _holder, _shares, 0, true);
+    emit IRelay.Kicked(_holder, _shares);
   }
 
   /// @notice Walk the deposit queue from its head: visit up to `_ctx.maxEntries` entries in request
   ///         order and process each live entry at the simulated totalBacking/totalSupply ratio,
-  ///         deleting it as it settles.
+  ///         retaining its share receipt until exit registration.
   /// @param _list Deposit-queue bookkeeping (the Relay's storage).
   /// @param _deposits Deposit-queue entries by id.
   /// @param _ctx Relay-side counters the loop prices against, plus the satellite pair to mint on.
@@ -314,7 +333,7 @@ library QueueLib {
   ///      principal alone.
   function processDeposits(
     DenseQueue.Queue storage _list,
-    mapping(uint256 id => IRelay.PendingDeposit deposit) storage _deposits,
+    mapping(uint256 id => IRelay.Deposit deposit) storage _deposits,
     DepositContext memory _ctx
   ) external returns (DepositResult memory _result) {
     DenseQueue.Queue memory _queueCache = _list;
@@ -328,15 +347,13 @@ library QueueLib {
     for (uint256 _i; _i < _ctx.maxEntries && _queueCache.exists(_cursor); ++_i) {
       // A skip over a consumed entry reads only the entry's first slot: a live entry always
       // carries its request timestamp.
-      IRelay.PendingDeposit storage _stored = _deposits[_cursor];
+      IRelay.Deposit storage _stored = _deposits[_cursor];
       if (_stored.requestedAt != 0) {
-        IRelay.PendingDeposit memory _entry = _stored;
-        // Effects before the mints: the delete prevents a second processing (and refunds the
-        // entry's slots), and the mint hook re-enters the Relay's settle path.
-        delete _deposits[_cursor];
+        IRelay.Deposit memory _entry = _stored;
+        // Marking the record processed before the mints prevents a second admission.
         --_queueCache.count;
         ++_result.count;
-        (_result.totalBacking, _supply) = _processEntry(_entry, _ctx, _result.totalBacking, _supply);
+        (_result.totalBacking, _supply) = _processEntry(_deposits, _cursor, _entry, _ctx, _result.totalBacking, _supply);
       }
       ++_cursor;
     }
@@ -361,7 +378,7 @@ library QueueLib {
   ///      first. The call reverts only if it processes nothing.
   function processOverdueDeposits(
     DenseQueue.Queue storage _list,
-    mapping(uint256 id => IRelay.PendingDeposit deposit) storage _deposits,
+    mapping(uint256 id => IRelay.Deposit deposit) storage _deposits,
     uint256[] calldata _ids,
     DepositContext memory _ctx
   ) external returns (DepositResult memory _result) {
@@ -375,8 +392,8 @@ library QueueLib {
       uint256 _id = _ids[_i];
       if (!_queueCache.exists(_id)) revert IRelay.DepositNotFound();
 
-      IRelay.PendingDeposit memory _entry = _deposits[_id];
-      // A consumed entry is deleted, so its zeroed timestamp is the already-processed marker.
+      IRelay.Deposit memory _entry = _deposits[_id];
+      // A zero timestamp marks a processed or consumed entry.
       if (_entry.requestedAt == 0) continue;
       // The age comparison cannot underflow (requestedAt never exceeds the current timestamp),
       // whatever the configured window. An entry aged exactly the window is already processable.
@@ -384,15 +401,14 @@ library QueueLib {
         revert IRelay.KeeperWindowNotElapsed();
       }
 
-      // Effects before the mints, as in the ordered walk.
-      delete _deposits[_id];
+      // Mark the entry processed before the mints, as in the ordered walk.
       --_queueCache.count;
       ++_result.count;
       // The single cheap head step. The new head can also be a consumed entry; the walk's budget
       // pays for longer advances, never this path.
       if (_id == _queueCache.head) _queueCache.head = _queueCache.nextHead(_id + 1);
 
-      (_result.totalBacking, _supply) = _processEntry(_entry, _ctx, _result.totalBacking, _supply);
+      (_result.totalBacking, _supply) = _processEntry(_deposits, _id, _entry, _ctx, _result.totalBacking, _supply);
     }
     if (_result.count == 0) revert IRelay.DepositAlreadyProcessed();
 
@@ -510,7 +526,7 @@ library QueueLib {
   }
 
   /// @notice The one queue append behind every exit: bank the escrow and store the entry.
-  /// @dev Both callers, `registerExit` and `ejectHolder`, run their own guards first; this function
+  /// @dev Both callers, `registerExit` and `ejectDeposit`, run their own guards first; this function
   ///      trusts its inputs.
   /// @param _queue Bookkeeping of the withdraw FIFO.
   /// @param _withdrawals Registered exits by id.
@@ -542,9 +558,11 @@ library QueueLib {
     emit IRelay.WithdrawRegistered(_holder, _shares, _mintFresh ? _MINT_SENTINEL : _destination, _id);
   }
 
-  /// @notice Price one pending deposit at the running ratio, mint its pair and emit the
-  ///         `DepositProcessed` event. The one pricing block behind both deposit paths.
-  /// @param _entry The entry to process; the caller already deleted it from the queue's storage.
+  /// @notice Price one pending deposit at the running ratio, record its shares in the Relay, mint its pair and
+  ///         emit the `DepositProcessed` event. The one pricing block behind both deposit paths.
+  /// @param _deposits Pending requests and processed share records, keyed by deposit id.
+  /// @param _id The deposit's id, under which the Relay records its shares.
+  /// @param _entry The pending entry before its amount becomes shares.
   /// @param _ctx The processing context that carries the satellite pair to mint on.
   /// @param _backing Running backing counter before this entry.
   /// @param _supply Running share supply before this entry.
@@ -552,9 +570,13 @@ library QueueLib {
   /// @return _newSupply Running share supply after this entry's mint.
   /// @dev The supply==0/backing==0 one-to-one branch is unreachable in production (initialize
   ///      mints the seed 1:1), kept as defense-in-depth. An entry whose shares round down to zero
-  ///      still processes: its principal joins the backing with no shares minted against it.
+  ///      still processes: its principal joins the backing with no shares minted against it, and no record.
+  ///      Its id stays in the recipient's list. The `minDeposit` floor and the request-time `ZeroShares` guard
+  ///      keep this path out of reach, so the Relay spends no bytecode on removing it.
   function _processEntry(
-    IRelay.PendingDeposit memory _entry,
+    mapping(uint256 id => IRelay.Deposit deposit) storage _deposits,
+    uint256 _id,
+    IRelay.Deposit memory _entry,
     DepositContext memory _ctx,
     uint256 _backing,
     uint256 _supply
@@ -564,6 +586,15 @@ library QueueLib {
     // The next entry prices at the post-mint ratio.
     _newBacking = _backing + _entry.amount;
     _newSupply = _supply + _shares;
+
+    // The record is the deposit's only way out. Keep the source and recipient for discovery.
+    if (_shares != 0) {
+      _deposits[_id].requestedAt = 0;
+      _deposits[_id].amount = _shares.toUint128();
+      emit IRelay.DepositRecorded(address(this), _id, _entry.recipient, _shares);
+    } else {
+      delete _deposits[_id];
+    }
 
     // A closed Relay mints the principal alone.
     _ctx.principalToken.mint(_entry.recipient, _shares);
@@ -611,6 +642,49 @@ library QueueLib {
     // holder, not the remaining ones.
     uint256 _netAmount = uint256(_votingEscrow.staked(_settled).amount) - _destinationBefore;
     emit IRelay.WithdrawProcessed(_entry.holder, _entry.shares, _netAmount, _settled);
+  }
+
+  /// @notice Removes `_id` from `_holder`'s deposit ids. The last id moves into its place.
+  /// @param _depositIdsOf Deposit ids by share recipient.
+  /// @param _depositPositions One-based position of each listed id; zero when unlisted.
+  /// @param _holder Recipient whose list holds the id.
+  /// @param _id Deposit id to remove.
+  /// @dev An id that is not listed, like the bootstrap record, leaves the list as it is.
+  function _unlistDeposit(
+    mapping(address recipient => uint256[] ids) storage _depositIdsOf,
+    mapping(uint256 id => uint256 position) storage _depositPositions,
+    address _holder,
+    uint256 _id
+  ) private {
+    uint256 _position = _depositPositions[_id];
+    if (_position == 0) return;
+    uint256[] storage _ids = _depositIdsOf[_holder];
+    uint256 _lastId = _ids[_ids.length - 1];
+    _ids[_position - 1] = _lastId;
+    _depositPositions[_lastId] = _position;
+    _ids.pop();
+    delete _depositPositions[_id];
+  }
+
+  /// @notice Reverts unless `_holder`'s free pair covers `_shares` more of escrow.
+  /// @param _escrowedShares Per-holder escrowed (queued, undrained) shares.
+  /// @param _principalToken The Relay's principal token (PT).
+  /// @param _yieldToken The Relay's yield token (YT), skipped once the Relay is closed.
+  /// @param _holder Holder whose pair escrows.
+  /// @param _shares Shares about to escrow.
+  /// @param _closed Whether the Relay is closed.
+  /// @dev A closed Relay asks the principal alone; see `registerExit`.
+  function _requireCover(
+    mapping(address holder => uint256 shares) storage _escrowedShares,
+    IRelayToken _principalToken,
+    IRelayToken _yieldToken,
+    address _holder,
+    uint256 _shares,
+    bool _closed
+  ) private view {
+    uint256 _needed = _escrowedShares[_holder] + _shares;
+    if (_principalToken.balanceOf(_holder) < _needed) revert IRelay.InsufficientFreeShares();
+    if (!_closed && _yieldToken.balanceOf(_holder) < _needed) revert IRelay.InsufficientFreeShares();
   }
 
   /// @notice Whether a named withdraw destination cannot legally receive weight from the Relay sAERO

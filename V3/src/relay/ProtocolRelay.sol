@@ -59,16 +59,11 @@ contract ProtocolRelay is RelayBase {
     emit AllowListSet(_account, _allowed);
   }
 
-  /// @notice Forces an account out: removes it from the allow list and sends its entire free
-  ///         position to the withdraw queue.
-  /// @param _account Account to remove and eject.
-  function kick(address _account) external onlyOwner {
-    if (allowList[_account]) {
-      allowList[_account] = false;
-      emit AllowListSet(_account, false);
-    }
-    uint256 _shares = _ejectHolder(_account);
-    emit Kicked(_account, _shares);
+  /// @notice Forces one deposit's whole position into the withdraw queue. It does not change the allow list.
+  /// @dev To remove a holder, call `setAllowList(holder, false)` first, then `kick` each of its deposits.
+  /// @param _depositId Deposit to eject.
+  function kick(uint256 _depositId) external nonReentrant onlyOwner {
+    _ejectDeposit(_depositId);
   }
 
   /// @notice Promotes this L1 Relay to L2: hands the ownership to the L2 admin and unlocks the
@@ -180,12 +175,13 @@ contract ProtocolRelay is RelayBase {
   /// @inheritdoc RelayBase
   function _authorizeTransfer(address _from, address _to) internal view virtual override {
     // Both ends must be listed, so a removed holder can only exit: full withdraw rights, no transfers.
-    if (!allowList[_from] || !allowList[_to]) _revert(uint32(NotAllowed.selector));
+    _requireAllowed(_from);
+    _requireAllowed(_to);
   }
 
   /// @inheritdoc RelayBase
   function _authorizeDeposit(address _owner) internal view virtual override {
-    if (!allowList[_owner]) _revert(uint32(NotAllowed.selector));
+    _requireAllowed(_owner);
   }
 
   /// @inheritdoc RelayBase
@@ -197,5 +193,11 @@ contract ProtocolRelay is RelayBase {
   /// @param _role Role to validate.
   function _validateEntrypointRole(uint256 _role) internal pure {
     if (_role != COMPOUNDER && _role != CONVERTER) _revert(uint32(InvalidEntrypointRole.selector));
+  }
+
+  /// @notice Shared allow-list check for deposits and both ends of a transfer.
+  /// @param _account Address that must be listed.
+  function _requireAllowed(address _account) private view {
+    if (!allowList[_account]) _revert(uint32(NotAllowed.selector));
   }
 }
