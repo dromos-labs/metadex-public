@@ -43,6 +43,7 @@ deployments:
     base - deployment-addresses/pools-base.json
     base - deployment-addresses/registerleafchains-base.json
     base - deployment-addresses/registerrootchain-base.json
+    base - deployment-addresses/relaycreate-base-backup.json
     base - deployment-addresses/relayfactoryregistry-base.json
     base - deployment-addresses/relaystack-base.json
     base - deployment-addresses/root-base.json
@@ -68,3 +69,17 @@ deployments:
     robinhood - deployment-addresses/metarouter-robinhood.json
     robinhood - deployment-addresses/pools-robinhood.json
     robinhood - deployment-addresses/relayleafmoduledeployer-robinhood.json
+
+version: 1.2.0
+commit tag: 957b2569f9d1ef3a16e20a00d4f12f909ab89708
+first-distribution: 2026-11-04
+converts-to-gpl: 2031-11-04
+deployments:
+    arbitrum - deployment-addresses/relayleafmodules-arbitrum.json
+    arc - deployment-addresses/relayleafmodules-arc.json
+    base - deployment-addresses/relaycreate-base.json
+    base - deployment-addresses/relaystackv2-base.json
+    ethereum - deployment-addresses/relayleafmodules-ethereum.json
+    ink - deployment-addresses/relayleafmodules-ink.json
+    optimism - deployment-addresses/relayleafmodules-optimism.json
+    robinhood - deployment-addresses/relayleafmodules-robinhood.json
